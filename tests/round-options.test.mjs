@@ -24,7 +24,7 @@ for(const count of [0,1,3])test(`admin can finish voting with ${count} of six su
   applyAction(g,'p0',{type:'finishVoting'},now+1000);
   assert.equal(g.phase,'results');assert.equal(g.results.submittedCount,count);assert.equal(g.deadline,now+1000+BREAK_MS);
   assert.equal(g.history.length,1);assert.equal(g.voteDeadline,null);
-  for(const p of g.results.players.filter(p=>!p.submitted&&p.role==='faithful'))assert.equal(p.delta,-1);
+  for(const p of g.results.players.filter(p=>!p.submitted&&p.role==='faithful'))assert.equal(p.delta,-2);
 });
 test('only the admin can finish voting and paused voting must be resumed first',()=>{
   const g=fixture();openVoting(g);assert.throws(()=>applyAction(g,'p2',{type:'finishVoting'},now),/Only the admin/);
@@ -44,13 +44,13 @@ test('Finish voting is unavailable before a roundtable or after the Game ends',(
 test('the murder method stays private until results and is retained when later tasks change',()=>{
   const g=fixture();g.mission={...CONTENT.murders[0]};const method={...g.mission};
   assert.equal(publicView(g,'p2',now).secret.mission,undefined);openVoting(g);
-  for(const id of ['p0','p1'])applyAction(g,id,{type:'ballot',target:'p2'},now);
+  for(const id of ['p0','p1'])applyAction(g,id,{type:'ballot',target:'p2',performed:true},now);
   assert.equal(publicView(g,'p2',now).results,null);applyAction(g,'p0',{type:'finishVoting'},now);
   assert.deepEqual(g.results.murderMethod,method);assert.notEqual(g.results.murderMethod,g.mission);
   g.mission.title='Changed task';assert.deepEqual(g.history[0].murderMethod,method);
   tick(g,g.deadline,()=>0);assert.deepEqual(publicView(g,'p2',g.deadline).history[0].murderMethod,method);
 });
 test('results without a confirmed murder do not name a successful murder method',()=>{
-  const g=fixture();openVoting(g);applyAction(g,'p0',{type:'ballot',target:'p2'},now);applyAction(g,'p1',{type:'ballot',target:'p3'},now);
+  const g=fixture();openVoting(g);applyAction(g,'p0',{type:'ballot',target:'p2',performed:true},now);applyAction(g,'p1',{type:'ballot',target:'p3',performed:true},now);
   applyAction(g,'p0',{type:'finishVoting'},now);assert.equal(g.results.murderedId,null);assert.equal(g.results.murderMethod,null);
 });

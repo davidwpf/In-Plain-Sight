@@ -24,10 +24,10 @@ The count is recalculated at each new deal. Each round uses a fresh weighted dra
 - Everyone privately checks whether they are faithful or a traitor. Roles start hidden and hide when the page goes into the background.
 - Multiple traitors receive the same recognition signal: a word, phrase, sound or gesture to help recognise each other. Names remain secret. A lone traitor acts alone.
 - All traitors receive the same murder task. At least one must perform it on their chosen faithful. Coordination happens in person, and actual actions use an honour system.
-- After the chosen round length, the roundtable opens. The length is fixed for that Game and defaults to 60 minutes, including for existing Games without a saved duration. The admin can open it sooner using **Call roundtable** above the countdown. Faithful players accuse one other player. Traitors report one victim or “No murder”. Everyone’s submission is final. No victim or report is revealed during voting.
+- After the chosen round length, the roundtable opens. The length is fixed for that Game and defaults to 60 minutes, including for existing Games without a saved duration. The admin can open it sooner using **Call roundtable** above the countdown. Faithful players accuse one other player. Traitors report one victim or “No murder”. With multiple traitors, choosing a victim also requires an explicit Yes/No answer to “Did you personally complete the murder task on [Name]?” Neither answer is preselected, and changing the victim clears it. A solo traitor naming a victim implicitly confirms completing the task. Both answers are shown before locking and in the private locked submission. Everyone’s submission is final. No victim or report is revealed during voting.
 - At least half the active players submitting starts a five-minute deadline. All submissions in closes immediately. Before halfway, there is no voting deadline. Both accusation ballots and murder reports count towards submission progress. Everyone can see who has submitted and who has not, while roles and choices stay private until results.
 - The admin can choose **Finish voting**, confirm the submission count and close a stalled vote at any point, including before halfway. Missing faithful votes receive the usual missed-vote score; missing traitor reports count as no report. Repeated requests cannot award points twice.
-- Reports confirm a murder only when a majority of the assigned traitors name the same faithful: 1 of 1, 2 of 2 or 2 of 3. Missing reports do not reduce the majority needed. Other named targets are attempted murders. Naming another traitor cannot murder them and produces a failed attempt.
+- Reports confirm a murder only when a majority of the assigned traitors name the same faithful: 1 of 1, 2 of 2 or 2 of 3. At least one matching reporter must also confirm personally completing the task. Matching reporters who did the task are murderers; the others are accomplices. Missing reports do not reduce the majority needed. Other named targets are attempted murders. Naming another traitor cannot murder them and produces a failed attempt.
 - Roles, accusations, reports, murders, attempts and points appear together. The victim’s name is followed by the murder method, such as “Method: Coin in a pocket”. This task snapshot is saved in past rounds too; results completed before this update have no recorded method. A personal reveal can say: “You were murdered. Alice and Ben both killed you.”
 - A 120-second break follows. Players can sit out or return without losing their score. New arrivals wait through the current vote and this break, then receive a role with everyone else. If fewer than three are ready, the Game returns to the lobby.
 - The group chooses when to finish; the admin ends the Game. An unfinished round earns no points.
@@ -36,24 +36,43 @@ The current round number is prominent, with a brief reminder to check the new ro
 
 ## Scoring
 
-“Caught” means receiving the highest faithful accusation total, including all ties and requiring at least one accusation. Traitor murder reports never count as accusations.
+Only faithful accusations count. “Caught” means the highest accusation total across the whole group, including ties and requiring at least one accusation. Traitor reports are never accusations.
+
+### Faithful scoring
 
 | Outcome | Points |
 | --- | ---: |
-| Faithful accuses any actual traitor | +4 |
-| Faithful accuses another faithful | -1 |
-| Faithful misses the vote | -1 |
-| Faithful receives the most accusations | -1 extra |
-| Faithful is murdered without a correct accusation, including no vote | -1 extra |
-| Successful murderer escapes; no traitor caught | +4 |
-| Successful murderer escapes; another traitor caught | +2 |
-| Successful murderer is caught | +1 |
-| No successful murder; escapes | 0 |
-| No successful murder; caught | -3 |
+| Correctly accuse any traitor | +4 |
+| Accuse a faithful | -1 |
+| Miss the vote | -2 |
+| Receive the most accusations | -1 extra, once |
 
-Faithful penalties add together. The most-accusations penalty applies once per round, only to players sharing the highest accusation total across the whole group, including ties. With no accusations, nobody gets that penalty. A faithful who makes a wrong accusation and receives the most accusations loses 2 points; being murdered as well makes it 3. A correct accusation avoids the murder penalty, but the most-accusations penalty can still reduce +4 to +3.
+Being murdered does not cost points and does not prevent voting. The most-accusations penalty adds to the vote score: a correct vote becomes +3, a wrong vote becomes -2 and a missed vote becomes -3. With no accusations, nobody gets this penalty.
 
-Only the traitors who report the confirmed victim qualify for successful-murder scoring. A minority attempted murderer uses no-murder scoring, even when their teammates successfully murder someone else. Revised scoring applies when a round finishes; previously completed rounds keep their recorded points.
+### Traitor scoring
+
+Only reporters naming the confirmed victim qualify for confirmed-murder scoring. At least one of those reporters must say they personally completed the task. If nobody did, there is no confirmed murder. A completed task on a minority target cannot validate the majority target.
+
+| Confirmed murder outcome | Personally completed the task | Accomplice |
+| --- | ---: | ---: |
+| No traitor caught and at least one faithful vote submitted | +6 | +2 |
+| Personally escapes but another traitor is caught | +4 | 0 |
+| Personally caught | +1 | 0 |
+| No faithful votes submitted | +4 | 0 |
+
+The totals include a +2 team bonus when no traitor is caught and at least one faithful vote was submitted. No faithful votes means no escape bonus. Each matching performer earns their own full murderer score; points are not divided. A caught murderer scores more than an escaped accomplice for the same murder.
+
+### Other traitor outcomes
+
+| Outcome | Points |
+| --- | ---: |
+| No confirmed murder credited to their report; escapes | 0 |
+| No confirmed murder credited to their report; caught | -2 |
+| Misses the report | -2 total, even if caught |
+
+A minority report, failed attempt or explicit No murder uses no-confirmed-murder scoring. No murder is a valid submission; a missing report incurs the flat penalty. Attempt and victim blurbs name only those who said they actually performed the task. Results reveal each traitor’s report and Yes/No claim after voting, and distinguish murderers from accomplices.
+
+Rules are saved per round (`roundRulesVersion: 2`). Games already playing or voting when this update is published finish their current round under the previous rules, without reopening locked ballots. Their next deal uses the new ballot and scoring. Completed histories and recorded scores remain unchanged. The Game storage schema stays at version 2.
 
 ## Editable phrases and tasks
 

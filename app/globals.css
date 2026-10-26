@@ -76,3 +76,19 @@
 
 .join-highlight{background:#a7c2a0;border:1px solid #a7c2a0;color:#162015}
 .join-highlight:hover:not(:disabled){background:#bbd4b4;border-color:#bbd4b4}
+
+/* A separate, explicit claim keeps reporting a victim distinct from doing the task. */
+.participation-step{border:0;border-top:1px solid var(--border);padding:22px 0 0;margin:22px 0 24px;min-width:0}
+.participation-step legend{float:left;width:100%;padding:0;margin-bottom:14px;color:var(--cream);font-size:16px;line-height:1.6;font-weight:500}
+.participation-options{clear:both;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.participation-option{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:3px;padding:14px;margin:0;min-height:52px;cursor:pointer;color:var(--cream);font-size:15px}
+.participation-option.selected{border-color:var(--gold);background:#c5ad7b12}
+.participation-option input{accent-color:var(--gold);width:18px;height:18px;margin:0;flex-shrink:0}
+.participation-option:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:3px}
+.participation-step:disabled{opacity:.6}
+.participation-summary{color:var(--cream)!important}
+.legacy-rules{margin-bottom:16px;line-height:1.6;color:var(--muted)}
+.rules table th{font-size:12px;color:var(--cream);font-weight:500;text-align:left;padding:10px 0;border-bottom:1px solid var(--border)}
+.rules .traitor-scoring td:not(:first-child),.rules .traitor-scoring th:not(:first-child){text-align:center;padding-left:12px}
+@media(max-width:600px){.participation-step legend{font-size:16px}.participation-option{font-size:15px;padding:12px}.rules table td,.rules table th{font-size:13px}.rules .traitor-scoring td:not(:first-child),.rules .traitor-scoring th:not(:first-child){padding-left:8px}.result-detail{flex-wrap:wrap}}
+@media(max-width:360px){.participation-options{grid-template-columns:1fr}}
