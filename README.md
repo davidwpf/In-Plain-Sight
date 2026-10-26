@@ -1,6 +1,6 @@
 # In Plain Sight
 
-**[Play In Plain Sight](https://in-plain-sight.davidwpfrancis.workers.dev)**
+**[Play In Plain Sight](https://in-plain-sight.plain-sight-games.workers.dev)**
 
 A social deduction game for an evening or weekend with friends and family. Everyone can play, including the admin. Every round randomly assigns fresh traitors. The interface centres on one current task, with extra information in small menus.
 
@@ -92,7 +92,7 @@ pnpm check
 node tests/live-flow.mjs
 ```
 
-The live-flow script creates its own disposable local Game and uses local D1 updates to advance its deadlines. It refuses remote origins and never creates a progression endpoint in the deployed API. It checks ten independent players, shared-code sign-in, majority and minority murder scoring, exact reveal wording, paused voting, late arrivals, new-round assignment, concurrency and throttling.
+The live-flow script creates its own disposable local Game and uses local D1 updates to advance its deadlines. It refuses remote origins and never creates a progression endpoint in the deployed API. The random-assignment checks cover early roundtables, stored Game restoration and changing active groups of 3, 4, 3, 6 and 6 players. The live-flow script checks ten independent players, shared-code sign-in, majority and minority murder scoring, exact reveal wording, paused voting, late arrivals, new-round assignment, concurrency and throttling.
 
 ## GitHub and deployment
 
