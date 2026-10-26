@@ -6,7 +6,7 @@ A social deduction game for an evening or weekend with friends and family. Every
 
 ## Play
 
-1. **Create game.** The admin enters their name and a Game name. Their private six-digit player code also unlocks Start, Call roundtable, Pause, Resume and End.
+1. **Create game.** The admin enters their name, a Game name and a round length in 30-minute steps (60 minutes by default). Their private six-digit player code also unlocks Start, Call roundtable, Finish voting, Pause, Resume and End.
 2. **Share code.** Share the six-character game code or invite link. Keep personal player codes private.
 3. **Join.** A player chooses “Enter my player code” or “Join as a new player”. Joining gives them their own private six-digit code. Shared devices use **Switch player** to hide the current identity and sign in as someone else.
 4. **Start.** The admin starts when everyone has joined. There must be at least three ready players. The admin receives a normal role and cannot inspect anyone else’s role.
@@ -17,21 +17,22 @@ A social deduction game for an evening or weekend with friends and family. Every
 | 6–9 | 2 |
 | 10–30 | 3 |
 
-The count is recalculated at each new deal. Every round makes a fresh, independent shuffle using the server’s cryptographic random generator. Previous roles do not affect the draw; the same players can be traitors again. With five players and one traitor, the same traitor across three rounds has a 1-in-25 chance.
+The count is recalculated at each new deal. Each round uses a fresh weighted draw with the server’s cryptographic random generator. Players with fewer traitor turns than expected for the rounds they have played get higher odds. The calculation accounts for each round’s group size and traitor count; sitting out adds no opportunities, and new players start with a neutral weight. Weights stay between 25 and 400 around a neutral 100, so everyone remains eligible and consecutive traitor turns are still possible. Existing scores and current roles are preserved; the weighting applies at the next deal.
 
 ## A round
 
 - Everyone privately checks whether they are faithful or a traitor. Roles start hidden and hide when the page goes into the background.
 - Multiple traitors receive the same ordinary question and particular reply to help recognise each other. Names remain secret. A lone traitor acts alone.
 - All traitors receive the same murder task. At least one must perform it on their chosen faithful. Coordination happens in person, and actual actions use an honour system.
-- After 60 minutes, the roundtable opens. The admin can open it sooner using **Call roundtable** above the countdown. Faithful players accuse one other player. Traitors report one victim or “No murder”. Everyone’s submission is final. No victim or report is revealed during voting.
+- After the chosen round length, the roundtable opens. The length is fixed for that Game and defaults to 60 minutes, including for existing Games without a saved duration. The admin can open it sooner using **Call roundtable** above the countdown. Faithful players accuse one other player. Traitors report one victim or “No murder”. Everyone’s submission is final. No victim or report is revealed during voting.
 - At least half the active players submitting starts a five-minute deadline. All submissions in closes immediately. Before halfway, there is no voting deadline. Both accusation ballots and murder reports count towards submission progress. Everyone can see who has submitted and who has not, while roles and choices stay private until results.
+- The admin can choose **Finish voting**, confirm the submission count and close a stalled vote at any point, including before halfway. Missing faithful votes receive the usual missed-vote score; missing traitor reports count as no report. Repeated requests cannot award points twice.
 - Reports confirm a murder only when a majority of the assigned traitors name the same faithful: 1 of 1, 2 of 2 or 2 of 3. Missing reports do not reduce the majority needed. Other named targets are attempted murders. Naming another traitor cannot murder them and produces a failed attempt.
-- Roles, accusations, reports, murders, attempts and points appear together. A personal reveal can say: “You were murdered. Alice and Ben both killed you.”
+- Roles, accusations, reports, murders, attempts and points appear together. The victim’s name is followed by the murder method, such as “Method: Coin in a pocket”. This task snapshot is saved in past rounds too; results completed before this update have no recorded method. A personal reveal can say: “You were murdered. Alice and Ben both killed you.”
 - A 120-second break follows. Players can sit out or return without losing their score. New arrivals wait through the current vote and this break, then receive a role with everyone else. If fewer than three are ready, the Game returns to the lobby.
 - The group chooses when to finish; the admin ends the Game. An unfinished round earns no points.
 
-The admin’s Start, Call roundtable, Pause/Resume and End buttons appear on their main Game screen, above the countdown. Only the actions available in the current phase are shown. Calling a roundtable and ending a Game still require confirmation. The admin can pause a round, voting or break. Pause freezes all countdowns and prevents ballot submissions. Joining, signing in and choosing next-round readiness remain available. Resume preserves the time that was remaining. Resume a paused Game before calling an early roundtable; this opens voting immediately and uses the usual halfway threshold and five-minute deadline.
+The current round number is prominent, with a brief reminder to check the new role after each deal. The admin’s Start, Call roundtable, Finish voting, Pause/Resume and End buttons appear on their main Game screen, above the countdown. Only the actions available in the current phase are shown. Calling a roundtable, finishing voting and ending a Game require confirmation. The admin can pause a round, voting or break. Pause freezes all countdowns and prevents ballot submissions. Joining, signing in and choosing next-round readiness remain available. Resume preserves the time that was remaining. Resume a paused Game before calling an early roundtable or finishing voting.
 
 ## Scoring
 
@@ -92,7 +93,7 @@ pnpm check
 node tests/live-flow.mjs
 ```
 
-The live-flow script creates its own disposable local Game and uses local D1 updates to advance its deadlines. It refuses remote origins and never creates a progression endpoint in the deployed API. The random-assignment checks cover early roundtables, stored Game restoration and changing active groups of 3, 4, 3, 6 and 6 players. The live-flow script checks ten independent players, shared-code sign-in, majority and minority murder scoring, exact reveal wording, paused voting, late arrivals, new-round assignment, concurrency and throttling.
+The live-flow script creates its own disposable local Game and uses local D1 updates to advance its deadlines. It refuses remote origins and never creates a progression endpoint in the deployed API. The random-assignment checks cover weighted odds, eligibility, early roundtables, stored Game restoration and changing active groups of 3, 4, 3, 6 and 6 players. The live-flow script checks ten independent players, shared-code sign-in, configured round lengths, majority and minority murder scoring, saved murder methods, exact reveal wording, paused voting, late arrivals, new-round assignment, finishing a vote before halfway, concurrency and throttling.
 
 ## GitHub and deployment
 

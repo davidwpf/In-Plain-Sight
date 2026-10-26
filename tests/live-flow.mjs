@@ -8,7 +8,9 @@ async function view(s){const res=await fetch(`${origin}/api/game?code=${s.view.c
 function advanceLocalDeadline(gameCode){assert.match(gameCode,/^[A-Z2-9]{6}$/);const command=`UPDATE games SET state = json_set(state, '$.deadline', ${Date.now()-1000}), version = version + 1 WHERE code = '${gameCode}'`;
   execFileSync(process.execPath,['--import','./scripts/sites-env.mjs','./node_modules/wrangler/bin/wrangler.js','d1','execute','DB','--local','--config','dist/server/wrangler.json','--persist-to','.wrangler/state','--command',command],{stdio:'pipe'});
 }
-const admin=await request({type:'create',name:'Test Admin',gameName:'Shared-device integration test'});const sessions=[admin];
+assert.equal((await raw({type:'create',name:'Test Admin',gameName:'Invalid duration',roundMinutes:45})).status,400);
+const admin=await request({type:'create',name:'Test Admin',gameName:'Shared-device integration test',roundMinutes:90});const sessions=[admin];
+assert.equal(admin.view.roundMinutes,90);
 assert.match(admin.passcode,/^\d{6}$/);assert.ok(admin.view.me.isAdmin);
 const joined=await Promise.all(Array.from({length:9},(_,i)=>request({type:'join',code:admin.view.code,name:`Guest ${i+1}`})));sessions.push(...joined);
 assert.equal(new Set(sessions.map(s=>s.passcode)).size,10);assert.equal((await view(admin)).players.length,10);
@@ -17,6 +19,7 @@ for(const s of sessions){const logged=await request({type:'login',code:s.view.co
 const bad=await raw({type:'login',code:admin.view.code,passcode:'not-a-code'});assert.equal(bad.status,400);
 await request({type:'start'},admin);
 const initial=await Promise.all(sessions.map(view));const traitors=sessions.filter((_,i)=>initial[i].secret.role==='traitor'),faithful=sessions.filter((_,i)=>initial[i].secret.role==='faithful');assert.equal(traitors.length,3);
+assert.ok(initial[0].deadline>Date.now()+89*60000);assert.ok(initial[0].deadline<=Date.now()+90*60000);
 for(const v of initial){for(const p of v.players){assert.equal(p.role,undefined);assert.equal(p.passcode,undefined);assert.equal(p.loginHash,undefined);}const text=JSON.stringify(v);for(const secret of ['tokenHashes','loginHash','authSalt','loginAttempts','"ballots"'])assert.ok(!text.includes(secret));assert.equal(v.murderedId,undefined);assert.equal(v.results,null);}
 assert.deepEqual(initial.find(v=>v.me.id===traitors[0].view.me.id).secret.mission,initial.find(v=>v.me.id===traitors[1].view.me.id).secret.mission);
 await assert.rejects(()=>request({type:'roundtable'},sessions[1]),/Only the admin/);
@@ -34,6 +37,7 @@ const hidden=await view(faithful[0]);assert.equal(hidden.results,null);assert.eq
 await request({type:'ballot',target:caught},faithful[0]);await request({type:'ballot',target:caught},faithful[1]);const half=await view(admin);assert.equal(half.submittedCount,5);assert.ok(half.voteDeadline>Date.now()+290000);
 await Promise.all(faithful.slice(2).map(s=>request({type:'ballot',target:caught},s)));
 const result=await view(admin);assert.equal(result.phase,'results');assert.equal(result.history.length,1);assert.equal(result.results.submittedCount,10);assert.equal(result.results.murderedId,victim);assert.equal(result.results.attempts[0].targetId,attempted);
+assert.deepEqual(result.results.murderMethod,initial.find(v=>v.me.id===traitors[0].view.me.id).secret.mission);
 for(const s of traitors.slice(0,2))assert.equal(result.results.players.find(p=>p.id===s.view.me.id).delta,2);assert.equal(result.results.players.find(p=>p.id===caught).delta,-3);
 assert.deepEqual(new Set(result.results.murdererIds),new Set(traitors.slice(0,2).map(s=>s.view.me.id)));
 const named=result.results.murdererIds.map(id=>result.players.find(p=>p.id===id).name);assert.equal(result.results.players.find(p=>p.id===victim).blurb,`You were murdered. ${named.join(' and ')} both killed you.`);
@@ -54,9 +58,21 @@ for(const round of [2,3]){
   advanceLocalDeadline(admin.view.code);const dealt=await view(late);
   assert.equal(dealt.phase,'playing');assert.equal(dealt.round,round+1);assert.equal(dealt.submittedCount,0);assert.equal(dealt.results,null);
 }
+// Close a stalled vote before halfway; only the admin may do so, and never while paused.
+const fourth=await Promise.all([...sessions,late].map(async s=>({session:s,view:await view(s)})));
+const voter=fourth.find(p=>p.view.me.active&&p.view.secret.role==='faithful'),suspect=fourth.find(p=>p.view.me.active&&p.view.secret.role==='traitor');
+await request({type:'roundtable'},admin);
+await request({type:'ballot',target:suspect.view.me.id},voter.session);
+assert.equal((await view(admin)).voteDeadline,null);
+await assert.rejects(()=>request({type:'finishVoting'},sessions[1]),/Only the admin/);
+await request({type:'pause'},admin);await assert.rejects(()=>request({type:'finishVoting'},admin),/Resume/);await request({type:'resume'},admin);
+const finished=await request({type:'finishVoting'},admin);assert.equal(finished.phase,'results');assert.equal(finished.results.submittedCount,1);assert.equal(finished.history.length,4);
+assert.equal(finished.results.players.find(p=>p.id===voter.view.me.id).delta,4);
+for(const p of finished.results.players.filter(p=>p.role==='faithful'&&!p.submitted))assert.equal(p.delta,-1);
+const repeated=await request({type:'finishVoting'},admin);assert.equal(repeated.history.length,4);assert.deepEqual(repeated.players.map(p=>p.score),finished.players.map(p=>p.score));
 await request({type:'end'},admin);assert.equal((await view(late)).phase,'ended');
 let wrong=String((Number(admin.passcode)+1)%1000000).padStart(6,'0');while(sessions.some(s=>s.passcode===wrong)||late.passcode===wrong)wrong=String((Number(wrong)+1)%1000000).padStart(6,'0');
 for(let i=0;i<8;i++)assert.equal((await raw({type:'login',code:admin.view.code,passcode:wrong})).status,401);assert.equal((await raw({type:'login',code:admin.view.code,passcode:wrong})).status,429);
 assert.equal((await view(admin)).phase,'ended');
-console.log('PASS: ten independent players, private-code recovery, admin permissions, simultaneous joins and submissions, paused voting, secret majority reports, revised scoring, exact reveal wording, late arrivals, fresh assignments across three completed rounds, persistent history and login throttling.');
+console.log('PASS: ten independent players, private-code recovery, admin permissions, simultaneous joins and submissions, 90-minute rounds, paused voting, secret majority reports, recorded murder methods, revised scoring, exact reveal wording, late arrivals, fresh assignments across three completed rounds, confirmed early vote closure with missing submissions, persistent history and login throttling.');
 console.log(`Disposable local test Game: ${admin.view.code}`);

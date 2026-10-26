@@ -22,3 +22,48 @@
 .admin-toolbar .end-game{color:#d6aaa1;border-color:#9d606650}
 @media(max-width:600px){.admin-toolbar{display:block;padding:14px}.admin-toolbar-label{margin-bottom:12px}.admin-toolbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.admin-toolbar-actions.three-actions{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-toolbar .button{font-size:10px;padding:9px 7px;gap:5px;white-space:normal;line-height:1.4;min-height:42px}}
 @media(max-width:360px){.admin-toolbar-actions.three-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-toolbar-actions.three-actions>.button:first-child{grid-column:1/-1}}
+
+/* Keep the round and its new-role prompt easy to spot. */
+.game-heading>div:first-child{min-width:0}
+.game-heading .game-name{font-size:14px;letter-spacing:0;text-transform:none;color:var(--muted);overflow-wrap:anywhere}
+.game-heading h1.round-heading{font-size:48px;margin-top:4px}
+.round-notice{display:flex;align-items:center;gap:10px;background:#35452b88;border:1px solid #87976577;border-radius:4px;padding:12px 14px;margin-bottom:20px;color:var(--cream);font-size:14px}
+.round-notice b{font-weight:500}
+.round-notice>.icon-button{margin-left:auto;color:var(--muted)}
+#create-round-minutes{width:100%}
+#round-length-hint{margin-top:7px;margin-bottom:15px}
+@media(max-width:600px){
+  :root{--muted:#b6c1ac}
+  .game-heading h1.round-heading{font-size:42px}
+  .game-heading .game-name{font-size:14px;line-height:1.5}
+  .game-code-link{font-size:12px}
+  .player-identity{font-size:12px}
+  .player-identity small{font-size:9px;letter-spacing:.5px}
+  .fine,.secret-details .fine,.ballot-panel>.fine,.ballot-panel .centred,.rules>.fine{font-size:12px}
+  .secret-details p,.faithful-note p,.mission-note,.ballot-intro p,.sealed-ballot p,.sealed-role p,.locked-detail p{font-size:15px;line-height:1.7}
+  .secret-details .signal-question{font-size:28px;line-height:1.25}
+  .secret-details blockquote{font-size:26px}
+  .ballot b,.submission-panel li>b,.roster b,.result-person b,.leaderboard b{font-size:14px}
+  .submission-status{font-size:12px}
+  .submission-panel .avatar{width:32px;height:32px;font-size:11px}
+  .submission-panel small,.result-person b>small,.leaderboard small{font-size:9px}
+  .result-role{font-size:12px}
+  .result-detail,.results-list article>p{font-size:13px;line-height:1.6;color:var(--muted)}
+  .result-points>span{font-size:11px}
+  .private-heading .eyebrow,.private-heading>span,.secret-details .eyebrow,.admin-toolbar-label{font-size:11px;letter-spacing:1px}
+  .admin-toolbar .button{font-size:11px}
+  .admin-toolbar .button svg{width:12px;height:12px}
+  .game-bottom>.text-button,.connection{font-size:11px}
+  .game-bottom{gap:18px}
+  .connection{letter-spacing:0}
+  .menu-list button,.rules,.rules td{font-size:14px}
+  .next-round b{font-size:14px}
+  .next-round span{font-size:12px}
+  .round-notice{font-size:14px;line-height:1.5}
+}
+
+.reveal-intro>p{flex-wrap:wrap}
+.murder-method{color:var(--muted);font-size:14px}
+.result-murder-method{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted);padding:12px 0;border-bottom:1px solid var(--border);line-height:1.6}
+.result-murder-method b{font-weight:500;color:var(--cream)}
+.result-murder-method svg{margin-top:3px}

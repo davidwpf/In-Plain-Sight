@@ -1,5 +1,5 @@
 import {env} from 'cloudflare:workers';
-import {makeGame,addPlayer,applyAction,tick,publicView,randomInt} from '../../../lib/game/engine.mjs';
+import {makeGame,addPlayer,applyAction,tick,publicView,randomInt,validateRoundMinutes} from '../../../lib/game/engine.mjs';
 export const dynamic='force-dynamic';
 type Outcome={body:any;status:number};
 const headers={'Cache-Control':'no-store, private','Content-Type':'application/json','X-Content-Type-Options':'nosniff'};
@@ -33,9 +33,10 @@ export async function POST(req:Request){
     if(Number(req.headers.get('content-length'))>12000)return respond(fail('Request too large.',413));const raw=await req.text();if(raw.length>12000)return respond(fail('Request too large.',413));const body=JSON.parse(raw);
     if(body.type==='create'){
       const name=clean(body.name),gameName=clean(body.gameName,40);if(!name||!gameName)return respond(fail('Enter your name and a name for the game.'));
+      const roundMinutes=validateRoundMinutes(body.roundMinutes);
       for(let i=0;i<5;i++){
         const gameCode=code(),token=crypto.randomUUID()+crypto.randomUUID();const player={id:crypto.randomUUID(),name,tokenHashes:[await hash(token)]};
-        const g:any=makeGame(gameCode,gameName,player);g.authSalt=crypto.randomUUID();const login=await newLogin(g);g.players[0].loginHash=login.loginHash;
+        const g:any=makeGame(gameCode,gameName,player,Date.now(),roundMinutes);g.authSalt=crypto.randomUUID();const login=await newLogin(g);g.players[0].loginHash=login.loginHash;
         const r=await db().prepare('INSERT OR IGNORE INTO games (code, state, version, expires_at) VALUES (?, ?, 0, ?)').bind(gameCode,JSON.stringify(g),Date.now()+7*86400000).run();
         if(r.meta.changes===1)return respond(ok({token,passcode:login.passcode,view:publicView(g,player.id)},201));
       }throw new Error('Could not create the game. Please try again.');
