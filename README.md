@@ -1,5 +1,7 @@
 # In Plain Sight
 
+**[Play In Plain Sight](https://in-plain-sight.davidwpfrancis.workers.dev)**
+
 A social deduction game for an evening or weekend with friends and family. Everyone can play, including the admin. Every round randomly assigns fresh traitors. The interface centres on one current task, with extra information in small menus.
 
 ## Play
@@ -121,11 +123,11 @@ pnpm exec wrangler d1 migrations apply DB --remote --config dist/server/wrangler
 pnpm exec wrangler deploy --config dist/server/wrangler.standalone.json
 ```
 
-Use the actual database UUID. `CLOUDFLARE_WORKER_NAME` can override the default `in-plain-sight`. Configuration preparation itself does not deploy. Build output is ignored and must be regenerated for deployments. This standalone route is provided for portability; deployment to an external Cloudflare account has not been exercised here.
+Use the actual database UUID. `CLOUDFLARE_WORKER_NAME` can override the default `in-plain-sight`. Configuration preparation itself does not deploy. Build output is ignored and must be regenerated for deployments. The live game is deployed to Cloudflare Workers with D1. Creation, joining, private codes, role privacy, pause/resume, early roundtables, voting, murder resolution and scoring have been checked against the live service.
 
 ### Sites deployment
 
-`.openai/hosting.json` retains the existing project identity and `DB` binding. Use the Sites source-sync and publishing workflow for this project, preserving its access settings. New Sites are owner-private by default; permit friends through the Site’s sharing controls before a group session. The private publishing upload in this environment has been blocked by automatic approval review; no live deployment has been confirmed.
+`.openai/hosting.json` retains the original Sites project identity and `DB` binding for compatibility. The live game uses the standalone Cloudflare deployment above. If using Sites as an alternative, follow its source-sync and publishing workflow and preserve the selected Site’s access settings.
 
 ## Source map
 
