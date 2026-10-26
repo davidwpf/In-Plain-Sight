@@ -12,3 +12,13 @@
 
 /* Public submission progress; ballot choices stay private. */
 .submission-panel{border:1px solid var(--border);border-radius:4px;background:#19221b88;padding:22px 24px;margin-top:20px}.submission-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.submission-heading h2{font-size:30px;line-height:1.2}.submission-heading>span{font-size:10px;color:var(--muted)}.submission-panel ul{list-style:none;margin:0;padding:0}.submission-panel li{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--border)}.submission-panel .avatar{width:29px;height:29px;font-size:9px}.submission-panel li>b{font-size:12px;font-weight:500;min-width:0;overflow-wrap:anywhere}.submission-panel small{font-size:7px;font-weight:400;color:var(--muted);white-space:nowrap}.submission-status{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0}.submission-status.sent{color:#d0dcad}@media(max-width:600px){.submission-panel{padding:18px}.submission-panel li>b{font-size:11px}.submission-status{font-size:9px}}
+
+/* Admin actions remain visible above the current round. */
+.admin-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 16px;border:1px solid var(--border);border-radius:4px;background:#19221b88;margin-bottom:20px}
+.admin-toolbar-label{display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:1.3px;color:var(--gold);text-transform:uppercase;white-space:nowrap}
+.admin-toolbar-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.admin-toolbar .button{font-size:11px;min-height:38px;padding:9px 12px;gap:7px;white-space:nowrap}
+.admin-toolbar .button svg{flex-shrink:0}
+.admin-toolbar .end-game{color:#d6aaa1;border-color:#9d606650}
+@media(max-width:600px){.admin-toolbar{display:block;padding:14px}.admin-toolbar-label{margin-bottom:12px}.admin-toolbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.admin-toolbar-actions.three-actions{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-toolbar .button{font-size:10px;padding:9px 7px;gap:5px;white-space:normal;line-height:1.4;min-height:42px}}
+@media(max-width:360px){.admin-toolbar-actions.three-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-toolbar-actions.three-actions>.button:first-child{grid-column:1/-1}}

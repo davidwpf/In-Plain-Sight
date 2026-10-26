@@ -24,14 +24,14 @@ The count is recalculated at each new deal. Every round makes a fresh, independe
 - Everyone privately checks whether they are faithful or a traitor. Roles start hidden and hide when the page goes into the background.
 - Multiple traitors receive the same ordinary question and particular reply to help recognise each other. Names remain secret. A lone traitor acts alone.
 - All traitors receive the same murder task. At least one must perform it on their chosen faithful. Coordination happens in person, and actual actions use an honour system.
-- After 60 minutes, the roundtable opens. The admin can open it sooner using **Call roundtable** in the admin menu. Faithful players accuse one other player. Traitors report one victim or “No murder”. Everyone’s submission is final. No victim or report is revealed during voting.
+- After 60 minutes, the roundtable opens. The admin can open it sooner using **Call roundtable** above the countdown. Faithful players accuse one other player. Traitors report one victim or “No murder”. Everyone’s submission is final. No victim or report is revealed during voting.
 - At least half the active players submitting starts a five-minute deadline. All submissions in closes immediately. Before halfway, there is no voting deadline. Both accusation ballots and murder reports count towards submission progress. Everyone can see who has submitted and who has not, while roles and choices stay private until results.
 - Reports confirm a murder only when a majority of the assigned traitors name the same faithful: 1 of 1, 2 of 2 or 2 of 3. Missing reports do not reduce the majority needed. Other named targets are attempted murders. Naming another traitor cannot murder them and produces a failed attempt.
 - Roles, accusations, reports, murders, attempts and points appear together. A personal reveal can say: “You were murdered. Alice and Ben both killed you.”
 - A 120-second break follows. Players can sit out or return without losing their score. New arrivals wait through the current vote and this break, then receive a role with everyone else. If fewer than three are ready, the Game returns to the lobby.
 - The group chooses when to finish; the admin ends the Game. An unfinished round earns no points.
 
-The admin can pause a round, voting or break. Pause freezes all countdowns and prevents ballot submissions. Joining, signing in and choosing next-round readiness remain available. Resume preserves the time that was remaining. Resume a paused Game before calling an early roundtable; this opens voting immediately and uses the usual halfway threshold and five-minute deadline.
+The admin’s Start, Call roundtable, Pause/Resume and End buttons appear on their main Game screen, above the countdown. Only the actions available in the current phase are shown. Calling a roundtable and ending a Game still require confirmation. The admin can pause a round, voting or break. Pause freezes all countdowns and prevents ballot submissions. Joining, signing in and choosing next-round readiness remain available. Resume preserves the time that was remaining. Resume a paused Game before calling an early roundtable; this opens voting immediately and uses the usual halfway threshold and five-minute deadline.
 
 ## Scoring
 
