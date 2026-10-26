@@ -92,3 +92,10 @@
 .rules .traitor-scoring td:not(:first-child),.rules .traitor-scoring th:not(:first-child){text-align:center;padding-left:12px}
 @media(max-width:600px){.participation-step legend{font-size:16px}.participation-option{font-size:15px;padding:12px}.rules table td,.rules table th{font-size:13px}.rules .traitor-scoring td:not(:first-child),.rules .traitor-scoring th:not(:first-child){padding-left:8px}.result-detail{flex-wrap:wrap}}
 @media(max-width:360px){.participation-options{grid-template-columns:1fr}}
+
+/* Share only the public joining link, with a clear margin for phone cameras. */
+.invite-qr{width:224px;max-width:100%;margin:22px auto 0;background:#fff;border-radius:4px;overflow:hidden;line-height:0}
+.invite-qr svg{display:block;width:100%;height:auto}
+.lobby-invite-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-top:8px}
+.lobby-invite-actions .text-button{min-height:44px;padding:9px 0}
+@media(max-width:600px){.lobby-invite-actions .text-button{font-size:12px}}

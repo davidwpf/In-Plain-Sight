@@ -19,6 +19,8 @@ A social deduction game for an evening or weekend with friends and family. Every
 
 The count is recalculated at each new deal. Each round uses a fresh weighted draw with the server’s cryptographic random generator. Players with fewer traitor turns than expected for the rounds they have played get higher odds. The calculation accounts for each round’s group size and traitor count; sitting out adds no opportunities, and new players start with a neutral weight. Weights stay between 25 and 400 around a neutral 100, so everyone remains eligible and consecutive traitor turns are still possible. Existing scores and current roles are preserved; the weighting applies at the next deal.
 
+Players can scan the joining QR code from **Show QR code** in the lobby or **Game menu → Invite someone**. It opens the join page with the public game code filled in, leaving the choice of joining as a new player or signing in with a private player code. The QR code is generated locally from the same URL as Copy invite link and contains no player code or session token. QR codes are unavailable in the demo and after a Game ends.
+
 ## A round
 
 - Everyone privately checks whether they are faithful or a traitor. Roles start hidden and hide when the page goes into the background.
