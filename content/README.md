@@ -34,6 +34,16 @@ All traitors receive the same randomly chosen task. At least one must complete i
 
 Keep tasks short, specific and feasible in an ordinary British home. Describe exactly what completes the task. Consider an alternative for tasks needing a prop.
 
+## Edit on GitHub
+
+Open [tasks.json on GitHub](https://github.com/davidwpf/In-Plain-Sight/blob/main/content/tasks.json), sign in and select the pencil icon. Edit the wording, then select **Commit changes** and save to `main`. GitHub checks the file and Cloudflare builds and publishes it automatically; allow a few minutes for the update.
+
+- Under `recognition`, edit `prompt` (the question or phrase) and `reply` (the response).
+- Under `murders`, edit `title` (the short name) and `instruction` (what the traitor must do).
+- To add an entry, copy a whole existing entry and give it a new, unique `id`. Keep the commas and quotation marks in place.
+
+[GitHub checks](https://github.com/davidwpf/In-Plain-Sight/actions) show whether the tests have passed. You can also ask Codex to edit the wording for you.
+
 ## Check and publish changes
 
-Run `pnpm test` to check the content structure and game rules. Then build and publish through the usual site workflow. The library is bundled with the app, so saved edits appear in the deployed game after a new build and deployment. Existing rounds keep their assigned task; new rounds draw from the updated list.
+Run `pnpm test` to check the content structure and game rules. Commit the change to `main` to publish through the connected Cloudflare build. The library is bundled with the app, so saved edits appear in the deployed game after a new build and deployment. Existing rounds keep their assigned task; new rounds draw from the updated list.
