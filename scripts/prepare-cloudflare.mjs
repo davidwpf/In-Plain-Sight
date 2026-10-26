@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const databaseId=process.env.CLOUDFLARE_D1_DATABASE_ID;
+const name=process.env.CLOUDFLARE_WORKER_NAME||'in-plain-sight';
+if(!databaseId||!/^[0-9a-f-]{36}$/i.test(databaseId))throw new Error('Set CLOUDFLARE_D1_DATABASE_ID to your actual D1 database UUID.');
+if(!/^[a-z][a-z0-9-]{1,62}$/.test(name))throw new Error('CLOUDFLARE_WORKER_NAME must be a lowercase Worker name.');
+const config=JSON.parse(fs.readFileSync('dist/server/wrangler.json','utf8'));
+config.name=name;delete config.topLevelName;config.workers_dev=true;
+config.d1_databases=[{binding:'DB',database_name:'in-plain-sight-games',database_id:databaseId,migrations_dir:'../../drizzle'}];
+fs.writeFileSync('dist/server/wrangler.standalone.json',JSON.stringify(config,null,2)+'\n');
+console.log('Prepared dist/server/wrangler.standalone.json. No deployment has been made.');

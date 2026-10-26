@@ -1,0 +1,92 @@
+{
+  "recognition": [
+    {
+      "id": "cuppa",
+      "prompt": "Fancy a cuppa?",
+      "reply": "Only if you’re making it."
+    },
+    {
+      "id": "biscuits",
+      "prompt": "Any biscuits left?",
+      "reply": "Save me a custard cream."
+    },
+    {
+      "id": "jumper",
+      "prompt": "Is it a bit chilly in here?",
+      "reply": "I should have brought a jumper."
+    },
+    {
+      "id": "tea-time",
+      "prompt": "What time do you make it?",
+      "reply": "Time to put the kettle on."
+    },
+    {
+      "id": "weather",
+      "prompt": "Do you reckon it’ll rain?",
+      "reply": "I’ve left my washing out."
+    },
+    {
+      "id": "telly",
+      "prompt": "Anything good on the telly?",
+      "reply": "I’m waiting for the adverts."
+    }
+  ],
+  "murders": [
+    {
+      "id": "got-the-time",
+      "title": "Have you got the time?",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Ask your chosen person ‘Have you got the time?’ and get an answer. Once they answer, the task is complete."
+    },
+    {
+      "id": "favourite-biscuit",
+      "title": "Favourite biscuit",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Ask your chosen person ‘What’s your favourite biscuit?’ and get an answer. Any biscuit counts."
+    },
+    {
+      "id": "weekend-plans",
+      "title": "Weekend plans",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Ask your chosen person ‘Got much planned for the weekend?’ and let them answer. That completes the task."
+    },
+    {
+      "id": "pass-it-on",
+      "title": "Could you pass that?",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Ask your chosen person to pass you an ordinary object, such as a pen, napkin or plate. The task is complete when they pass it to you."
+    },
+    {
+      "id": "rain-later",
+      "title": "Weather question",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Ask your chosen person ‘Do you reckon it’ll rain later?’ and get an answer. Keep it casual."
+    },
+    {
+      "id": "pocket-penny",
+      "title": "Coin in a pocket",
+      "kind": "prop",
+      "difficulty": "medium",
+      "instruction": "Leave a coin in a pocket of your chosen person’s unattended coat. The coin is a game prop; leave it there until the reveal."
+    },
+    {
+      "id": "sticky-note",
+      "title": "Sticky note",
+      "kind": "prop",
+      "difficulty": "medium",
+      "instruction": "Get a small sticky note reading ‘In Plain Sight’ onto your chosen person’s back, or the back of the chair they are sitting in. Leave it there for at least ten seconds."
+    },
+    {
+      "id": "three-words",
+      "title": "Say ‘fair enough’",
+      "kind": "spoken",
+      "difficulty": "medium",
+      "instruction": "Get your chosen person to say ‘fair enough’ during a conversation. You may steer the conversation, but don’t directly ask them to repeat the phrase."
+    }
+  ]
+}
