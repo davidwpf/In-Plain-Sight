@@ -22,6 +22,10 @@ const initial=await Promise.all(sessions.map(view));const traitors=sessions.filt
 assert.ok(initial[0].deadline>Date.now()+89*60000);assert.ok(initial[0].deadline<=Date.now()+90*60000);
 for(const v of initial){for(const p of v.players){assert.equal(p.role,undefined);assert.equal(p.passcode,undefined);assert.equal(p.loginHash,undefined);}const text=JSON.stringify(v);for(const secret of ['tokenHashes','loginHash','authSalt','loginAttempts','"ballots"'])assert.ok(!text.includes(secret));assert.equal(v.murderedId,undefined);assert.equal(v.results,null);}
 assert.deepEqual(initial.find(v=>v.me.id===traitors[0].view.me.id).secret.mission,initial.find(v=>v.me.id===traitors[1].view.me.id).secret.mission);
+const firstSecret=initial.find(v=>v.me.id===traitors[0].view.me.id).secret;
+assert.deepEqual(firstSecret.signal,initial.find(v=>v.me.id===traitors[1].view.me.id).secret.signal);assert.equal(firstSecret.signal.reply,undefined);
+const seenSignals=new Set([firstSecret.signal.id]),seenTasks=new Set([firstSecret.mission.id]);
+for(const v of initial)assert.equal(v.usedTaskIds,undefined);
 await assert.rejects(()=>request({type:'roundtable'},sessions[1]),/Only the admin/);
 await request({type:'pause'},admin);await assert.rejects(()=>request({type:'roundtable'},admin),/Resume/);await request({type:'resume'},admin);
 await request({type:'roundtable'},admin);const early=await view(admin);assert.equal(early.phase,'voting');assert.equal(early.round,1);assert.equal(early.deadline,null);assert.equal(early.voteDeadline,null);assert.equal(early.results,null);
@@ -50,6 +54,8 @@ for(const round of [2,3]){
   const current=await Promise.all([...sessions,late].map(async s=>({session:s,view:await view(s)})));
   const active=current.filter(p=>p.view.me.active),team=active.filter(p=>p.view.secret.role==='traitor'),others=active.filter(p=>p.view.secret.role==='faithful');
   assert.equal(active.length,10);assert.equal(team.length,3);assert.ok(active.every(p=>p.view.round===round));
+  const secret=team[0].view.secret;assert.ok(!seenSignals.has(secret.signal.id));assert.ok(!seenTasks.has(secret.mission.id));seenSignals.add(secret.signal.id);seenTasks.add(secret.mission.id);
+  for(const p of team){assert.deepEqual(p.view.secret.signal,secret.signal);assert.deepEqual(p.view.secret.mission,secret.mission);}
   await request({type:'roundtable'},admin);
   await Promise.all(active.map(p=>request({type:'ballot',target:p.view.secret.role==='traitor'?others[0].view.me.id:team[0].view.me.id},p.session)));
   const completed=await view(admin);assert.equal(completed.phase,'results');assert.equal(completed.history.length,round);

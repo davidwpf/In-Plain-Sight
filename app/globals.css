@@ -71,3 +71,5 @@
 .result-murder-method{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted);padding:12px 0;border-bottom:1px solid var(--border);line-height:1.6}
 .result-murder-method b{font-weight:500;color:var(--cream)}
 .result-murder-method svg{margin-top:3px}
+
+.secret-details .signal-instruction{font-size:20px;line-height:1.5;color:var(--cream);margin:13px 0 15px}

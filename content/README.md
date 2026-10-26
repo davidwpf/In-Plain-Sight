@@ -1,49 +1,59 @@
-# Editing the phrases and tasks
+# Editing recognition signals and murder tasks
 
-Edit `tasks.json` in this folder. These are site content, not admin controls or player settings. You can also describe changes in plain English in Codex and ask it to update this list.
+Edit `tasks.json` in this folder. The library contains 34 recognition signals and 18 murder tasks. These are site content, separate from admin controls and player settings.
 
-There are two independent lists. Add an entry by copying an existing one and changing its `id` and wording. Give every entry its own unique `id` within its list. Keep the JSON commas and quotation marks valid.
+There are two independent lists. Add an entry by copying an existing one and changing its `id` and wording. Every entry needs a unique `id` within its list. Keep the JSON commas and quotation marks valid.
 
-## Recognition phrases
+## Recognition signals
 
 ```json
 {
-  "id": "cuppa",
-  "prompt": "Fancy a cuppa?",
-  "reply": "Only if you’re making it."
+  "id": "pickle",
+  "prompt": "Say “pickle” during a conversation."
 }
 ```
 
-Both lines are shown to every traitor in that round. They are used in conversation; the app does not check spoken words. A lone traitor does not receive a recognition phrase. Prefer everyday British language that a twelve-year-old can understand, with a particular reply that helps distinguish it from chance conversation.
+`prompt` describes the word, phrase, sound or gesture to use. Every traitor receives the same signal and looks for others using it. A lone traitor receives no recognition signal. The app does not observe or verify real-world actions.
+
+Only `id` and `prompt` are required. Older question-and-answer entries can still include a non-empty `reply`; their two-part display is retained for rounds already in progress. The new single-signal entries leave `reply` out.
 
 ## Murder tasks
 
 ```json
 {
-  "id": "favourite-biscuit",
-  "title": "Favourite biscuit",
-  "kind": "spoken",
+  "id": "offer-food",
+  "title": "Offer some food",
+  "kind": "action",
   "difficulty": "easy",
-  "instruction": "Ask your chosen person ‘What’s your favourite biscuit?’ and get an answer. Any biscuit counts."
+  "instruction": "Offer your chosen person some food. Making the offer completes the task."
 }
 ```
 
-All traitors receive the same randomly chosen task. At least one must complete it. The app compares their victim reports at the roundtable; it does not observe the real-world action.
+All traitors receive the same task. At least one must complete it. The app compares their victim reports at the roundtable; it does not observe the real-world action.
 
-`kind` and `difficulty` are labels for maintaining the library. They do not change scoring or add settings to the Game. Current kinds are `spoken`, `action`, and `prop`; current difficulties are `easy` and `medium`. No task requires a person to eat or drink anything.
+- `title`: the short name shown on the traitor screen and beside a confirmed victim in results.
+- `instruction`: what the traitor must do and what completes the task.
+- `kind`: `spoken`, `action` or `prop`.
+- `difficulty`: `easy` or `medium`.
 
-Keep tasks short, specific and feasible in an ordinary British home. Describe exactly what completes the task. Consider an alternative for tasks needing a prop.
+Kind and difficulty help maintain the library; they do not change scoring or add Game settings. The selected food and drink tasks finish when the offer is made. Asking for the time finishes when the question is asked. The passing and seating tasks require the other person to carry out the action. The dagger-note task uses a drawing on paper.
+
+## Variety between rounds
+
+Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. Recognition signals are only used up in rounds with multiple traitors. The two lists cycle independently, and draw history is saved with the Game.
+
+Edits take effect for new rounds after publication. Current rounds retain their assigned signal and task. New entries become available in the current cycle; removed entries are no longer drawn. Keep an existing entry's `id` when changing only its wording so the Game can recognise that it has already been used.
 
 ## Edit on GitHub
 
 Open [tasks.json on GitHub](https://github.com/davidwpf/In-Plain-Sight/blob/main/content/tasks.json), sign in and select the pencil icon. Edit the wording, then select **Commit changes** and save to `main`. GitHub checks the file and Cloudflare builds and publishes it automatically; allow a few minutes for the update.
 
-- Under `recognition`, edit `prompt` (the question or phrase) and `reply` (the response).
-- Under `murders`, edit `title` (the short name) and `instruction` (what the traitor must do).
-- To add an entry, copy a whole existing entry and give it a new, unique `id`. Keep the commas and quotation marks in place.
+- Under `recognition`, edit `prompt`.
+- Under `murders`, edit `title` and `instruction`.
+- To add an entry, copy a whole existing entry and give it a new, unique `id`.
 
-[GitHub checks](https://github.com/davidwpf/In-Plain-Sight/actions) show whether the tests have passed. You can also ask Codex to edit the wording for you.
+[GitHub checks](https://github.com/davidwpf/In-Plain-Sight/actions) show whether the tests have passed. You can also describe changes in plain English in Codex and ask it to update the library.
 
-## Check and publish changes
+## Check changes locally
 
-Run `pnpm test` to check the content structure and game rules. Commit the change to `main` to publish through the connected Cloudflare build. The library is bundled with the app, so saved edits appear in the deployed game after a new build and deployment. Existing rounds keep their assigned task; new rounds draw from the updated list.
+Run `pnpm test` to check the content structure, draw cycles and game rules. The library is bundled with the app, so editing the file requires a new build and deployment before it appears on the live site.

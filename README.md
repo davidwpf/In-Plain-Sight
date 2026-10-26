@@ -22,7 +22,7 @@ The count is recalculated at each new deal. Each round uses a fresh weighted dra
 ## A round
 
 - Everyone privately checks whether they are faithful or a traitor. Roles start hidden and hide when the page goes into the background.
-- Multiple traitors receive the same ordinary question and particular reply to help recognise each other. Names remain secret. A lone traitor acts alone.
+- Multiple traitors receive the same recognition signal: a word, phrase, sound or gesture to help recognise each other. Names remain secret. A lone traitor acts alone.
 - All traitors receive the same murder task. At least one must perform it on their chosen faithful. Coordination happens in person, and actual actions use an honour system.
 - After the chosen round length, the roundtable opens. The length is fixed for that Game and defaults to 60 minutes, including for existing Games without a saved duration. The admin can open it sooner using **Call roundtable** above the countdown. Faithful players accuse one other player. Traitors report one victim or “No murder”. Everyone’s submission is final. No victim or report is revealed during voting.
 - At least half the active players submitting starts a five-minute deadline. All submissions in closes immediately. Before halfway, there is no voting deadline. Both accusation ballots and murder reports count towards submission progress. Everyone can see who has submitted and who has not, while roles and choices stay private until results.
@@ -57,7 +57,7 @@ Only the traitors who report the confirmed victim qualify for successful-murder 
 
 ## Editable phrases and tasks
 
-The complete library is in **[content/tasks.json](content/tasks.json)**. **[content/README.md](content/README.md)** explains how to add and edit entries. Editing the library is separate from gameplay; the admin does not choose or edit tasks. The engine validates required fields and duplicate identifiers.
+The complete library is in **[content/tasks.json](content/tasks.json)**. **[content/README.md](content/README.md)** explains how to add and edit entries. Editing the library is separate from gameplay; the admin does not choose or edit tasks. The library contains 34 recognition signals and 18 murder tasks. Each list is drawn without repeats within a Game until all its entries have been used, then a new random cycle starts. The next cycle avoids repeating the immediately previous entry when alternatives exist. Recognition signals are only drawn for rounds with multiple traitors. Draw history survives signing in again and server restarts. The engine validates required fields and duplicate identifiers.
 
 The site includes a demo with sample players and controls to move through the stages. Demo progression controls do not exist in the live Game API.
 

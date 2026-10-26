@@ -1,92 +1,268 @@
 {
   "recognition": [
     {
-      "id": "cuppa",
-      "prompt": "Fancy a cuppa?",
-      "reply": "Only if you’re making it."
+      "id": "pickle",
+      "prompt": "Say “pickle” during a conversation."
     },
     {
-      "id": "biscuits",
-      "prompt": "Any biscuits left?",
-      "reply": "Save me a custard cream."
+      "id": "banana",
+      "prompt": "Say “banana” during a conversation."
     },
     {
-      "id": "jumper",
-      "prompt": "Is it a bit chilly in here?",
-      "reply": "I should have brought a jumper."
+      "id": "penguin",
+      "prompt": "Say “penguin” during a conversation."
     },
     {
-      "id": "tea-time",
-      "prompt": "What time do you make it?",
-      "reply": "Time to put the kettle on."
+      "id": "crikey",
+      "prompt": "Say “crikey”."
     },
     {
-      "id": "weather",
-      "prompt": "Do you reckon it’ll rain?",
-      "reply": "I’ve left my washing out."
+      "id": "blimey",
+      "prompt": "Say “blimey”."
     },
     {
-      "id": "telly",
-      "prompt": "Anything good on the telly?",
-      "reply": "I’m waiting for the adverts."
+      "id": "marvellous",
+      "prompt": "Say “marvellous”."
+    },
+    {
+      "id": "nonsense",
+      "prompt": "Say “nonsense”."
+    },
+    {
+      "id": "apparently",
+      "prompt": "Say “apparently”."
+    },
+    {
+      "id": "fair-enough",
+      "prompt": "Say “Fair enough”."
+    },
+    {
+      "id": "thatll-do",
+      "prompt": "Say “That’ll do”."
+    },
+    {
+      "id": "could-be-worse",
+      "prompt": "Say “Could be worse”."
+    },
+    {
+      "id": "here-we-go",
+      "prompt": "Say “Here we go”."
+    },
+    {
+      "id": "happy-days",
+      "prompt": "Say “Happy days”."
+    },
+    {
+      "id": "typical",
+      "prompt": "Say “Typical”."
+    },
+    {
+      "id": "nice-one",
+      "prompt": "Say “Nice one”."
+    },
+    {
+      "id": "there-you-go",
+      "prompt": "Say “There you go”."
+    },
+    {
+      "id": "fancy-that",
+      "prompt": "Say “Fancy that”."
+    },
+    {
+      "id": "well-well-well",
+      "prompt": "Say “Well, well, well”."
+    },
+    {
+      "id": "would-you-believe-it",
+      "prompt": "Say “Would you believe it?”"
+    },
+    {
+      "id": "i-reckon-so",
+      "prompt": "Say “I reckon so”."
+    },
+    {
+      "id": "pretend-coughs",
+      "prompt": "Give two small, pretend coughs."
+    },
+    {
+      "id": "pretend-sneeze",
+      "prompt": "Pretend to sneeze."
+    },
+    {
+      "id": "clear-throat",
+      "prompt": "Clear your throat twice."
+    },
+    {
+      "id": "exaggerated-sigh",
+      "prompt": "Give an exaggerated sigh."
+    },
+    {
+      "id": "yawn-and-stretch",
+      "prompt": "Yawn and stretch your arms."
+    },
+    {
+      "id": "whistle",
+      "prompt": "Whistle a few notes."
+    },
+    {
+      "id": "tap-knee",
+      "prompt": "Tap your knee twice."
+    },
+    {
+      "id": "tap-chest",
+      "prompt": "Tap your chest twice."
+    },
+    {
+      "id": "scratch-head",
+      "prompt": "Scratch the back of your head."
+    },
+    {
+      "id": "rub-hands",
+      "prompt": "Rub your hands together."
+    },
+    {
+      "id": "hand-on-head",
+      "prompt": "Rest a hand on top of your head."
+    },
+    {
+      "id": "hands-on-hips",
+      "prompt": "Put both hands on your hips."
+    },
+    {
+      "id": "thumbs-up",
+      "prompt": "Give a thumbs-up during a conversation."
+    },
+    {
+      "id": "rub-chin",
+      "prompt": "Rub your chin as though thinking."
     }
   ],
   "murders": [
     {
-      "id": "got-the-time",
-      "title": "Have you got the time?",
-      "kind": "spoken",
-      "difficulty": "easy",
-      "instruction": "Ask your chosen person ‘Have you got the time?’ and get an answer. Once they answer, the task is complete."
+      "id": "clothes-peg",
+      "title": "Clothes peg",
+      "kind": "prop",
+      "difficulty": "medium",
+      "instruction": "Clip a clothes peg onto your chosen person’s coat or clothing."
     },
     {
-      "id": "favourite-biscuit",
-      "title": "Favourite biscuit",
-      "kind": "spoken",
-      "difficulty": "easy",
-      "instruction": "Ask your chosen person ‘What’s your favourite biscuit?’ and get an answer. Any biscuit counts."
+      "id": "dagger-note",
+      "title": "Dagger note",
+      "kind": "prop",
+      "difficulty": "medium",
+      "instruction": "Place a paper note with a dagger drawn on it in your chosen person’s shoe, coat or pocket."
     },
     {
-      "id": "weekend-plans",
-      "title": "Weekend plans",
-      "kind": "spoken",
-      "difficulty": "easy",
-      "instruction": "Ask your chosen person ‘Got much planned for the weekend?’ and let them answer. That completes the task."
-    },
-    {
-      "id": "pass-it-on",
-      "title": "Could you pass that?",
+      "id": "pat-on-back",
+      "title": "Pat on the back",
       "kind": "action",
       "difficulty": "easy",
-      "instruction": "Ask your chosen person to pass you an ordinary object, such as a pen, napkin or plate. The task is complete when they pass it to you."
+      "instruction": "Give your chosen person a light pat on the back."
     },
     {
-      "id": "rain-later",
-      "title": "Weather question",
+      "id": "tap-upper-arm",
+      "title": "Tap on the upper arm",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Gently tap your chosen person’s upper arm."
+    },
+    {
+      "id": "hand-on-shoulder",
+      "title": "Hand on the shoulder",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Briefly place a hand on your chosen person’s shoulder."
+    },
+    {
+      "id": "tap-knee",
+      "title": "Tap on the knee",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Gently tap your chosen person’s knee."
+    },
+    {
+      "id": "high-five",
+      "title": "High-five",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to give you a high-five."
+    },
+    {
+      "id": "fist-bump",
+      "title": "Fist bump",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to give you a fist bump."
+    },
+    {
+      "id": "handshake",
+      "title": "Handshake",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Shake hands with your chosen person."
+    },
+    {
+      "id": "offer-food",
+      "title": "Offer some food",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Offer your chosen person some food. Making the offer completes the task."
+    },
+    {
+      "id": "offer-drink",
+      "title": "Offer a drink",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Offer your chosen person a drink. Making the offer completes the task."
+    },
+    {
+      "id": "pass-something",
+      "title": "Pass something",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Ask your chosen person to pass you something. The task is complete when they pass it to you."
+    },
+    {
+      "id": "offer-seat",
+      "title": "Offer a seat",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Offer your chosen person a seat. The task is complete when they sit down."
+    },
+    {
+      "id": "point-and-look",
+      "title": "Look over there",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to look at something you point to."
+    },
+    {
+      "id": "look-over-shoulder",
+      "title": "Look over a shoulder",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to look over their shoulder."
+    },
+    {
+      "id": "ask-the-time",
+      "title": "Ask for the time",
       "kind": "spoken",
       "difficulty": "easy",
-      "instruction": "Ask your chosen person ‘Do you reckon it’ll rain later?’ and get an answer. Keep it casual."
+      "instruction": "Ask your chosen person for the time. Asking the question completes the task."
     },
     {
-      "id": "pocket-penny",
-      "title": "Coin in a pocket",
-      "kind": "prop",
-      "difficulty": "medium",
-      "instruction": "Leave a coin in a pocket of your chosen person’s unattended coat. The coin is a game prop; leave it there until the reveal."
+      "id": "say-yes",
+      "title": "Say yes",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to say “yes” in answer to a question."
     },
     {
-      "id": "sticky-note",
-      "title": "Sticky note",
-      "kind": "prop",
-      "difficulty": "medium",
-      "instruction": "Get a small sticky note reading ‘In Plain Sight’ onto your chosen person’s back, or the back of the chair they are sitting in. Leave it there for at least ten seconds."
-    },
-    {
-      "id": "three-words",
-      "title": "Say ‘fair enough’",
+      "id": "say-your-name",
+      "title": "Say your name",
       "kind": "spoken",
       "difficulty": "medium",
-      "instruction": "Get your chosen person to say ‘fair enough’ during a conversation. You may steer the conversation, but don’t directly ask them to repeat the phrase."
+      "instruction": "Get your chosen person to say your name."
     }
   ]
 }
