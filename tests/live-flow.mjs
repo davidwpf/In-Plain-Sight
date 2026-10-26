@@ -35,14 +35,28 @@ await request({type:'ballot',target:caught},faithful[0]);await request({type:'ba
 await Promise.all(faithful.slice(2).map(s=>request({type:'ballot',target:caught},s)));
 const result=await view(admin);assert.equal(result.phase,'results');assert.equal(result.history.length,1);assert.equal(result.results.submittedCount,10);assert.equal(result.results.murderedId,victim);assert.equal(result.results.attempts[0].targetId,attempted);
 for(const s of traitors.slice(0,2))assert.equal(result.results.players.find(p=>p.id===s.view.me.id).delta,2);assert.equal(result.results.players.find(p=>p.id===caught).delta,-3);
-const named=traitors.slice(0,2).map(s=>s.view.me.name);assert.equal(result.results.players.find(p=>p.id===victim).blurb,`You were murdered. ${named.join(' and ')} both killed you.`);
+assert.deepEqual(new Set(result.results.murdererIds),new Set(traitors.slice(0,2).map(s=>s.view.me.id)));
+const named=result.results.murdererIds.map(id=>result.players.find(p=>p.id===id).name);assert.equal(result.results.players.find(p=>p.id===victim).blurb,`You were murdered. ${named.join(' and ')} both killed you.`);
 const lateResult=await view(late);assert.equal(lateResult.me.active,false);assert.equal(lateResult.secret,null);
 const reread=await view(admin);assert.deepEqual(reread.players.map(p=>p.score),result.players.map(p=>p.score));
 await request({type:'ready',ready:false},faithful.at(-1));advanceLocalDeadline(admin.view.code);const next=await view(late);assert.equal(next.phase,'playing');assert.equal(next.round,2);assert.equal(next.me.active,true);assert.ok(next.secret);assert.equal(next.activeCount,10);assert.equal(next.traitorCount,3);assert.equal(next.submittedCount,0);assert.equal(next.history.length,1);
-const restored=await request({type:'login',code:faithful[0].view.code,passcode:faithful[0].passcode});assert.equal(restored.view.me.id,faithful[0].view.me.id);assert.equal(restored.view.me.score,3);
+const restored=await request({type:'login',code:faithful[0].view.code,passcode:faithful[0].passcode});assert.equal(restored.view.me.id,faithful[0].view.me.id);assert.equal(restored.view.me.score,4);
+// Exercise fresh persisted assignments through three completed rounds, including the late arrival.
+for(const round of [2,3]){
+  const current=await Promise.all([...sessions,late].map(async s=>({session:s,view:await view(s)})));
+  const active=current.filter(p=>p.view.me.active),team=active.filter(p=>p.view.secret.role==='traitor'),others=active.filter(p=>p.view.secret.role==='faithful');
+  assert.equal(active.length,10);assert.equal(team.length,3);assert.ok(active.every(p=>p.view.round===round));
+  await request({type:'roundtable'},admin);
+  await Promise.all(active.map(p=>request({type:'ballot',target:p.view.secret.role==='traitor'?others[0].view.me.id:team[0].view.me.id},p.session)));
+  const completed=await view(admin);assert.equal(completed.phase,'results');assert.equal(completed.history.length,round);
+  for(const p of active)assert.equal(completed.results.players.find(r=>r.id===p.view.me.id).role,p.view.secret.role);
+  assert.deepEqual(completed.history[0],result.results);
+  advanceLocalDeadline(admin.view.code);const dealt=await view(late);
+  assert.equal(dealt.phase,'playing');assert.equal(dealt.round,round+1);assert.equal(dealt.submittedCount,0);assert.equal(dealt.results,null);
+}
 await request({type:'end'},admin);assert.equal((await view(late)).phase,'ended');
 let wrong=String((Number(admin.passcode)+1)%1000000).padStart(6,'0');while(sessions.some(s=>s.passcode===wrong)||late.passcode===wrong)wrong=String((Number(wrong)+1)%1000000).padStart(6,'0');
 for(let i=0;i<8;i++)assert.equal((await raw({type:'login',code:admin.view.code,passcode:wrong})).status,401);assert.equal((await raw({type:'login',code:admin.view.code,passcode:wrong})).status,429);
 assert.equal((await view(admin)).phase,'ended');
-console.log('PASS: ten independent players, private-code recovery, admin permissions, simultaneous joins and submissions, paused voting, secret majority reports, minority scoring, exact reveal wording, late arrivals after the break, persistent scores and login throttling.');
+console.log('PASS: ten independent players, private-code recovery, admin permissions, simultaneous joins and submissions, paused voting, secret majority reports, revised scoring, exact reveal wording, late arrivals, fresh assignments across three completed rounds, persistent history and login throttling.');
 console.log(`Disposable local test Game: ${admin.view.code}`);

@@ -17,7 +17,7 @@ A social deduction game for an evening or weekend with friends and family. Every
 | 6–9 | 2 |
 | 10–30 | 3 |
 
-The count is recalculated at each new deal. Roles are independently random; getting the same role again is possible.
+The count is recalculated at each new deal. Every round makes a fresh, independent shuffle using the server’s cryptographic random generator. Previous roles do not affect the draw; the same players can be traitors again. With five players and one traitor, the same traitor across three rounds has a 1-in-25 chance.
 
 ## A round
 
@@ -39,16 +39,20 @@ The admin can pause a round, voting or break. Pause freezes all countdowns and p
 
 | Outcome | Points |
 | --- | ---: |
-| Faithful accuses any actual traitor | +3 |
-| Faithful makes an incorrect accusation | 0 |
-| Successful murderer escapes; no traitor caught | +5 |
+| Faithful accuses any actual traitor | +4 |
+| Faithful accuses another faithful | -1 |
+| Faithful misses the vote | -1 |
+| Faithful receives the most accusations | -1 extra |
+| Faithful is murdered without a correct accusation, including no vote | -1 extra |
+| Successful murderer escapes; no traitor caught | +4 |
 | Successful murderer escapes; another traitor caught | +2 |
 | Successful murderer is caught | +1 |
 | No successful murder; escapes | 0 |
 | No successful murder; caught | -3 |
-| Murdered faithful has no correct accusation, including no vote | -1 |
 
-Only the traitors who report the confirmed victim qualify for successful-murder scoring. A minority attempted murderer uses no-murder scoring, even when their teammates successfully murder someone else. A murdered faithful who correctly identifies a traitor earns +3 without an additional penalty. Other faithful missing a vote earn 0.
+Faithful penalties add together. The most-accusations penalty applies once per round, only to players sharing the highest accusation total across the whole group, including ties. With no accusations, nobody gets that penalty. A faithful who makes a wrong accusation and receives the most accusations loses 2 points; being murdered as well makes it 3. A correct accusation avoids the murder penalty, but the most-accusations penalty can still reduce +4 to +3.
+
+Only the traitors who report the confirmed victim qualify for successful-murder scoring. A minority attempted murderer uses no-murder scoring, even when their teammates successfully murder someone else. Revised scoring applies when a round finishes; previously completed rounds keep their recorded points.
 
 ## Editable phrases and tasks
 
