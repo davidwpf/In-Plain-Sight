@@ -36,7 +36,7 @@ export default function Home(){
     return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',hide);};
   },[]);
   useEffect(()=>{setRevealed(false);setChoice('');setModal(previous=>['ballot','roundtable'].includes(previous||'')?null:previous);},[view?.round,view?.phase]);
-  useEffect(()=>{if(!session||session.demo||screen!=='game')return;const poll=()=>{if(!document.hidden&&!pending.current)load(session);};const id=setInterval(poll,3000);document.addEventListener('visibilitychange',poll);return()=>{clearInterval(id);document.removeEventListener('visibilitychange',poll);};},[session,screen]);
+  useEffect(()=>{if(!session||session.demo||screen!=='game')return;const poll=()=>{if(!document.hidden&&!pending.current)load(session);};const id=setInterval(poll,6000);document.addEventListener('visibilitychange',poll);return()=>{clearInterval(id);document.removeEventListener('visibilitychange',poll);};},[session,screen]);
   useEffect(()=>{if(!session?.demo||screen!=='game')return;const id=setInterval(()=>{tick(demoGame.current);setView(publicView(demoGame.current,'demo-me'));},1000);return()=>clearInterval(id);},[session,screen]);
   async function load(s:Any,resume=false){const generation=mutation.current;try{const res=await fetch(`/api/game?code=${encodeURIComponent(s.code)}`,{headers:{Authorization:`Bearer ${s.token}`},cache:'no-store'});const data:Any=await res.json();if(current.current?.token!==s.token||generation!==mutation.current)return;if(!res.ok){if([401,404,410].includes(res.status)){entrance(s.code);setError(data.error);return;}throw new Error(data.error);}accept(data);if(resume)setScreen('game');}catch{setConnected(false);}}
   async function enter(type:'create'|'join'|'login'){

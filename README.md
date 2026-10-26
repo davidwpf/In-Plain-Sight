@@ -61,7 +61,7 @@ The site includes a demo with sample players and controls to move through the st
 - The current tab uses session storage for its own session and personal code. **Switch player** clears that tab’s credentials, role, ballot choice and cached Game view before presenting the entrance screen. It never keeps a selectable list of other players’ private codes.
 - Roles, ballots, private-code hashes and authentication data remain server-side. Public responses include only the current player’s active secrets; completed rounds reveal everyone’s game information as agreed.
 - D1 stores the shared state. Compare-and-swap updates prevent concurrent submissions from overwriting one another or awarding points twice.
-- Timers use server timestamps. Visible phones synchronise every three seconds and when the page becomes visible. A phase advances on the next authenticated request after its deadline; no background alarm or notification is included.
+- Timers use server timestamps. Visible phones synchronise every six seconds and when the page becomes visible. A phase advances on the next authenticated request after its deadline; no background alarm or notification is included.
 - Games stop accepting access seven days after creation. Expired rows remain in storage until an operator removes them; automatic deletion is not implemented.
 - Earlier prototype Games are not migrated. Their API response asks users to create a new Game. No version of the earlier prototype was published.
 
@@ -94,7 +94,21 @@ Source repository: **[davidwpf/In-Plain-Sight](https://github.com/davidwpf/In-Pl
 
 GitHub can store and build the project. [GitHub Pages provides static hosting](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages), while this live game also needs a server and shared database. This implementation runs on Cloudflare Workers with D1, or on Sites with managed D1 provisioning.
 
-### Standalone Cloudflare deployment
+### Publish automatically from GitHub
+
+Use Cloudflare Workers with a D1 database on the Free plan. GitHub Pages alone cannot run the shared Game API.
+
+1. In Cloudflare, create a D1 database named `in-plain-sight-games` and copy its database UUID.
+2. Create a Worker by connecting the `davidwpf/In-Plain-Sight` GitHub repository. Limit the GitHub connection to this repository and select the `main` branch.
+3. Set the build command to `pnpm test && pnpm check && pnpm build:cloudflare` and the deploy command to `pnpm deploy:cloudflare`. Leave the root directory at the repository root.
+4. Add build variables: `NODE_VERSION=24`, `PNPM_VERSION=11.25.0`, and `CLOUDFLARE_D1_DATABASE_ID` set to the actual database UUID. These are configuration values, not login credentials. Do not commit account credentials or API tokens.
+5. Deploy. The deploy command applies pending migrations before publishing. Cloudflare supplies a `workers.dev` address and publishes subsequent updates pushed to `main`.
+
+See [Cloudflare Git integration](https://developers.cloudflare.com/workers/ci-cd/builds/) for the connection and build settings. The database UUID must refer to a database in the same Cloudflare account as the Worker. `CLOUDFLARE_WORKER_NAME` can override the default `in-plain-sight`, and must match the Worker name in the dashboard.
+
+Phones check for updates every six seconds while the Game is visible, and immediately when returning to the tab. The local countdown still updates every second. Twenty continuously visible screens use roughly 48,000 polling requests in four hours, plus other requests. The Workers Free limit is 100,000 requests per day across the account; long sessions or several Games can still reach it.
+
+### Deploy from your computer
 
 1. Install dependencies, select the portable profile and build as above.
 2. Sign in to your Cloudflare account: `pnpm exec wrangler login`.

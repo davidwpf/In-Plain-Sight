@@ -9,6 +9,8 @@
     "install:ci": "pnpm install --frozen-lockfile",
     "dev": "node scripts/run-framework.mjs dev",
     "build": "node scripts/run-framework.mjs build",
+    "build:cloudflare": "node scripts/configure-portable.mjs && pnpm build && node scripts/prepare-cloudflare.mjs",
+    "deploy:cloudflare": "pnpm exec wrangler d1 migrations apply DB --remote --config dist/server/wrangler.standalone.json && pnpm exec wrangler deploy --config dist/server/wrangler.standalone.json",
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
