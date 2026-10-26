@@ -44,7 +44,7 @@ await request({type:'ballot',target:caught},faithful[0]);await request({type:'ba
 await Promise.all(faithful.slice(2).map(s=>request({type:'ballot',target:caught},s)));
 const result=await view(admin);assert.equal(result.phase,'results');assert.equal(result.history.length,1);assert.equal(result.results.submittedCount,10);assert.equal(result.results.murderedId,victim);assert.equal(result.results.attempts[0].targetId,attempted);
 assert.deepEqual(result.results.murderMethod,initial.find(v=>v.me.id===traitors[0].view.me.id).secret.mission);
-assert.equal(result.results.rulesVersion,2);assert.equal(result.results.players.find(p=>p.id===traitors[0].view.me.id).delta,4);assert.equal(result.results.players.find(p=>p.id===traitors[1].view.me.id).delta,0);assert.equal(result.results.players.find(p=>p.id===caught).delta,-2);
+assert.equal(result.results.rulesVersion,3);assert.equal(result.results.players.find(p=>p.id===traitors[0].view.me.id).delta,4);assert.equal(result.results.players.find(p=>p.id===traitors[1].view.me.id).delta,0);assert.equal(result.results.players.find(p=>p.id===caught).delta,-2);
 assert.deepEqual(new Set(result.results.murdererIds),new Set([traitors[0].view.me.id]));
 const named=result.results.murdererIds.map(id=>result.players.find(p=>p.id===id).name);assert.equal(result.results.players.find(p=>p.id===victim).blurb,`You were murdered. ${named[0]} killed you.`);
 const lateResult=await view(late);assert.equal(lateResult.me.active,false);assert.equal(lateResult.secret,null);
@@ -59,9 +59,16 @@ for(const round of [2,3]){
   const secret=team[0].view.secret;assert.ok(!seenSignals.has(secret.signal.id));assert.ok(!seenTasks.has(secret.mission.id));seenSignals.add(secret.signal.id);seenTasks.add(secret.mission.id);
   for(const p of team){assert.deepEqual(p.view.secret.signal,secret.signal);assert.deepEqual(p.view.secret.mission,secret.mission);}
   await request({type:'roundtable'},admin);
-  await Promise.all(active.map(p=>request({type:'ballot',target:p.view.secret.role==='traitor'?others[0].view.me.id:team[0].view.me.id,...(p.view.secret.role==='traitor'?{performed:true}:{})},p.session)));
+  await Promise.all(active.map(p=>request({type:'ballot',target:p.view.secret.role==='traitor'?(round===3&&p.view.me.id===team[2].view.me.id?team[0].view.me.id:others[0].view.me.id):team[0].view.me.id,...(p.view.secret.role==='traitor'?{performed:true}:{})},p.session)));
   const completed=await view(admin);assert.equal(completed.phase,'results');assert.equal(completed.history.length,round);
   for(const p of active)assert.equal(completed.results.players.find(r=>r.id===p.view.me.id).role,p.view.secret.role);
+  if(round===3){
+    const player=id=>completed.results.players.find(p=>p.id===id);
+    assert.equal(player(team[0].view.me.id).delta,0);assert.equal(player(team[0].view.me.id).penalties.traitorTarget,-1);
+    assert.equal(player(team[1].view.me.id).delta,4);
+    assert.equal(player(team[2].view.me.id).delta,-2);assert.equal(player(team[2].view.me.id).penalties.mistakenAttack,-2);
+    assert.equal(completed.results.murderedId,others[0].view.me.id);
+  }
   assert.deepEqual(completed.history[0],result.results);
   advanceLocalDeadline(admin.view.code);const dealt=await view(late);
   assert.equal(dealt.phase,'playing');assert.equal(dealt.round,round+1);assert.equal(dealt.submittedCount,0);assert.equal(dealt.results,null);
@@ -82,5 +89,5 @@ await request({type:'end'},admin);assert.equal((await view(late)).phase,'ended')
 let wrong=String((Number(admin.passcode)+1)%1000000).padStart(6,'0');while(sessions.some(s=>s.passcode===wrong)||late.passcode===wrong)wrong=String((Number(wrong)+1)%1000000).padStart(6,'0');
 for(let i=0;i<8;i++)assert.equal((await raw({type:'login',code:admin.view.code,passcode:wrong})).status,401);assert.equal((await raw({type:'login',code:admin.view.code,passcode:wrong})).status,429);
 assert.equal((await view(admin)).phase,'ended');
-console.log('PASS: ten independent players, private-code recovery, admin permissions, simultaneous joins and submissions, 90-minute rounds, paused voting, secret majority reports, recorded murder methods, revised scoring, exact reveal wording, late arrivals, fresh assignments across three completed rounds, confirmed early vote closure with missing submissions, persistent history and login throttling.');
+console.log('PASS: ten independent players, private-code recovery, admin permissions, simultaneous joins and submissions, 90-minute rounds, paused voting, secret majority reports, recorded murder methods, revised scoring, actual mistaken attacks and once-only target penalties, exact reveal wording, late arrivals, fresh assignments across three completed rounds, confirmed early vote closure with missing submissions, persistent history and login throttling.');
 console.log(`Disposable local test Game: ${admin.view.code}`);

@@ -17,7 +17,7 @@ for(const [performed,otherPerformed] of [[true,false],[false,true],[true,true]])
       if(outcome==='caught'||outcome==='tied')submit(g,'p3','p0');
       if(outcome==='otherCaught'||outcome==='tied')submit(g,'p4','p1');
       finishRound(g,now);
-      assert.equal(g.results.murderedId,'p2');assert.equal(g.results.rulesVersion,2);
+      assert.equal(g.results.murderedId,'p2');assert.equal(g.results.rulesVersion,3);
       assert.equal(result(g,'p0').delta,performed?wantedActor:wantedHelper);
       assert.equal(result(g,'p0').killed,performed);assert.equal(result(g,'p0').accomplice,!performed);
       assert.equal(result(g,'p0').performed,performed);
@@ -98,7 +98,7 @@ test('existing in-progress rounds retain old ballots and scoring; the next deal 
   assert.equal(result(g,'p0').delta,2);assert.equal(result(g,'p1').delta,1);assert.equal(result(g,'p3').delta,-1);
   assert.deepEqual(g.results.murdererIds,['p0','p1']);assert.equal(g.results.rulesVersion,undefined);
   const oldResults=structuredClone(g.results),oldScores=g.players.map(p=>p.score);
-  tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,2);assert.deepEqual(g.history[0],oldResults);assert.deepEqual(g.players.map(p=>p.score),oldScores);
+  tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,3);assert.deepEqual(g.history[0],oldResults);assert.deepEqual(g.players.map(p=>p.score),oldScores);
 });
 test('a restored old playing round also keeps its rules when the admin calls an early roundtable',()=>{
   const g=game();g.phase='playing';g.deadline=now+3600000;delete g.roundRulesVersion;

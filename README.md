@@ -68,11 +68,15 @@ The totals include a +2 team bonus when no traitor is caught and at least one fa
 | --- | ---: |
 | No confirmed murder credited to their report; escapes | 0 |
 | No confirmed murder credited to their report; caught | -2 |
-| Misses the report | -2 total, even if caught |
+| Misses the report | -2, with no additional caught penalty |
+| Personally completes the task on another traitor | -2 extra |
+| Is a traitor targeted by another traitor who completed the task | -1 extra, once per round |
 
-A minority report, failed attempt or explicit No murder uses no-confirmed-murder scoring. No murder is a valid submission; a missing report incurs the flat penalty. Attempt and victim blurbs name only those who said they actually performed the task. Results reveal each traitor’s report and Yes/No claim after voting, and distinguish murderers from accomplices.
+A minority report, failed attempt or explicit No murder uses no-confirmed-murder scoring. No murder is a valid submission; a missing report incurs the base -2 penalty. The separate -1 penalty for being targeted by a traitor can still apply. Attempt and victim blurbs name only those who said they actually performed the task. Results reveal each traitor’s report and Yes/No claim after voting, and distinguish murderers from accomplices.
 
-Rules are saved per round (`roundRulesVersion: 2`). Games already playing or voting when this update is published finish their current round under the previous rules, without reopening locked ballots. Their next deal uses the new ballot and scoring. Completed histories and recorded scores remain unchanged. The Game storage schema stays at version 2.
+The mistaken-attack penalties require an actual attacker’s Yes claim. A report naming a traitor without completing the task adds no penalty for the reporter or target. Each actual attacker loses 2 extra points; the traitor target loses only 1 extra point per round, even with several attackers. No majority is needed for these penalties. They add to other scoring: an escaped mistaken attacker scores -2, a caught mistaken attacker scores -4, and a successful murderer mistakenly targeted by a teammate can score +5 instead of +6. Faithful targets receive no extra penalty for attempted murders.
+
+Rules are saved per round (`roundRulesVersion: 3`; version 2 introduced the performer/accomplice ballot). Games already playing or voting when this update is published finish their current round under the previous rules, without reopening locked ballots. Their next deal uses the latest scoring. Version 2 rounds retain the performer/accomplice ballot without the new mistaken-attack penalties; version 1 rounds keep the original ballot and scoring. Completed histories and recorded scores remain unchanged. The Game storage schema stays at version 2.
 
 ## Editable phrases and tasks
 
