@@ -73,3 +73,6 @@
 .result-murder-method svg{margin-top:3px}
 
 .secret-details .signal-instruction{font-size:20px;line-height:1.5;color:var(--cream);margin:13px 0 15px}
+
+.join-highlight{background:#a7c2a0;border:1px solid #a7c2a0;color:#162015}
+.join-highlight:hover:not(:disabled){background:#bbd4b4;border-color:#bbd4b4}
