@@ -6,7 +6,7 @@ A social deduction game for an evening or weekend with friends and family. Every
 
 ## Play
 
-1. **Create game.** The admin enters their name, a Game name and a round length from a dropdown (1 hour by default). Presets run from 30 minutes to 6 hours in half-hour steps, labelled as hours and minutes. “Custom duration…” accepts whole hours plus either 0 or 30 minutes for longer Games. Their private six-digit player code also unlocks Start, Call roundtable, Finish voting, Pause, Resume and End.
+1. **Create game.** The admin enters their name, a Game name and a round length using separate Hours and Minutes dropdowns, defaulting to 1 and 0. Minutes show only 0 or 30. Hours run from 0 to 24, with “More…” allowing any larger whole-hour value. Choosing 0 hours selects 30 minutes to keep the minimum round length at half an hour. Their private six-digit player code also unlocks Start, Call roundtable, Finish voting, Pause, Resume and End.
 2. **Share code.** Share the six-character game code or invite link. Keep personal player codes private.
 3. **Join.** A player chooses “Enter my player code” or “Join as a new player”. Joining gives them their own private six-digit code. Shared devices use **Switch player** to hide the current identity and sign in as someone else.
 4. **Start.** The admin starts when everyone has joined. There must be at least three ready players. The admin receives a normal role and cannot inspect anyone else’s role.
