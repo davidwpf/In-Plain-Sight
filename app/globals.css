@@ -30,8 +30,9 @@
 .round-notice{display:flex;align-items:center;gap:10px;background:#35452b88;border:1px solid #87976577;border-radius:4px;padding:12px 14px;margin-bottom:20px;color:var(--cream);font-size:14px}
 .round-notice b{font-weight:500}
 .round-notice>.icon-button{margin-left:auto;color:var(--muted)}
-#create-round-minutes{width:100%}
-#round-length-hint{margin-top:7px;margin-bottom:15px}
+#create-round-length,.custom-round-length input,.custom-round-length select{width:100%}
+.custom-round-length{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.custom-round-length>div{min-width:0}
 @media(max-width:600px){
   :root{--muted:#b6c1ac}
   .game-heading h1.round-heading{font-size:42px}
