@@ -199,3 +199,4 @@ input::placeholder{color:#777}
 .hero-description>span{display:block}
 
 .round-mode-note{text-align:center;margin:0 0 12px;font-size:14px;line-height:1.6}
+.ballot.selected:hover:not(:disabled){background:#111;color:#fff}
