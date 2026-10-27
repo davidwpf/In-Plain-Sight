@@ -200,3 +200,39 @@ input::placeholder{color:#777}
 
 .round-mode-note{text-align:center;margin:0 0 12px;font-size:14px;line-height:1.6}
 .ballot.selected:hover:not(:disabled){background:#111;color:#fff}
+
+/* Short instructions first; detailed rules are available when needed. */
+.rules{font-size:15px;line-height:1.7}
+.rules .rules-intro{margin:22px 0;color:var(--ink);font-size:16px;line-height:1.7}
+.rules .rules-steps{margin:18px 0 28px;padding-left:24px}
+.rules .rules-steps li{margin:16px 0;padding-left:6px}
+.rules b{font-weight:600}
+.rules h3{font-size:24px;letter-spacing:-.6px;margin:28px 0 16px}
+.rules h4{color:var(--ink);font-size:16px;font-weight:600;margin:24px 0 12px;line-height:1.5}
+.rules-section{border-top:1px solid var(--border)}
+.rules-section:last-child{border-bottom:1px solid var(--border)}
+.rules-section summary{display:flex;align-items:center;justify-content:space-between;gap:16px;list-style:none;padding:18px 0;color:var(--ink);font-size:16px;font-weight:500;line-height:1.5;cursor:pointer}
+.rules-section summary::-webkit-details-marker{display:none}
+.rules-section summary::marker{content:''}
+.rules-section summary svg{flex-shrink:0}
+.rules-section[open]>summary svg{transform:rotate(180deg)}
+.rules-section summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.rules-section-body{padding:0 0 22px}
+.rules-section-body>p{margin:0 0 15px}
+.rules-section-body>p:last-child{margin-bottom:0}
+.rules-section-body ul{padding-left:22px;margin:14px 0}
+.rules-section-body li{padding-left:3px;margin:10px 0}
+.rules table{margin:16px 0 20px}
+.rules table td,.rules table th{font-size:14px;line-height:1.6;padding:12px 0;vertical-align:top}
+.rules table th{font-weight:600}
+.rules table th:last-child{text-align:right}
+.rules table td+td,.rules table th+th{padding-left:14px}
+.rules .killer-scoring th:not(:first-child){width:25%}
+@media(max-width:600px){
+  .rules{font-size:15px}
+  .rules .rules-intro{font-size:16px}
+  .rules h3{font-size:23px}
+  .rules-section summary{font-size:16px;padding:17px 0}
+  .rules table td,.rules table th{font-size:14px}
+  .rules table td+td,.rules table th+th{padding-left:10px}
+}
