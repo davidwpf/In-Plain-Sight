@@ -85,7 +85,7 @@ test('early roundtables redraw after each full break with 3, 4, 3, 6 and 6 playe
     if(i===1)act('p3',{type:'ready',ready:false});
     if(i===2){act('p3',{type:'ready',ready:true});for(const id of ['p4','p5'])addPlayer(g,{id,name:`Player ${id.slice(1)}`});assert.throws(()=>act('p5',{type:'ballot',target:'p0'}),/next round/);}
     const team=traitors(g);
-    for(const id of [...g.active])act(id,{type:'ballot',target:team.includes(id)?null:team[0]});
+    for(const id of [...g.active])act(id,{type:'ballot',target:team.includes(id)?null:team[0],...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})});
     assert.equal(g.phase,'results');assert.equal(g.history.length,i+1);assert.equal(entropy.mock.callCount(),calls);
     if(i<4){
       const deadline=g.deadline;tick(g,deadline-1);assert.equal(g.phase,'results');assert.equal(entropy.mock.callCount(),calls);
@@ -98,7 +98,7 @@ test('an early-roundtable request at the break boundary draws new weighted roles
   t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=0;return array;});
   const g=lobby(3);applyAction(g,'p0',{type:'start'},base);const first=traitors(g);
   applyAction(g,'p0',{type:'roundtable'},base+1000);
-  for(const id of g.active)applyAction(g,id,{type:'ballot',target:first.includes(id)?null:first[0]},base+1000);
+  for(const id of g.active)applyAction(g,id,{type:'ballot',target:first.includes(id)?null:first[0],...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})},base+1000);
   assert.equal(g.phase,'results');applyAction(g,'p0',{type:'roundtable'},g.deadline);
   assert.equal(g.round,2);assert.equal(g.phase,'voting');assert.notDeepEqual(traitors(g),first);
   assert.deepEqual(g.ballots,{});assert.equal(g.results,null);

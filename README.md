@@ -23,13 +23,13 @@ Players can scan the joining QR code from **Show QR code** in the lobby or **Gam
 
 ## A round
 
-- Everyone privately checks whether they are faithful or a killer. Roles start hidden and hide when the page goes into the background.
+- Everyone privately checks whether they are innocent or a killer. Roles start hidden and hide when the page goes into the background.
 - Multiple killers receive the same recognition signal: a word, phrase, sound or gesture to help recognise each other. Names remain secret. A lone killer acts alone.
-- All killers receive the same murder task. At least one must perform it on their chosen faithful. Coordination happens in person, and actual actions use an honour system.
-- After the chosen round length, the roundtable opens. The length is fixed for that Game and defaults to 60 minutes, including for existing Games without a saved duration. The admin can open it sooner using **Call roundtable** above the countdown. Faithful players accuse one other player. Killers report one victim or “No murder”. With multiple killers, choosing a victim also requires an explicit Yes/No answer to “Did you personally complete the murder task on [Name]?” Neither answer is preselected, and changing the victim clears it. A solo killer naming a victim implicitly confirms completing the task. Both answers are shown before locking and in the private locked submission. Everyone’s submission is final. No victim or report is revealed during voting.
+- All killers receive the same murder task. At least one must perform it on their chosen innocent. Coordination happens in person, and actual actions use an honour system.
+- After the chosen round length, the roundtable opens. The length is fixed for that Game and defaults to 60 minutes, including for existing Games without a saved duration. The admin can open it sooner using **Call roundtable** above the countdown. Innocents accuse one other player and explicitly answer Yes or No to “Do you think someone tried to murder you this round?” Neither answer is preselected. Both answers must be given before locking the ballot, and both appear in the confirmation and private submission. Killers report one victim or “No murder”. With multiple killers, choosing a victim also requires an explicit Yes/No answer to “Did you personally complete the murder task on [Name]?” Neither answer is preselected, and changing the victim clears it. A solo killer naming a victim implicitly confirms completing the task. Both answers are shown before locking and in the private locked submission. Everyone’s submission is final. No victim or report is revealed during voting.
 - At least half the active players submitting starts a five-minute deadline. All submissions in closes immediately. Before halfway, there is no voting deadline. Both accusation ballots and murder reports count towards submission progress. Everyone can see who has submitted and who has not, while roles and choices stay private until results.
-- The admin can choose **Finish voting**, confirm the submission count and close a stalled vote at any point, including before halfway. Missing faithful votes receive the usual missed-vote score; missing killer reports count as no report. Repeated requests cannot award points twice.
-- Reports confirm a murder only when a majority of the assigned killers name the same faithful: 1 of 1, 2 of 2 or 2 of 3. At least one matching reporter must also confirm personally completing the task. Matching reporters who did the task are murderers; the others are accomplices. Missing reports do not reduce the majority needed. Other named targets are attempted murders. Naming another killer cannot murder them and produces a failed attempt.
+- The admin can choose **Finish voting**, confirm the submission count and close a stalled vote at any point, including before halfway. Missing innocent votes receive the usual missed-vote score; missing killer reports count as no report. Repeated requests cannot award points twice.
+- Reports confirm a murder only when a majority of the assigned killers name the same innocent: 1 of 1, 2 of 2 or 2 of 3. At least one matching reporter must also confirm personally completing the task. Matching reporters who did the task are murderers; the others are accomplices. Missing reports do not reduce the majority needed. Other named targets are attempted murders. Naming another killer cannot murder them and produces a failed attempt.
 - Roles, accusations, reports, murders, attempts and points appear together. The victim’s name is followed by the murder method, such as “Method: Coin in a pocket”. This task snapshot is saved in past rounds too; results completed before this update have no recorded method. A personal reveal can say: “You were murdered. Alice and Ben both killed you.”
 - A 120-second break follows. Players can sit out or return without losing their score. New arrivals wait through the current vote and this break, then receive a role with everyone else. If fewer than three are ready, the Game returns to the lobby.
 - The group chooses when to finish; the admin ends the Game. An unfinished round earns no points.
@@ -38,18 +38,31 @@ The current round number is prominent, with a brief reminder to check the new ro
 
 ## Scoring
 
-Only faithful accusations count. “Caught” means the highest accusation total across the whole group, including ties and requiring at least one accusation. Killer reports are never accusations.
+Only innocent accusations count. “Caught” means the highest accusation total across the whole group, including ties and requiring at least one accusation. Killer reports are never accusations.
 
-### Faithful scoring
+### Innocent scoring
 
 | Outcome | Points |
 | --- | ---: |
 | Correctly accuse any killer | +4 |
-| Accuse a faithful | -1 |
+| Accuse an innocent | -1 |
 | Miss the vote | -2 |
 | Receive the most accusations | -1 extra, once |
 
-Being murdered does not cost points and does not prevent voting. The most-accusations penalty adds to the vote score: a correct vote becomes +3, a wrong vote becomes -2 and a missed vote becomes -3. With no accusations, nobody gets this penalty.
+Being murdered does not prevent voting. There is no automatic murder penalty; the separate awareness question below scores whether the player noticed a completed task. The most-accusations penalty adds to the vote score: a correct vote becomes +3, a wrong vote becomes -2 and a missed vote becomes -3. With no accusations, nobody gets this penalty.
+
+### Spotting a murder attempt
+
+Innocents answer “Do you think someone tried to murder you this round?”
+
+| Answer and outcome | Points |
+| --- | ---: |
+| Yes — someone completed the task on you | +1 |
+| Yes — nobody completed the task on you | -1 |
+| No — someone completed the task on you | -1 |
+| No — nobody completed the task on you | 0 |
+
+A completed task is established by any active killer’s report naming the player with `performed: true`. Confirmed murders and failed attempts both count, without needing a majority. Naming someone without performing the task does not count. These points add to the accusation score and any most-accusations penalty. A missing ballot receives only the existing -2 missed-vote penalty; there is no additional awareness penalty. Multiple attackers still produce only one awareness score. Only the player’s own answer is returned before results; outcomes and other players’ answers stay private until voting ends.
 
 ### Killer scoring
 
@@ -57,12 +70,12 @@ Only reporters naming the confirmed victim qualify for confirmed-murder scoring.
 
 | Confirmed murder outcome | Personally completed the task | Accomplice |
 | --- | ---: | ---: |
-| No killer caught and at least one faithful vote submitted | +6 | +2 |
+| No killer caught and at least one innocent vote submitted | +6 | +2 |
 | Personally escapes but another killer is caught | +4 | 0 |
 | Personally caught | +1 | 0 |
-| No faithful votes submitted | +4 | 0 |
+| No innocent votes submitted | +4 | 0 |
 
-The totals include a +2 team bonus when no killer is caught and at least one faithful vote was submitted. No faithful votes means no escape bonus. Each matching performer earns their own full murderer score; points are not divided. A caught murderer scores more than an escaped accomplice for the same murder.
+The totals include a +2 team bonus when no killer is caught and at least one innocent vote was submitted. No innocent votes means no escape bonus. Each matching performer earns their own full murderer score; points are not divided. A caught murderer scores more than an escaped accomplice for the same murder.
 
 ### Other killer outcomes
 
@@ -76,9 +89,9 @@ The totals include a +2 team bonus when no killer is caught and at least one fai
 
 A minority report, failed attempt or explicit No murder uses no-confirmed-murder scoring. No murder is a valid submission; a missing report incurs the base -2 penalty. The separate -1 penalty for being targeted by a killer can still apply. Attempt and victim blurbs name only those who said they actually performed the task. Results reveal each killer’s report and Yes/No claim after voting, and distinguish murderers from accomplices.
 
-The mistaken-attack penalties require an actual attacker’s Yes claim. A report naming a killer without completing the task adds no penalty for the reporter or target. Each actual attacker loses 2 extra points; the killer target loses only 1 extra point per round, even with several attackers. No majority is needed for these penalties. They add to other scoring: an escaped mistaken attacker scores -2, a caught mistaken attacker scores -4, and a successful murderer mistakenly targeted by a teammate can score +5 instead of +6. Faithful targets receive no extra penalty for attempted murders.
+The mistaken-attack penalties require an actual attacker’s Yes claim. A report naming a killer without completing the task adds no penalty for the reporter or target. Each actual attacker loses 2 extra points; the killer target loses only 1 extra point per round, even with several attackers. No majority is needed for these penalties. They add to other scoring: an escaped mistaken attacker scores -2, a caught mistaken attacker scores -4, and a successful murderer mistakenly targeted by a teammate can score +5 instead of +6. Innocent targets use the awareness scoring above; being targeted is not itself an automatic extra penalty.
 
-Rules are saved per round (`roundRulesVersion: 3`; version 2 introduced the performer/accomplice ballot). Games already playing or voting when this update is published finish their current round under the previous rules, without reopening locked ballots. Their next deal uses the latest scoring. Version 2 rounds retain the performer/accomplice ballot without the new mistaken-attack penalties; version 1 rounds keep the original ballot and scoring. Completed histories and recorded scores remain unchanged. The Game storage schema stays at version 2.
+Rules are saved per round (`roundRulesVersion: 4`; version 2 introduced the performer/accomplice ballot, version 3 added mistaken-attack penalties and version 4 adds the Innocent awareness question). Games already playing or voting when this update is published finish their current round under the previous rules, without reopening locked ballots. Their next deal uses the latest scoring. Version 3 rounds retain their existing ballot and scoring without the awareness question. Version 2 rounds retain the performer/accomplice ballot without the new mistaken-attack penalties; version 1 rounds keep the original ballot and scoring. Completed histories and recorded scores remain unchanged. The Game storage schema stays at version 2.
 
 ## Editable phrases and tasks
 
@@ -171,3 +184,5 @@ Use the actual database UUID. `CLOUDFLARE_WORKER_NAME` can override the default 
 In Plain Sight is an independent party game, with its own name, wording and design.
 
 The interface uses a white background, black rules and sans-serif typography. The player-facing role is **Killer**. Stored role identifiers remain `traitor` to preserve existing Games and older clients; display helpers translate role names and recorded score explanations without changing saved points.
+
+Saved role identifiers remain `faithful` and `traitor` for compatibility. Player-facing labels are Innocent and Killer, including historical scoring explanations; player names and recorded scores are not rewritten.

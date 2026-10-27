@@ -1,11 +1,12 @@
+// Regression coverage for saved version 3 rounds; awareness tests cover new deals.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,BREAK_MS} from '../lib/game/engine.mjs';
+import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,BREAK_MS,ROUND_RULES_VERSION} from '../lib/game/engine.mjs';
 const now=1000000;
 function game(count=8){
   const g=makeGame('ABC234','Participation',{id:'p0',name:'Alice'},now);
   for(let i=1;i<count;i++)addPlayer(g,{id:`p${i}`,name:i===1?'Ben':`Player ${i}`});
-  startRound(g,now,n=>n-1);openVoting(g);return g;
+  startRound(g,now,n=>n-1);g.roundRulesVersion=3;openVoting(g);return g;
 }
 const submit=(g,id,target,performed)=>applyAction(g,id,{type:'ballot',target,...(performed!==undefined?{performed}:{})},now);
 const result=(g,id)=>g.results.players.find(p=>p.id===id);
@@ -76,7 +77,7 @@ for(const bad of [undefined,null,0,1,'true','false',{},[]])test(`multiple traito
   const g=game(),before=structuredClone(g);assert.throws(()=>submit(g,'p0','p2',bad),/personally completed/);assert.deepEqual(g,before);
 });
 test('contradictory claims and faithful participation claims are rejected',()=>{
-  const g=game();assert.throws(()=>submit(g,'p0',null,true),/No murder/);assert.throws(()=>submit(g,'p2','p0',true),/faithful vote/);
+  const g=game();assert.throws(()=>submit(g,'p0',null,true),/No murder/);assert.throws(()=>submit(g,'p2','p0',true),/Innocent vote/);
   const solo=game(3);assert.throws(()=>submit(solo,'p0','p1',false),/Choosing a victim/);
   assert.deepEqual(g.ballots,{});assert.deepEqual(solo.ballots,{});
 });
@@ -98,7 +99,7 @@ test('existing in-progress rounds retain old ballots and scoring; the next deal 
   assert.equal(result(g,'p0').delta,2);assert.equal(result(g,'p1').delta,1);assert.equal(result(g,'p3').delta,-1);
   assert.deepEqual(g.results.murdererIds,['p0','p1']);assert.equal(g.results.rulesVersion,undefined);
   const oldResults=structuredClone(g.results),oldScores=g.players.map(p=>p.score);
-  tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,3);assert.deepEqual(g.history[0],oldResults);assert.deepEqual(g.players.map(p=>p.score),oldScores);
+  tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.deepEqual(g.history[0],oldResults);assert.deepEqual(g.players.map(p=>p.score),oldScores);
 });
 test('a restored old playing round also keeps its rules when the admin calls an early roundtable',()=>{
   const g=game();g.phase='playing';g.deadline=now+3600000;delete g.roundRulesVersion;

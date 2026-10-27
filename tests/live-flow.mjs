@@ -40,17 +40,20 @@ assert.equal((await raw({type:'ballot',target:victim},traitors[0])).status,400);
 assert.equal((await view(traitors[0])).myBallot,null);
 await request({type:'ballot',target:victim,performed:true},traitors[0]);await request({type:'ballot',target:victim,performed:false},traitors[1]);await request({type:'ballot',target:attempted,performed:true},traitors[2]);
 const hidden=await view(faithful[0]);assert.equal(hidden.results,null);assert.equal(hidden.murderedId,undefined);assert.equal(hidden.myBallot,null);assert.equal(hidden.voteDeadline,null);for(const p of hidden.players){assert.equal(p.submitted,p.active?traitors.some(s=>s.view.me.id===p.id):undefined);assert.equal(p.performed,undefined);}
-await request({type:'ballot',target:caught},faithful[0]);await request({type:'ballot',target:caught},faithful[1]);const half=await view(admin);assert.equal(half.submittedCount,5);assert.ok(half.voteDeadline>Date.now()+290000);
-await Promise.all(faithful.slice(2).map(s=>request({type:'ballot',target:caught},s)));
+await request({type:'ballot',target:caught,suspectedAttempt:true},faithful[0]);await request({type:'ballot',target:caught,suspectedAttempt:true},faithful[1]);const half=await view(admin);assert.equal(half.submittedCount,5);assert.ok(half.voteDeadline>Date.now()+290000);
+for(const s of faithful.slice(0,2)){const mine=await view(s);assert.equal(mine.phase,'voting');assert.equal(mine.myBallot.suspectedAttempt,true);}
+await Promise.all(faithful.slice(2).map(s=>request({type:'ballot',target:caught,suspectedAttempt:false},s)));
 const result=await view(admin);assert.equal(result.phase,'results');assert.equal(result.history.length,1);assert.equal(result.results.submittedCount,10);assert.equal(result.results.murderedId,victim);assert.equal(result.results.attempts[0].targetId,attempted);
 assert.deepEqual(result.results.murderMethod,initial.find(v=>v.me.id===traitors[0].view.me.id).secret.mission);
-assert.equal(result.results.rulesVersion,3);assert.equal(result.results.players.find(p=>p.id===traitors[0].view.me.id).delta,4);assert.equal(result.results.players.find(p=>p.id===traitors[1].view.me.id).delta,0);assert.equal(result.results.players.find(p=>p.id===caught).delta,-2);
+assert.equal(result.results.rulesVersion,4);assert.equal(result.results.players.find(p=>p.id===traitors[0].view.me.id).delta,4);assert.equal(result.results.players.find(p=>p.id===traitors[1].view.me.id).delta,0);assert.equal(result.results.players.find(p=>p.id===caught).delta,-2);
 assert.deepEqual(new Set(result.results.murdererIds),new Set([traitors[0].view.me.id]));
 const named=result.results.murdererIds.map(id=>result.players.find(p=>p.id===id).name);assert.equal(result.results.players.find(p=>p.id===victim).blurb,`You were murdered. ${named[0]} killed you.`);
+for(const s of faithful.slice(0,2)){const p=result.results.players.find(p=>p.id===s.view.me.id);assert.equal(p.awareness.points,1);assert.equal(p.delta,5);}
+for(const s of faithful.slice(2)){const p=result.results.players.find(p=>p.id===s.view.me.id);assert.equal(p.awareness.points,0);assert.equal(p.delta,4);}
 const lateResult=await view(late);assert.equal(lateResult.me.active,false);assert.equal(lateResult.secret,null);
 const reread=await view(admin);assert.deepEqual(reread.players.map(p=>p.score),result.players.map(p=>p.score));
 await request({type:'ready',ready:false},faithful.at(-1));advanceLocalDeadline(admin.view.code);const next=await view(late);assert.equal(next.phase,'playing');assert.equal(next.round,2);assert.equal(next.me.active,true);assert.ok(next.secret);assert.equal(next.activeCount,10);assert.equal(next.traitorCount,3);assert.equal(next.submittedCount,0);assert.equal(next.history.length,1);
-const restored=await request({type:'login',code:faithful[0].view.code,passcode:faithful[0].passcode});assert.equal(restored.view.me.id,faithful[0].view.me.id);assert.equal(restored.view.me.score,4);
+const restored=await request({type:'login',code:faithful[0].view.code,passcode:faithful[0].passcode});assert.equal(restored.view.me.id,faithful[0].view.me.id);assert.equal(restored.view.me.score,5);
 // Exercise fresh persisted assignments through three completed rounds, including the late arrival.
 for(const round of [2,3]){
   const current=await Promise.all([...sessions,late].map(async s=>({session:s,view:await view(s)})));
@@ -59,7 +62,7 @@ for(const round of [2,3]){
   const secret=team[0].view.secret;assert.ok(!seenSignals.has(secret.signal.id));assert.ok(!seenTasks.has(secret.mission.id));seenSignals.add(secret.signal.id);seenTasks.add(secret.mission.id);
   for(const p of team){assert.deepEqual(p.view.secret.signal,secret.signal);assert.deepEqual(p.view.secret.mission,secret.mission);}
   await request({type:'roundtable'},admin);
-  await Promise.all(active.map(p=>request({type:'ballot',target:p.view.secret.role==='traitor'?(round===3&&p.view.me.id===team[2].view.me.id?team[0].view.me.id:others[0].view.me.id):team[0].view.me.id,...(p.view.secret.role==='traitor'?{performed:true}:{})},p.session)));
+  await Promise.all(active.map(p=>request({type:'ballot',target:p.view.secret.role==='traitor'?(round===3&&p.view.me.id===team[2].view.me.id?team[0].view.me.id:others[0].view.me.id):team[0].view.me.id,...(p.view.secret.role==='traitor'?{performed:true}:{suspectedAttempt:p.view.me.id===others[0].view.me.id})},p.session)));
   const completed=await view(admin);assert.equal(completed.phase,'results');assert.equal(completed.history.length,round);
   for(const p of active)assert.equal(completed.results.players.find(r=>r.id===p.view.me.id).role,p.view.secret.role);
   if(round===3){
@@ -77,7 +80,7 @@ for(const round of [2,3]){
 const fourth=await Promise.all([...sessions,late].map(async s=>({session:s,view:await view(s)})));
 const voter=fourth.find(p=>p.view.me.active&&p.view.secret.role==='faithful'),suspect=fourth.find(p=>p.view.me.active&&p.view.secret.role==='traitor');
 await request({type:'roundtable'},admin);
-await request({type:'ballot',target:suspect.view.me.id},voter.session);
+await request({type:'ballot',target:suspect.view.me.id,suspectedAttempt:false},voter.session);
 assert.equal((await view(admin)).voteDeadline,null);
 await assert.rejects(()=>request({type:'finishVoting'},sessions[1]),/Only the admin/);
 await request({type:'pause'},admin);await assert.rejects(()=>request({type:'finishVoting'},admin),/Resume/);await request({type:'resume'},admin);

@@ -1,3 +1,4 @@
+// Regression coverage for saved version 3 rounds; awareness tests cover new deals.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound} from '../lib/game/engine.mjs';
@@ -6,7 +7,7 @@ function game(){
   const g=makeGame('ABC234','Scoring',{id:'p0',name:'Player 0'},now);
   for(let i=1;i<8;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});
   startRound(g,now,n=>n-1); // p0 and p1 are traitors.
-  openVoting(g);return g;
+  g.roundRulesVersion=3;openVoting(g);return g;
 }
 const vote=(g,id,target)=>applyAction(g,id,{type:'ballot',target,...(g.roles[id]==='traitor'&&target?{performed:true}:{})},now);
 const result=(g,id)=>g.results.players.find(p=>p.id===id);

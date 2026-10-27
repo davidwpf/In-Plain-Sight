@@ -1,11 +1,12 @@
+// Regression coverage for saved version 3 rounds; awareness tests cover new deals.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,BREAK_MS} from '../lib/game/engine.mjs';
+import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,BREAK_MS,ROUND_RULES_VERSION} from '../lib/game/engine.mjs';
 const now=1000000;
 function game(count=8){
   const g=makeGame('ABC234','Mistaken attacks',{id:'p0',name:'Alice'},now);
   for(let i=1;i<count;i++)addPlayer(g,{id:`p${i}`,name:i===1?'Ben':`Player ${i}`});
-  startRound(g,now,n=>n-1);openVoting(g);return g;
+  startRound(g,now,n=>n-1);g.roundRulesVersion=3;openVoting(g);return g;
 }
 const submit=(g,id,target,performed)=>applyAction(g,id,{type:'ballot',target,...(performed!==undefined?{performed}:{})},now);
 const result=(g,id)=>g.results.players.find(p=>p.id===id);
@@ -98,7 +99,7 @@ for(const phase of ['playing','voting'])test(`existing version 2 ${phase} rounds
   submit(g,'p0','p1',true);submit(g,'p1',null);finishRound(g,now);
   assert.equal(g.results.rulesVersion,2);assert.equal(result(g,'p0').delta,0);assert.equal(result(g,'p1').delta,0);
   assert.equal(result(g,'p0').penalties,undefined);assert.deepEqual(g.results.attempts[0].performerIds,['p0']);
-  const previous=structuredClone(g.results);tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,3);assert.deepEqual(g.history[0],previous);
+  const previous=structuredClone(g.results);tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.deepEqual(g.history[0],previous);
 });
 test('version 1 rounds retain original ballots and failed-murder scoring',()=>{
   const g=game();delete g.roundRulesVersion;submit(g,'p0','p1');submit(g,'p1',null);finishRound(g,now);

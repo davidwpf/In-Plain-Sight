@@ -1,8 +1,9 @@
+// Regression coverage for saved version 3 rounds; awareness tests cover new deals.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeGame,addPlayer,startRound,openVoting,finishRound,tick,applyAction,publicView,traitorCountFor,validateContent,CONTENT,ROUND_MS,VOTE_MS,BREAK_MS} from '../lib/game/engine.mjs';
 const base=1000000;
-function fixture(count=8){const g=makeGame('ABC234','Test Game',{id:'p0',name:'Admin',tokenHashes:['secret-token'],loginHash:'private-login-hash'},base);for(let i=1;i<count;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});startRound(g,base,n=>n-1);return g;}
+function fixture(count=8){const g=makeGame('ABC234','Test Game',{id:'p0',name:'Admin',tokenHashes:['secret-token'],loginHash:'private-login-hash'},base);for(let i=1;i<count;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});startRound(g,base,n=>n-1);g.roundRulesVersion=3;return g;}
 function roles(g,ids){for(const id of g.active)g.roles[id]=ids.includes(id)?'traitor':'faithful';g.traitorCount=ids.length;}
 function ballot(g,id,target){return applyAction(g,id,{type:'ballot',target,...(g.roles[id]==='traitor'&&target?{performed:true}:{})},base);}
 function result(g,id){return g.results.players.find(p=>p.id===id);}

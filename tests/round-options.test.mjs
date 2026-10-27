@@ -20,7 +20,7 @@ test('new Games and existing Games without a duration default to 60 minutes',()=
 });
 for(const count of [0,1,3])test(`admin can finish voting with ${count} of six submitted`,()=>{
   const g=fixture();openVoting(g);
-  for(const id of g.active.slice(0,count))applyAction(g,id,{type:'ballot',target:g.roles[id]==='traitor'?null:'p0'},now);
+  for(const id of g.active.slice(0,count))applyAction(g,id,{type:'ballot',target:g.roles[id]==='traitor'?null:'p0',...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})},now);
   applyAction(g,'p0',{type:'finishVoting'},now+1000);
   assert.equal(g.phase,'results');assert.equal(g.results.submittedCount,count);assert.equal(g.deadline,now+1000+BREAK_MS);
   assert.equal(g.history.length,1);assert.equal(g.voteDeadline,null);
@@ -32,7 +32,7 @@ test('only the admin can finish voting and paused voting must be resumed first',
   assert.equal(g.history.length,0);applyAction(g,'p0',{type:'resume'},now+1000);applyAction(g,'p0',{type:'finishVoting'},now+1000);assert.equal(g.history.length,1);
 });
 test('repeating Finish voting or reaching its deadline scores the round only once',()=>{
-  const g=fixture();openVoting(g);for(const id of ['p0','p1','p2'])applyAction(g,id,{type:'ballot',target:g.roles[id]==='traitor'?null:'p0'},now);
+  const g=fixture();openVoting(g);for(const id of ['p0','p1','p2'])applyAction(g,id,{type:'ballot',target:g.roles[id]==='traitor'?null:'p0',...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})},now);
   const deadline=g.voteDeadline;applyAction(g,'p0',{type:'finishVoting'},deadline);
   const scores=g.players.map(p=>p.score);applyAction(g,'p0',{type:'finishVoting'},deadline+1000);
   assert.equal(g.history.length,1);assert.deepEqual(g.players.map(p=>p.score),scores);
