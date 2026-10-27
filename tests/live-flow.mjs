@@ -1,13 +1,10 @@
 import assert from 'node:assert/strict';
-import {execFileSync} from 'node:child_process';
 const origin=process.env.GAME_TEST_ORIGIN||'http://127.0.0.1:5173';
 if(!['localhost','127.0.0.1','[::1]'].includes(new URL(origin).hostname))throw new Error('This test only runs against a local preview.');
 async function raw(body,session){const res=await fetch(`${origin}/api/game`,{method:'POST',headers:{'Content-Type':'application/json',Origin:origin,...(session?{Authorization:`Bearer ${session.token}`}:{})},body:JSON.stringify({...body,...(session?{code:session.view.code}:{})})});return {status:res.status,data:await res.json()};}
 async function request(body,session){const {status,data}=await raw(body,session);if(status>=400)throw new Error(`${status}: ${data.error}`);return data;}
 async function view(s){const res=await fetch(`${origin}/api/game?code=${s.view.code}`,{headers:{Authorization:`Bearer ${s.token}`}});assert.equal(res.status,200);return res.json();}
-function advanceLocalDeadline(gameCode){assert.match(gameCode,/^[A-Z2-9]{6}$/);const command=`UPDATE games SET state = json_set(state, '$.deadline', ${Date.now()-1000}), version = version + 1 WHERE code = '${gameCode}'`;
-  execFileSync(process.execPath,['--import','./scripts/sites-env.mjs','./node_modules/wrangler/bin/wrangler.js','d1','execute','DB','--local','--config','dist/server/wrangler.json','--persist-to','.wrangler/state','--command',command],{stdio:'pipe'});
-}
+async function advance(){const current=await view(admin);await request({type:'nextRound',round:current.round},admin);}
 assert.equal((await raw({type:'create',name:'Test Admin',gameName:'Invalid duration',roundMinutes:45})).status,400);
 const admin=await request({type:'create',name:'Test Admin',gameName:'Shared-device integration test',roundMinutes:90});const sessions=[admin];
 assert.equal(admin.view.roundMinutes,90);
@@ -52,7 +49,7 @@ for(const s of faithful.slice(0,2)){const p=result.results.players.find(p=>p.id=
 for(const s of faithful.slice(2)){const p=result.results.players.find(p=>p.id===s.view.me.id);assert.equal(p.awareness.points,0);assert.equal(p.delta,4);}
 const lateResult=await view(late);assert.equal(lateResult.me.active,false);assert.equal(lateResult.secret,null);
 const reread=await view(admin);assert.deepEqual(reread.players.map(p=>p.score),result.players.map(p=>p.score));
-await request({type:'ready',ready:false},faithful.at(-1));advanceLocalDeadline(admin.view.code);const next=await view(late);assert.equal(next.phase,'playing');assert.equal(next.round,2);assert.equal(next.me.active,true);assert.ok(next.secret);assert.equal(next.activeCount,10);assert.equal(next.traitorCount,3);assert.equal(next.submittedCount,0);assert.equal(next.history.length,1);
+await request({type:'ready',ready:false},faithful.at(-1));await advance();const next=await view(late);assert.equal(next.phase,'playing');assert.equal(next.round,2);assert.equal(next.me.active,true);assert.ok(next.secret);assert.equal(next.activeCount,10);assert.equal(next.traitorCount,3);assert.equal(next.submittedCount,0);assert.equal(next.history.length,1);
 const restored=await request({type:'login',code:faithful[0].view.code,passcode:faithful[0].passcode});assert.equal(restored.view.me.id,faithful[0].view.me.id);assert.equal(restored.view.me.score,5);
 // Exercise fresh persisted assignments through three completed rounds, including the late arrival.
 for(const round of [2,3]){
@@ -73,7 +70,7 @@ for(const round of [2,3]){
     assert.equal(completed.results.murderedId,others[0].view.me.id);
   }
   assert.deepEqual(completed.history[0],result.results);
-  advanceLocalDeadline(admin.view.code);const dealt=await view(late);
+  await advance();const dealt=await view(late);
   assert.equal(dealt.phase,'playing');assert.equal(dealt.round,round+1);assert.equal(dealt.submittedCount,0);assert.equal(dealt.results,null);
 }
 // Close a stalled vote before halfway; only the admin may do so, and never while paused.

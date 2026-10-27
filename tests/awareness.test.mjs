@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,BREAK_MS,ROUND_RULES_VERSION} from '../lib/game/engine.mjs';
+import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,ROUND_RULES_VERSION} from '../lib/game/engine.mjs';
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
 const now=1000000;
 function game(count=8){
   const g=makeGame('ABC234','Awareness',{id:'p0',name:'Alice'},now);
@@ -80,7 +81,7 @@ test('all ballots close immediately with correct mixed awareness results',()=>{
   assert.equal(result(g,'p4').delta,3);assert.equal(result(g,'p5').delta,4);
   const completed=structuredClone(g.results),scores=g.players.map(p=>p.score);
   applyAction(g,'p0',{type:'finishVoting'},now+1);assert.deepEqual(g.results,completed);assert.deepEqual(g.players.map(p=>p.score),scores);
-  tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.round,2);assert.equal(g.results,null);assert.deepEqual(g.ballots,{});assert.deepEqual(g.history[0],completed);
+  nextRound(g,now+5000,n=>n-1);assert.equal(g.round,2);assert.equal(g.results,null);assert.deepEqual(g.ballots,{});assert.deepEqual(g.history[0],completed);
 });
 test('timer closure applies the awareness score only to submitted ballots',()=>{
   const g=game();report(g,'p0','p2');report(g,'p1','p2',false);accuse(g,'p2','p0',true);accuse(g,'p3','p0',false);
@@ -96,7 +97,7 @@ for(const version of [1,2,3])for(const phase of ['playing','voting'])test(`saved
   report(g,'p0','p2');report(g,'p1','p2',false);applyAction(g,'p2',{type:'ballot',target:'p0'},now);
   finishRound(g,now);assert.equal(result(g,'p2').delta,4);assert.equal(result(g,'p2').awareness,undefined);
   const saved=structuredClone(g.results),scores=g.players.map(p=>p.score);
-  tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.deepEqual(g.history[0],saved);assert.deepEqual(g.players.map(p=>p.score),scores);
+  nextRound(g,now+5000,n=>n-1);assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.deepEqual(g.history[0],saved);assert.deepEqual(g.players.map(p=>p.score),scores);
   openVoting(g);const innocent=g.active.find(id=>g.roles[id]==='faithful'),killer=g.active.find(id=>g.roles[id]==='traitor');
-  assert.throws(()=>applyAction(g,innocent,{type:'ballot',target:killer},now+BREAK_MS),/Choose Yes or No/);
+  assert.throws(()=>applyAction(g,innocent,{type:'ballot',target:killer},now+5000),/Choose Yes or No/);
 });

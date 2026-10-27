@@ -1,13 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeGame,addPlayer,startRound,openVoting,finishRound,tick,applyAction,publicView,CONTENT,validateContent} from '../lib/game/engine.mjs';
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
 const base=1000000;
 function fixture(count=8){
   const g=makeGame('ABC234','Task cycles',{id:'p0',name:'Admin'},base);
   for(let i=1;i<count;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});
   startRound(g,base,n=>n-1);return g;
 }
-function next(g){openVoting(g);finishRound(g,g.deadline??base);tick(g,g.deadline,n=>n-1);return g;}
+function next(g){openVoting(g);finishRound(g,g.deadline??base);nextRound(g,base,n=>n-1);return g;}
 
 test('recognition accepts a single shared signal and still supports a legacy reply',()=>{
   const content={...CONTENT,recognition:[{id:'signal',prompt:'Pretend to sneeze.'}]};

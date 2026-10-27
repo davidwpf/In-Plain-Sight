@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeGame,addPlayer,startRound,openVoting,applyAction,publicView,validateRoundMinutes,ROUND_MS,BREAK_MS,CONTENT,tick} from '../lib/game/engine.mjs';
+import {makeGame,addPlayer,startRound,openVoting,applyAction,publicView,validateRoundMinutes,ROUND_MS,CONTENT,tick} from '../lib/game/engine.mjs';
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
 const now=1000000;
 function fixture(minutes=60){
   const g=makeGame('ABC234','Options',{id:'p0',name:'Admin'},now,minutes);
@@ -11,7 +12,7 @@ for(const minutes of [30,60,90,120,150,1440,10080,30000])test(`round length acce
   const g=fixture(minutes);assert.equal(g.deadline,now+minutes*60000);assert.equal(publicView(g,'p2',now).roundMinutes,minutes);
   tick(g,g.deadline-1);assert.equal(g.phase,'playing');tick(g,g.deadline);assert.equal(g.phase,'voting');
   applyAction(g,'p0',{type:'finishVoting'},g.deadline??now+minutes*60000);
-  const next=g.deadline;tick(g,next,()=>0);assert.equal(g.deadline,next+minutes*60000);assert.equal(g.roundMinutes,minutes);
+  const next=now+minutes*60000+5000;nextRound(g,next,()=>0);assert.equal(g.deadline,next+minutes*60000);assert.equal(g.roundMinutes,minutes);
 });
 for(const value of [0,-30,15,45,30.5,'60',null,NaN,Infinity,Number.MAX_SAFE_INTEGER])test(`invalid round length ${String(value)} is rejected`,()=>assert.throws(()=>validateRoundMinutes(value),/30-minute steps/));
 test('new Games and existing Games without a duration default to 60 minutes',()=>{
@@ -22,7 +23,7 @@ for(const count of [0,1,3])test(`admin can finish voting with ${count} of six su
   const g=fixture();openVoting(g);
   for(const id of g.active.slice(0,count))applyAction(g,id,{type:'ballot',target:g.roles[id]==='traitor'?null:'p0',...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})},now);
   applyAction(g,'p0',{type:'finishVoting'},now+1000);
-  assert.equal(g.phase,'results');assert.equal(g.results.submittedCount,count);assert.equal(g.deadline,now+1000+BREAK_MS);
+  assert.equal(g.phase,'results');assert.equal(g.results.submittedCount,count);assert.equal(g.deadline,null);
   assert.equal(g.history.length,1);assert.equal(g.voteDeadline,null);
   for(const p of g.results.players.filter(p=>!p.submitted&&p.role==='faithful'))assert.equal(p.delta,-2);
 });
@@ -48,7 +49,7 @@ test('the murder method stays private until results and is retained when later t
   assert.equal(publicView(g,'p2',now).results,null);applyAction(g,'p0',{type:'finishVoting'},now);
   assert.deepEqual(g.results.murderMethod,method);assert.notEqual(g.results.murderMethod,g.mission);
   g.mission.title='Changed task';assert.deepEqual(g.history[0].murderMethod,method);
-  tick(g,g.deadline,()=>0);assert.deepEqual(publicView(g,'p2',g.deadline).history[0].murderMethod,method);
+  nextRound(g,now,()=>0);assert.deepEqual(publicView(g,'p2',now).history[0].murderMethod,method);
 });
 test('results without a confirmed murder do not name a successful murder method',()=>{
   const g=fixture();openVoting(g);applyAction(g,'p0',{type:'ballot',target:'p2',performed:true},now);applyAction(g,'p1',{type:'ballot',target:'p3',performed:true},now);

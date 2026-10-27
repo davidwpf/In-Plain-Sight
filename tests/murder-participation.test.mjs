@@ -1,7 +1,8 @@
 // Regression coverage for saved version 3 rounds; awareness tests cover new deals.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,BREAK_MS,ROUND_RULES_VERSION} from '../lib/game/engine.mjs';
+import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,ROUND_RULES_VERSION} from '../lib/game/engine.mjs';
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
 const now=1000000;
 function game(count=8){
   const g=makeGame('ABC234','Participation',{id:'p0',name:'Alice'},now);
@@ -99,7 +100,7 @@ test('existing in-progress rounds retain old ballots and scoring; the next deal 
   assert.equal(result(g,'p0').delta,2);assert.equal(result(g,'p1').delta,1);assert.equal(result(g,'p3').delta,-1);
   assert.deepEqual(g.results.murdererIds,['p0','p1']);assert.equal(g.results.rulesVersion,undefined);
   const oldResults=structuredClone(g.results),oldScores=g.players.map(p=>p.score);
-  tick(g,now+BREAK_MS,n=>n-1);assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.deepEqual(g.history[0],oldResults);assert.deepEqual(g.players.map(p=>p.score),oldScores);
+  nextRound(g,now+5000,n=>n-1);assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.deepEqual(g.history[0],oldResults);assert.deepEqual(g.players.map(p=>p.score),oldScores);
 });
 test('a restored old playing round also keeps its rules when the admin calls an early roundtable',()=>{
   const g=game();g.phase='playing';g.deadline=now+3600000;delete g.roundRulesVersion;

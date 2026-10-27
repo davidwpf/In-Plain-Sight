@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeGame,addPlayer,startRound,openVoting,finishRound,tick,drawTraitors,traitorWeights,traitorCountFor,applyAction,publicView} from '../lib/game/engine.mjs';
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
 const base=1000000;
 function lobby(count){
   const g=makeGame('ABC234','Random roles',{id:'p0',name:'Player 0'},base);
@@ -8,14 +9,14 @@ function lobby(count){
   return g;
 }
 const traitors=g=>g.active.filter(id=>g.roles[id]==='traitor');
-test('automatic rounds obtain fresh cryptographic randomness after restoring stored Games',t=>{
+test('admin-started rounds obtain fresh cryptographic randomness after restoring stored Games',t=>{
   const entropy=t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=0;return array;});
   let g=lobby(3);startRound(g,base);const teams=[];
   for(let round=1;round<=3;round++){
     assert.equal(g.round,round);assert.equal(traitors(g).length,1);teams.push(traitors(g));
     const calls=entropy.mock.callCount();openVoting(g);finishRound(g,base+round*1000000);
     if(round<3){
-      g=JSON.parse(JSON.stringify(g));tick(g,g.deadline);
+      g=JSON.parse(JSON.stringify(g));nextRound(g,base+round*1000000);
       assert.ok(entropy.mock.callCount()>calls);assert.equal(g.results,null);assert.deepEqual(g.ballots,{});
     }
   }
@@ -26,7 +27,7 @@ test('weighted draws keep a previous traitor eligible for three consecutive roun
   for(let round=1;round<=3;round++){
     assert.deepEqual(traitors(g),['p0']);assert.equal(g.round,round);
     openVoting(g);finishRound(g,base+round*1000000);
-    if(round<3)tick(g,g.deadline,()=>0);
+    if(round<3)nextRound(g,base,()=>0);
   }
 });
 function* drawSequences(n){
@@ -67,13 +68,13 @@ test('weights remain bounded after long streaks and sitting out adds no advantag
 test('weighted assignment recalculates the correct ratio without duplicate traitors for 3–30 players',()=>{
   for(let count=3;count<=30;count++){
     const g=lobby(count);startRound(g,base,n=>n-1);openVoting(g);finishRound(g,base);
-    tick(g,g.deadline,()=>0);
+    nextRound(g,base,()=>0);
     assert.equal(traitors(g).length,traitorCountFor(count));assert.equal(new Set(traitors(g)).size,traitorCountFor(count));
     assert.deepEqual(Object.keys(g.roles),g.active);
     assert.ok(publicView(g,'p0').players.every(p=>p.weight===undefined));
   }
 });
-test('early roundtables redraw after each full break with 3, 4, 3, 6 and 6 players',t=>{
+test('admin starts redraw after early roundtables with 3, 4, 3, 6 and 6 players',t=>{
   const entropy=t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=0;return array;});
   let g=lobby(3),now=base;const act=(id,action)=>{applyAction(g,id,action,now);g=JSON.parse(JSON.stringify(g));};
   act('p0',{type:'start'});
@@ -88,18 +89,21 @@ test('early roundtables redraw after each full break with 3, 4, 3, 6 and 6 playe
     for(const id of [...g.active])act(id,{type:'ballot',target:team.includes(id)?null:team[0],...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})});
     assert.equal(g.phase,'results');assert.equal(g.history.length,i+1);assert.equal(entropy.mock.callCount(),calls);
     if(i<4){
-      const deadline=g.deadline;tick(g,deadline-1);assert.equal(g.phase,'results');assert.equal(entropy.mock.callCount(),calls);
-      now=deadline;tick(g,now);g=JSON.parse(JSON.stringify(g));
+      tick(g,now+86400000);assert.equal(g.phase,'results');assert.equal(entropy.mock.callCount(),calls);
+      now+=86400000;nextRound(g,now);g=JSON.parse(JSON.stringify(g));
       assert.equal(g.phase,'playing');assert.deepEqual(g.ballots,{});assert.equal(g.results,null);assert.ok(entropy.mock.callCount()>calls);
     }
   }
 });
-test('an early-roundtable request at the break boundary draws new weighted roles before opening voting',t=>{
-  t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=0;return array;});
+test('an early roundtable cannot redraw roles while results wait for the admin',t=>{
+  const entropy=t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=0;return array;});
   const g=lobby(3);applyAction(g,'p0',{type:'start'},base);const first=traitors(g);
   applyAction(g,'p0',{type:'roundtable'},base+1000);
   for(const id of g.active)applyAction(g,id,{type:'ballot',target:first.includes(id)?null:first[0],...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})},base+1000);
-  assert.equal(g.phase,'results');applyAction(g,'p0',{type:'roundtable'},g.deadline);
-  assert.equal(g.round,2);assert.equal(g.phase,'voting');assert.notDeepEqual(traitors(g),first);
+  const calls=entropy.mock.callCount();assert.equal(g.phase,'results');
+  assert.throws(()=>applyAction(g,'p0',{type:'roundtable'},base+86400000),/not ready/);
+  assert.equal(g.round,1);assert.equal(entropy.mock.callCount(),calls);
+  nextRound(g,base+86400000);assert.equal(g.round,2);assert.notDeepEqual(traitors(g),first);
+  applyAction(g,'p0',{type:'roundtable'},base+86400001);assert.equal(g.phase,'voting');
   assert.deepEqual(g.ballots,{});assert.equal(g.results,null);
 });
