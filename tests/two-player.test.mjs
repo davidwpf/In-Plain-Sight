@@ -59,13 +59,13 @@ test('admin and waiting players do not gain the hidden count, task or roles',()=
 for(const accuse of [false,true])for(const answer of [false,true])test(`both Innocent: accuse=${accuse}, awareness=${answer}`,()=>{
   const g=game(false);openVoting(g);vote(g,'p0',accuse?'p1':null,answer);vote(g,'p1','p0',false);
   assert.equal(g.phase,'results');assert.equal(g.results.mode,'two-player');assert.equal(g.results.murderedId,null);
-  assert.equal(result(g,'p0').delta,(accuse?-1:2)+(answer?-1:0));assert.equal(result(g,'p1').delta,-1);
+  assert.equal(result(g,'p0').delta,(accuse?-1:2)+(accuse&&answer?-1:0));assert.equal(result(g,'p1').delta,-1);
   assert.equal(result(g,'p0').noKiller,!accuse);assert.equal(result(g,'p0').reason.includes('Most accusations'),false);
   assert.equal(publicView(g,'p0',now).traitorCount,0);
 });
 for(const killed of [false,true])for(const accuse of [false,true])for(const answer of [false,true])test(`one killer: murder=${killed}, accused=${accuse}, awareness=${answer}`,()=>{
   const g=game(true);openVoting(g);report(g,killed?'p1':null);vote(g,'p1',accuse?'p0':null,answer);
-  const awareness=answer?(killed?1:-1):(killed?-1:0);
+  const awareness=accuse?(answer?(killed?1:-1):(killed?-1:0)):0;
   assert.equal(result(g,'p1').delta,(accuse?4:-1)+awareness);
   assert.equal(result(g,'p0').delta,killed?(accuse?1:6):(accuse?-2:0));
   assert.equal(result(g,'p1').murdered,killed);assert.equal(result(g,'p0').caught,accuse);
@@ -75,7 +75,7 @@ for(const killed of [false,true])for(const accuse of [false,true])for(const answ
 test('No killer is an explicit locked submission that starts the five-minute timer',()=>{
   const g=game(false);openVoting(g);vote(g,'p0',null,false);
   assert.equal(g.phase,'voting');assert.equal(g.voteDeadline,now+VOTE_MS);assert.equal(publicView(g,'p0',now).submittedCount,1);
-  assert.deepEqual(publicView(g,'p0',now).myBallot,{kind:'accusation',targetId:null,suspectedAttempt:false});
+  assert.deepEqual(publicView(g,'p0',now).myBallot,{kind:'accusation',targetId:null});
   assert.equal(publicView(g,'p1',now).myBallot,null);assert.equal(publicView(g,'p1',now).traitorCount,null);
   assert.throws(()=>vote(g,'p0','p1'),/locked/);tick(g,now+VOTE_MS);
   assert.equal(g.phase,'results');assert.equal(result(g,'p0').delta,2);assert.equal(result(g,'p1').delta,-2);
@@ -85,9 +85,9 @@ test('a missing Innocent vote cannot award the killer an escape bonus',()=>{
   const g=game(true);openVoting(g);report(g,'p1');tick(g,g.voteDeadline);
   assert.equal(result(g,'p0').delta,4);assert.equal(result(g,'p1').delta,-2);
 });
-test('No killer still requires a Yes or No awareness answer and rejects performer claims',()=>{
+test('accusing the other player requires an awareness answer, while No killer rejects performer claims',()=>{
   const g=game(false);openVoting(g);
-  for(const answer of [undefined,null,0,'false'])assert.throws(()=>applyAction(g,'p0',{type:'ballot',target:null,suspectedAttempt:answer},now),/Choose Yes or No/);
+  for(const answer of [undefined,null,0,'false'])assert.throws(()=>applyAction(g,'p0',{type:'ballot',target:'p1',suspectedAttempt:answer},now),/Choose Yes or No/);
   assert.throws(()=>applyAction(g,'p0',{type:'ballot',target:null,suspectedAttempt:false,performed:true},now),/Innocent/);
   assert.deepEqual(g.ballots,{});assert.equal(g.voteDeadline,null);
 });
@@ -148,7 +148,7 @@ test('old group rounds retain scoring while their next deal can use two-player r
   const g=lobby(3);startRound(g,now,n=>n-1);g.roundRulesVersion=4;applyAction(g,'p2',{type:'leave'},now);openVoting(g);
   applyAction(g,'p0',{type:'ballot',target:null},now);vote(g,'p1','p0');finishRound(g,now);
   const saved=structuredClone(g.results);assert.equal(saved.rulesVersion,4);assert.equal(result(g,'p1').delta,4);
-  tick(g,g.deadline,()=>0);assert.equal(g.roundRulesVersion,5);assert.equal(g.active.length,2);assert.equal(g.traitorCount,0);assert.deepEqual(g.history[0],saved);
+  tick(g,g.deadline,()=>0);assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.equal(g.active.length,2);assert.equal(g.traitorCount,0);assert.deepEqual(g.history[0],saved);
 });
 test('both-Innocent rounds do not use up or repeat tasks when a killer returns',()=>{
   const g=game(true),task=g.mission.id,used=structuredClone(g.usedTaskIds);openVoting(g);finishRound(g,now);tick(g,g.deadline,()=>0);
@@ -158,4 +158,20 @@ test('both-Innocent rounds do not use up or repeat tasks when a killer returns',
 test('repeated finish requests do not score a No killer ballot twice',()=>{
   const g=game(false);openVoting(g);vote(g,'p0',null);vote(g,'p1',null);const saved=structuredClone(g.results);
   applyAction(g,'p0',{type:'finishVoting'},now+1);assert.deepEqual(g.results,saved);assert.equal(g.history.length,1);assert.equal(g.players[0].score,2);
+});
+
+test('No killer accepts an omitted answer and awards no awareness points, even for a completed murder',()=>{
+  const g=game(true);openVoting(g);applyAction(g,'p1',{type:'ballot',target:null},now);report(g,'p1');
+  assert.equal(result(g,'p1').delta,-1);assert.equal(result(g,'p1').murdered,true);
+  assert.deepEqual(result(g,'p1').awareness,{answer:null,taskCompleted:true,points:0,skipped:true});
+});
+for(const staleAnswer of [false,true])test(`an older form sending a No killer awareness answer (${staleAnswer}) is safely ignored`,()=>{
+  const g=game(false);openVoting(g);vote(g,'p0',null,staleAnswer);applyAction(g,'p1',{type:'ballot',target:null},now);
+  assert.equal(g.ballots.p0.suspectedAttempt,undefined);assert.equal(result(g,'p0').delta,2);assert.equal(result(g,'p0').awareness.skipped,true);
+});
+test('version 5 preserves a locked awareness answer but lets unsubmitted No killer votes skip it',()=>{
+  const g=game(false);g.roundRulesVersion=5;openVoting(g);vote(g,'p0',null,true);
+  assert.equal(g.ballots.p0.suspectedAttempt,true);applyAction(g,'p1',{type:'ballot',target:null},now);
+  assert.equal(result(g,'p0').delta,1);assert.equal(result(g,'p0').awareness.points,-1);assert.equal(result(g,'p0').awareness.skipped,undefined);
+  assert.equal(result(g,'p1').delta,2);assert.equal(result(g,'p1').awareness.skipped,true);
 });

@@ -20,8 +20,8 @@ try{
  const innocentIndex=roles.findIndex(r=>r==='faithful');assert.equal((await raw({type:'ballot',target:null,suspectedAttempt:false},sessions[innocentIndex])).status,400);await action({type:'resume'},admin);
  const victim=activeViews[innocentIndex].me.id;
  for(let i=0;i<2;i++)await action({type:'ballot',target:roles[i]==='traitor'?victim:null,...(roles[i]==='traitor'?{}:{suspectedAttempt:false})},sessions[i]);
- let completed=await view(admin);assert.equal(completed.phase,'results');assert.equal(completed.results.mode,'two-player');assert.equal(completed.results.submittedCount,2);assert.equal(completed.results.rulesVersion,5);
- for(let i=0;i<2;i++){const p=completed.results.players.find(p=>p.id===activeViews[i].me.id);assert.equal(p.delta,roles[i]==='traitor'?6:killers?-2:2);}
+ let completed=await view(admin);assert.equal(completed.phase,'results');assert.equal(completed.results.mode,'two-player');assert.equal(completed.results.submittedCount,2);assert.equal(completed.results.rulesVersion,6);
+ for(let i=0;i<2;i++){const p=completed.results.players.find(p=>p.id===activeViews[i].me.id);assert.equal(p.delta,roles[i]==='traitor'?6:killers?-1:2);}
  const firstResult=structuredClone(completed.results),scores=completed.players.map(p=>p.score);advance(admin.view.code);
  let groupViews=await Promise.all(sessions.map(view));assert.ok(groupViews.every(v=>v.roundMode==='group'&&v.activeCount===3&&v.traitorCount===1&&v.round===2));assert.deepEqual(groupViews[0].history[0],firstResult);assert.deepEqual(groupViews[0].players.map(p=>p.score),scores);
  await action({type:'leave'},late);assert.equal((await view(late)).me.nextActive,false);assert.equal((await view(late)).me.active,true);

@@ -45,7 +45,7 @@ for(const s of faithful.slice(0,2)){const mine=await view(s);assert.equal(mine.p
 await Promise.all(faithful.slice(2).map(s=>request({type:'ballot',target:caught,suspectedAttempt:false},s)));
 const result=await view(admin);assert.equal(result.phase,'results');assert.equal(result.history.length,1);assert.equal(result.results.submittedCount,10);assert.equal(result.results.murderedId,victim);assert.equal(result.results.attempts[0].targetId,attempted);
 assert.deepEqual(result.results.murderMethod,initial.find(v=>v.me.id===traitors[0].view.me.id).secret.mission);
-assert.equal(result.results.rulesVersion,5);assert.equal(result.results.players.find(p=>p.id===traitors[0].view.me.id).delta,4);assert.equal(result.results.players.find(p=>p.id===traitors[1].view.me.id).delta,0);assert.equal(result.results.players.find(p=>p.id===caught).delta,-2);
+assert.equal(result.results.rulesVersion,6);assert.equal(result.results.players.find(p=>p.id===traitors[0].view.me.id).delta,4);assert.equal(result.results.players.find(p=>p.id===traitors[1].view.me.id).delta,0);assert.equal(result.results.players.find(p=>p.id===caught).delta,-2);
 assert.deepEqual(new Set(result.results.murdererIds),new Set([traitors[0].view.me.id]));
 const named=result.results.murdererIds.map(id=>result.players.find(p=>p.id===id).name);assert.equal(result.results.players.find(p=>p.id===victim).blurb,`You were murdered. ${named[0]} killed you.`);
 for(const s of faithful.slice(0,2)){const p=result.results.players.find(p=>p.id===s.view.me.id);assert.equal(p.awareness.points,1);assert.equal(p.delta,5);}
