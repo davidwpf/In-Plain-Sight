@@ -13,7 +13,7 @@ There are two independent lists. Add an entry by copying an existing one and cha
 }
 ```
 
-`prompt` describes the word, phrase, sound or gesture to use. Every traitor receives the same signal and looks for others using it. A lone traitor receives no recognition signal. The app does not observe or verify real-world actions.
+`prompt` describes the word, phrase, sound or gesture to use. Every killer receives the same signal and looks for others using it. A lone killer receives no recognition signal. The app does not observe or verify real-world actions.
 
 Only `id` and `prompt` are required. Older question-and-answer entries can still include a non-empty `reply`; their two-part display is retained for rounds already in progress. The new single-signal entries leave `reply` out.
 
@@ -29,10 +29,10 @@ Only `id` and `prompt` are required. Older question-and-answer entries can still
 }
 ```
 
-All traitors receive the same task. At least one must complete it. The app compares their victim reports at the roundtable; it does not observe the real-world action.
+All killers receive the same task. At least one must complete it. The app compares their victim reports at the roundtable; it does not observe the real-world action.
 
-- `title`: the short name shown on the traitor screen and beside a confirmed victim in results.
-- `instruction`: what the traitor must do and what completes the task.
+- `title`: the short name shown on the killer screen and beside a confirmed victim in results.
+- `instruction`: what the killer must do and what completes the task.
 - `kind`: `spoken`, `action` or `prop`.
 - `difficulty`: `easy` or `medium`.
 
@@ -40,7 +40,7 @@ Kind and difficulty help maintain the library; they do not change scoring or add
 
 ## Variety between rounds
 
-Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. Recognition signals are only used up in rounds with multiple traitors. The two lists cycle independently, and draw history is saved with the Game.
+Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. Recognition signals are only used up in rounds with multiple killers. The two lists cycle independently, and draw history is saved with the Game.
 
 Edits take effect for new rounds after publication. Current rounds retain their assigned signal and task. New entries become available in the current cycle; removed entries are no longer drawn. Keep an existing entry's `id` when changing only its wording so the Game can recognise that it has already been used.
 
