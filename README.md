@@ -9,10 +9,11 @@ A social deduction game for an evening or weekend with friends and family. Every
 1. **Create game.** The admin enters their name, a Game name and a round length using separate Hours and Minutes dropdowns, defaulting to 1 and 0. Minutes show only 0 or 30. Hours run from 0 to 24, with “More…” allowing any larger whole-hour value. Choosing 0 hours selects 30 minutes to keep the minimum round length at half an hour. Their private six-digit player code also unlocks Start, Call roundtable, Finish voting, Pause, Resume and End.
 2. **Share code.** Share the six-character game code or invite link. Keep personal player codes private.
 3. **Join.** A player chooses “Enter my player code” or “Join as a new player”. Joining gives them their own private six-digit code. Shared devices use **Switch player** to hide the current identity and sign in as someone else.
-4. **Start.** The admin starts when everyone has joined. There must be at least three ready players. The admin receives a normal role and cannot inspect anyone else’s role.
+4. **Start.** The admin starts when everyone has joined. There must be at least two ready players. The admin receives a normal role and cannot inspect anyone else’s role.
 
 | Active players this round | Killers |
 | --- | ---: |
+| 2 | 0 or 1, drawn each round |
 | 3–5 | 1 |
 | 6–9 | 2 |
 | 10–30 | 3 |
@@ -20,6 +21,18 @@ A social deduction game for an evening or weekend with friends and family. Every
 The count is recalculated at each new deal. Each round uses a fresh weighted draw with the server’s cryptographic random generator. Players with fewer killer turns than expected for the rounds they have played get higher odds. The calculation accounts for each round’s group size and killer count; sitting out adds no opportunities, and new players start with a neutral weight. Weights stay between 25 and 400 around a neutral 100, so everyone remains eligible and consecutive killer turns are still possible. Existing scores and current roles are preserved; the weighting applies at the next deal.
 
 Players can scan the joining QR code from **Show QR code** in the lobby or **Game menu → Invite someone**. It opens the join page with the public game code filled in, leaving the choice of joining as a new player or signing in with a private player code. The QR code is generated locally from the same URL as Copy invite link and contains no player code or session token. QR codes are unavailable in the demo and after a Game ends.
+
+## Two-player rounds
+
+The default round length stays at 60 minutes, chosen before players join. The round type uses the number of ready players at each deal, rather than a fixed game setting. Exactly two active players draw a 50% chance of no killer and a 50% chance of one killer. When there is a killer, the existing weighted draw selects them. A both-Innocent round uses no murder task or recognition signal and consumes neither task deck. Three or more active players use the existing ratios and group rules.
+
+The actual two-player killer count is hidden in `publicView`, including for waiting players and the admin, until that round's results. Both roles' private information remains separate. `roundMode` safely identifies the rule set; `traitorCount` is null while an unrevealed two-player round is in progress. `nextTraitorCount` is null for two ready players because the next count has not been drawn. Ending an unfinished round does not disclose its hidden count.
+
+Innocents can accuse the other player or choose **No killer this round**. Correctly naming the killer earns +4; correctly choosing No killer earns +2; either wrong choice earns -1; missing the ballot costs -2. There is no most-accusations penalty for Innocents in two-player rounds. The existing attempt-awareness question adds +1, -1, -1 or 0 as before. A No killer vote is an explicit submitted accusation ballot with a null target, not a missing vote. It counts towards the halfway timer and a successful killer's +2 escape bonus. Killer task/report and scoring rules stay the same: a solo killer naming a victim confirms carrying out the task.
+
+New arrivals wait until the next deal. Sit-outs and **Leave game** also affect the next deal; neither changes existing roles or ballots mid-round. Leave marks only that player's `nextActive` false, preserves their name, code and scores, and returns the device to the entrance screen. Logging back in does not automatically make them ready: choose **Play next round** to return. Switching player does not mark anyone as sitting out. Admin identity stays with its player code even when the admin sits out or leaves. The admin can return to manage or end the game. Fewer than two ready players returns to the lobby after the break.
+
+A game can move from two players to a group and back repeatedly, with its chosen duration, scores, completed results and task history preserved. Results record the mode and distinguish an explicit No killer vote from a missed ballot.
 
 ## A round
 
@@ -31,7 +44,7 @@ Players can scan the joining QR code from **Show QR code** in the lobby or **Gam
 - The admin can choose **Finish voting**, confirm the submission count and close a stalled vote at any point, including before halfway. Missing innocent votes receive the usual missed-vote score; missing killer reports count as no report. Repeated requests cannot award points twice.
 - Reports confirm a murder only when a majority of the assigned killers name the same innocent: 1 of 1, 2 of 2 or 2 of 3. At least one matching reporter must also confirm personally completing the task. Matching reporters who did the task are murderers; the others are accomplices. Missing reports do not reduce the majority needed. Other named targets are attempted murders. Naming another killer cannot murder them and produces a failed attempt.
 - Roles, accusations, reports, murders, attempts and points appear together. The victim’s name is followed by the murder method, such as “Method: Coin in a pocket”. This task snapshot is saved in past rounds too; results completed before this update have no recorded method. A personal reveal can say: “You were murdered. Alice and Ben both killed you.”
-- A 120-second break follows. Players can sit out or return without losing their score. New arrivals wait through the current vote and this break, then receive a role with everyone else. If fewer than three are ready, the Game returns to the lobby.
+- A 120-second break follows. Players can sit out or return without losing their score. New arrivals wait through the current vote and this break, then receive a role with everyone else. If fewer than two are ready, the Game returns to the lobby.
 - The group chooses when to finish; the admin ends the Game. An unfinished round earns no points.
 
 The current round number is prominent, with a brief reminder to check the new role after each deal. The admin’s Start, Call roundtable, Finish voting, Pause/Resume and End buttons appear on their main Game screen, above the countdown. Only the actions available in the current phase are shown. Calling a roundtable, finishing voting and ending a Game require confirmation. The admin can pause a round, voting or break. Pause freezes all countdowns and prevents ballot submissions. Joining, signing in and choosing next-round readiness remain available. Resume preserves the time that was remaining. Resume a paused Game before calling an early roundtable or finishing voting.
@@ -91,7 +104,7 @@ A minority report, failed attempt or explicit No murder uses no-confirmed-murder
 
 The mistaken-attack penalties require an actual attacker’s Yes claim. A report naming a killer without completing the task adds no penalty for the reporter or target. Each actual attacker loses 2 extra points; the killer target loses only 1 extra point per round, even with several attackers. No majority is needed for these penalties. They add to other scoring: an escaped mistaken attacker scores -2, a caught mistaken attacker scores -4, and a successful murderer mistakenly targeted by a teammate can score +5 instead of +6. Innocent targets use the awareness scoring above; being targeted is not itself an automatic extra penalty.
 
-Rules are saved per round (`roundRulesVersion: 4`; version 2 introduced the performer/accomplice ballot, version 3 added mistaken-attack penalties and version 4 adds the Innocent awareness question). Games already playing or voting when this update is published finish their current round under the previous rules, without reopening locked ballots. Their next deal uses the latest scoring. Version 3 rounds retain their existing ballot and scoring without the awareness question. Version 2 rounds retain the performer/accomplice ballot without the new mistaken-attack penalties; version 1 rounds keep the original ballot and scoring. Completed histories and recorded scores remain unchanged. The Game storage schema stays at version 2.
+Rules are saved per round (`roundRulesVersion: 5`; version 2 introduced the performer/accomplice ballot, version 3 added mistaken-attack penalties and version 4 adds the Innocent awareness question and version 5 adds two-player rounds). Games already playing or voting when this update is published finish their current round under the previous rules, without reopening locked ballots. Their next deal uses the latest scoring. Version 4 rounds retain their existing group rules and awareness scoring. Version 3 rounds retain their existing ballot and scoring without the awareness question. Version 2 rounds retain the performer/accomplice ballot without the new mistaken-attack penalties; version 1 rounds keep the original ballot and scoring. Completed histories and recorded scores remain unchanged. The Game storage schema stays at version 2.
 
 ## Editable phrases and tasks
 

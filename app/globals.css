@@ -197,3 +197,5 @@ input::placeholder{color:#777}
 
 .hero-description>strong{display:block;color:var(--ink);font-weight:650;margin-bottom:8px}
 .hero-description>span{display:block}
+
+.round-mode-note{text-align:center;margin:0 0 12px;font-size:14px;line-height:1.6}

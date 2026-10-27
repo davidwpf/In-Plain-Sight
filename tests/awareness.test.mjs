@@ -22,7 +22,7 @@ for(const mode of ['confirmed','failed attempt','name only','no attempt'])for(co
     accuse(g,'p3',caught?'p2':'p0',false);accuse(g,'p4',caught?'p2':'p0',false);
     finishRound(g,now);
     const points=answer?(completed?1:-1):(completed?-1:0),p=result(g,'p2');
-    assert.equal(g.results.rulesVersion,4);
+    assert.equal(g.results.rulesVersion,ROUND_RULES_VERSION);
     assert.deepEqual(p.awareness,{answer,taskCompleted:completed,points});
     assert.equal(p.delta,(correct?4:-1)-(caught?1:0)+points);assert.equal(p.score,p.delta);
     assert.equal(p.murdered,mode==='confirmed');assert.equal(p.caught,caught);
