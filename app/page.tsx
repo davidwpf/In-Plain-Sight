@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {QRCodeSVG} from 'qrcode.react';
 import {roleLabel,roleWording} from '../lib/game/presentation.mjs';
+import {createGamePoller,POLL_REQUEST_TIMEOUT_MS} from '../lib/game/polling.mjs';
 import {ArrowLeft,ArrowRight,Check,CheckCheck,ChevronDown,Clock,Copy,Crown,Eye,EyeOff,HelpCircle,Hourglass,KeyRound,Link as LinkIcon,LoaderCircle,LogOut,MoreHorizontal,Pause,Play,QrCode,Shield,Skull,Sparkles,Swords,Trophy,Users,Vote,X} from 'lucide-react';
 import {makeGame,addPlayer,startRound,applyAction,publicView,tick,traitorCountFor,DEFAULT_ROUND_MINUTES,ROUND_RULES_VERSION,AWARENESS_RULES_VERSION,MIN_PLAYERS} from '../lib/game/engine.mjs';
 type Any=any;
@@ -93,11 +94,11 @@ export default function Home(){
   const resetRoundLength=()=>{setRoundHours(String(DEFAULT_ROUND_MINUTES/60));setRoundMinutes('0');setLongRoundHours('25');setAdminPasscode('');};
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[toast,setToast]=useState(''),[connected,setConnected]=useState(true);
   const [now,setNow]=useState(Date.now()),[offset,setOffset]=useState(0),[revealed,setRevealed]=useState(false),[choice,setChoice]=useState(''),[performed,setPerformed]=useState<boolean|null>(null),[suspectedAttempt,setSuspectedAttempt]=useState<boolean|null>(null),[saveCode,setSaveCode]=useState(false),[historyRound,setHistoryRound]=useState<number|null>(null);
-  const current=useRef<Any>(null),demoGame=useRef<Any>(null),mutation=useRef(0),pending=useRef(false),lastRoleRound=useRef('');
-  const accept=(v:Any)=>{const received=Date.now();setNow(received);setOffset(v.serverTime-received);setView(v);setConnected(true);};
+  const current=useRef<Any>(null),demoGame=useRef<Any>(null),mutation=useRef(0),pending=useRef(false),lastRoleRound=useRef(''),latestView=useRef<Any>(null),polling=useRef<ReturnType<typeof createGamePoller>|null>(null),serverOffset=useRef(0);
+  const accept=(v:Any)=>{const received=Date.now();latestView.current=v;serverOffset.current=v.serverTime-received;setNow(received);setOffset(serverOffset.current);setView(v);setConnected(true);polling.current?.updated();};
   const notify=(s:string)=>{setToast(s);setTimeout(()=>setToast(''),3500);};
   const storeSession=(s:Any)=>{current.current=s;setSession(s);try{sessionStorage.setItem(STORE,JSON.stringify(s));}catch{}};
-  const forgetSession=()=>{lastRoleRound.current='';setRoundNotice(null);current.current=null;setSession(null);try{sessionStorage.removeItem(STORE);}catch{}};
+  const forgetSession=()=>{polling.current?.stop();polling.current=null;latestView.current=null;lastRoleRound.current='';setRoundNotice(null);current.current=null;setSession(null);try{sessionStorage.removeItem(STORE);}catch{}};
   function entrance(code='',key='',knownName=''){
     const generation=++mutation.current;forgetSession();demoGame.current=null;setView(null);setRevealed(false);setSaveCode(false);setChoice('');setPerformed(null);setSuspectedAttempt(null);setPasscode('');setName('');setGameCode(code);setInviteKey(key);setEntryGameName(knownName);setEntryMode('choice');setModal(null);setError('');setScreen('entrance');
     if(knownName){setEntryLoading(false);return;}
@@ -120,9 +121,32 @@ export default function Home(){
     if(lastRoleRound.current!==key){lastRoleRound.current=key;setRoundNotice(view.round);}
   },[view?.code,view?.round,view?.phase,view?.me.id,view?.me.active]);
   useEffect(()=>{if(roundNotice===null)return;const id=setTimeout(()=>setRoundNotice(null),15000);return()=>clearTimeout(id);},[roundNotice]);
-  useEffect(()=>{if(!session||session.demo||screen!=='game')return;const poll=()=>{if(!document.hidden&&!pending.current)load(session);};const id=setInterval(poll,6000);document.addEventListener('visibilitychange',poll);return()=>{clearInterval(id);document.removeEventListener('visibilitychange',poll);};},[session,screen]);
+  useEffect(()=>{
+    if(!session||session.demo||screen!=='game')return;
+    const poller=createGamePoller({getState:()=>latestView.current,refresh:signal=>load(session,false,signal),isVisible:()=>!document.hidden,isBusy:()=>pending.current,now:()=>Date.now()+serverOffset.current});
+    polling.current=poller;
+    poller.checkNow();
+    const visibility=()=>poller.visibilityChanged(),online=()=>poller.checkNow();
+    document.addEventListener('visibilitychange',visibility);window.addEventListener('online',online);
+    return()=>{poller.stop();if(polling.current===poller)polling.current=null;document.removeEventListener('visibilitychange',visibility);window.removeEventListener('online',online);};
+  },[session,screen]);
   useEffect(()=>{if(!session?.demo||screen!=='game')return;const id=setInterval(()=>{tick(demoGame.current);setView(publicView(demoGame.current,'demo-me'));},1000);return()=>clearInterval(id);},[session,screen]);
-  async function load(s:Any,resume=false){const generation=mutation.current;try{const res=await fetch(`/api/game?code=${encodeURIComponent(s.code)}`,{headers:{Authorization:`Bearer ${s.token}`},cache:'no-store'});const data:Any=await res.json();if(current.current?.token!==s.token||generation!==mutation.current)return;if(!res.ok){if([401,404,410].includes(res.status)){entrance(s.code,s.inviteKey||'',s.gameName||'');setError(data.error);return;}throw new Error(data.error);}accept(data);if(resume)setScreen('game');}catch{setConnected(false);}}
+  async function load(s:Any,resume=false,signal?:AbortSignal){
+    if(signal?.aborted)return 'ignored';
+    const generation=mutation.current,request=new AbortController(),abort=()=>request.abort();
+    signal?.addEventListener('abort',abort,{once:true});
+    const timeout=setTimeout(abort,POLL_REQUEST_TIMEOUT_MS);
+    try{
+      const res=await fetch(`/api/game?code=${encodeURIComponent(s.code)}`,{headers:{Authorization:`Bearer ${s.token}`},cache:'no-store',signal:request.signal});
+      const data:Any=await res.json();
+      if(signal?.aborted||current.current?.token!==s.token||generation!==mutation.current)return 'ignored';
+      if(!res.ok){if([401,404,410].includes(res.status)){entrance(s.code,s.inviteKey||'',s.gameName||'');setError(data.error);return 'ignored';}throw new Error(data.error);}
+      accept(data);if(resume)setScreen('game');return 'success';
+    }catch{
+      if(signal?.aborted||current.current?.token!==s.token||generation!==mutation.current)return 'ignored';
+      setConnected(false);return 'failed';
+    }finally{clearTimeout(timeout);signal?.removeEventListener('abort',abort);}
+  }
   async function enter(type:'create'|'join'|'login'){
     if(busy)return;setBusy(true);setError('');mutation.current++;
     try{const res=await fetch('/api/game',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,name,gameName,code:gameCode,passcode,...(type==='create'?{roundMinutes:selectedRoundMinutes,adminPasscode}:{invite:inviteKey||undefined})})});const data:Any=await res.json();if(!res.ok)throw new Error(data.error);storeSession({token:data.token,code:data.view.code,passcode:data.passcode,inviteKey:data.view.inviteKey,gameName:data.view.name});accept(data.view);setSaveCode(type!=='login');setScreen('game');setModal(null);setPasscode('');setHistoryRound(null);history.replaceState(null,'',location.pathname);}
