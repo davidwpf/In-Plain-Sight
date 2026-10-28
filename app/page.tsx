@@ -35,11 +35,11 @@ function Rules(){return <div className="rules">
     <table><thead><tr><th>Players this round</th><th>Killers</th></tr></thead><tbody><tr><td>2</td><td>0 or 1</td></tr><tr><td>3–5</td><td>1</td></tr><tr><td>6–9</td><td>2</td></tr><tr><td>10–30</td><td>3</td></tr></tbody></table>
     <p><b>Just two of you?</b> There may be one Killer, or you could both be Innocent. You won’t find out how many Killers there are until the results. An Innocent can vote for the other player or choose <b>No killer this round</b>. Choosing No killer skips the question about a murder attempt on you.</p>
     <p><b>Solo Killer?</b> You can change your murder task twice during the round. Each change replaces it permanently. Once you’ve completed a task on anyone, keep it. Task changes close at the roundtable.</p>
-    <p>Roles are picked again each round. Players who have had fewer Killer turns get a better chance, but anyone can be picked again.</p>
+    <p>Roles are picked again each round.</p>
   </div></details>
   <details className="rules-section"><summary>Voting and murder results<ChevronDown size={18} aria-hidden="true"/></summary><div className="rules-section-body">
-    <p>A round lasts 60 minutes unless a different length was chosen when the game was created. The admin can call an early roundtable.</p>
-    <p>Once half the players have submitted, everyone else has <b>five minutes</b> to vote. Results appear when everyone has submitted, time runs out or the admin finishes voting. You can see who has submitted, but their choices stay secret until the results.</p>
+    <p>A default round lasts 60 minutes, but the round length is decided when the game is created. The admin can call an early roundtable.</p>
+    <p>Once a roundtable is called, players can submit their votes. There is no time limit until half the players have submitted. Everyone else then has <b>five minutes</b> to vote. Results appear when everyone has submitted, time runs out, or the admin finishes voting.</p>
     <h4>Reporting a murder</h4>
     <p>Killers choose the person they targeted, or <b>No murder</b>. With more than one Killer, each also says whether they personally did the task. A solo Killer only needs to name their victim or choose No murder.</p>
     <p>For a murder to succeed:</p>
@@ -81,7 +81,7 @@ function Rules(){return <div className="rules">
     <p>The person who creates the game is the admin. Their private player code gives them these controls:</p>
     <ul><li><b>Start:</b> begin when everyone has joined.</li><li><b>Start next round:</b> finish discussing the results, then give everyone playing a new role. There’s no time limit between rounds.</li><li><b>Call roundtable:</b> end the current round early and open voting.</li><li><b>Finish voting:</b> show results using the votes submitted so far. Players who haven’t submitted get the missed-vote penalty.</li><li><b>Pause / Resume:</b> stop or restart the timers and voting.</li><li><b>End game:</b> finish when the group is ready. Completed scores stay; an unfinished round earns no points.</li></ul>
     <p>The admin can still use these controls while sitting out.</p>
-    <p>Games and scores expire 7 days after creation and are automatically deleted. Cleanup runs every five minutes. Cloudflare’s recovery backups may retain a copy for up to a further seven days. There are no automatic alerts, so check the screen when a countdown ends.</p>
+    <p>Games and scores expire 7 days after creation and are automatically deleted.</p>
   </div></details>
 </div>;}
 function Scene(){return <div className="scene" aria-hidden="true"><div className="orbit outer"/><div className="orbit middle"/><div className="orbit inner"/><div className="table-centre"><Mark/><span>ROUND 1</span><small>2 KILLERS</small></div>{['YOU','ALICE','BEN','CHARLIE','ISLA','JAMIE'].map((name,i)=>{const a=(i*60-90)*Math.PI/180;return <div key={name} className={`seat ${i===0?'your-seat':''}`} style={{left:`${50+39*Math.cos(a)}%`,top:`${50+37*Math.sin(a)}%`}}><span>{i===0?<Eye size={21}/>:initials(name)}</span><small>{name}</small></div>;})}<div className="paper-secret"><span><KeyRound size={11}/> YOUR ROLE</span><Mark/><strong>Killer</strong><p>1 other killer</p></div></div>;}
