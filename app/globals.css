@@ -236,3 +236,7 @@ input::placeholder{color:#777}
   .rules table td,.rules table th{font-size:14px}
   .rules table td+td,.rules table th+th{padding-left:10px}
 }
+
+.field-note{margin:8px 0 0;line-height:1.6}
+.retention-note{margin-top:18px!important;line-height:1.7}
+.lobby-invite-actions{justify-content:center;flex-wrap:wrap;margin:26px 0;gap:22px}

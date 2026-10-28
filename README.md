@@ -6,9 +6,9 @@ A social deduction game for an evening or weekend with friends and family. Every
 
 ## Play
 
-1. **Create game.** The admin enters their name, a Game name and a round length using separate Hours and Minutes dropdowns, defaulting to 1 and 0. Minutes show only 0 or 30. Hours run from 0 to 24, with “More…” allowing any larger whole-hour value. Choosing 0 hours selects 30 minutes to keep the minimum round length at half an hour. Their private six-digit player code also unlocks Start, Call roundtable, Finish voting, Pause, Resume and End.
-2. **Share code.** Share the six-character game code or invite link. Keep personal player codes private.
-3. **Join.** A player chooses “Enter my player code” or “Join as a new player”. Joining gives them their own private six-digit code. Shared devices use **Switch player** to hide the current identity and sign in as someone else.
+1. **Create game.** The admin enters their name, chooses a private six-digit player code, and enters a Game name and round length using separate Hours and Minutes dropdowns, defaulting to 1 and 0. Minutes show only 0 or 30. Hours run from 0 to 24, with “More…” allowing any larger whole-hour value. Choosing 0 hours selects 30 minutes to keep the minimum round length at half an hour. Their private six-digit player code also unlocks Start, Call roundtable, Finish voting, Pause, Resume and End.
+2. **Share an invite.** Both admins and players have **Share link** and **Show QR code** buttons in the lobby. Share only with people playing. Keep personal player codes private.
+3. **Join.** Open the shared link or scan the QR code. The invitation shows the Game name, with no editable game code. A player chooses “Enter my player code” or “Join as a new player”. Joining gives them their own private six-digit code. Shared devices use **Switch player** to hide the current identity and sign in as someone else.
 4. **Start.** The admin starts when everyone has joined. There must be at least two ready players. The admin receives a normal role and cannot inspect anyone else’s role.
 
 | Active players this round | Killers |
@@ -20,7 +20,9 @@ A social deduction game for an evening or weekend with friends and family. Every
 
 The count is recalculated at each new deal. Each round uses a fresh weighted draw with the server’s cryptographic random generator. Players with fewer killer turns than expected for the rounds they have played get higher odds. The calculation accounts for each round’s group size and killer count; sitting out adds no opportunities, and new players start with a neutral weight. Weights stay between 25 and 400 around a neutral 100, so everyone remains eligible and consecutive killer turns are still possible. Existing scores and current roles are preserved; the weighting applies at the next deal.
 
-Players can scan the joining QR code from **Show QR code** in the lobby or **Game menu → Invite someone**. It opens the join page with the public game code filled in, leaving the choice of joining as a new player or signing in with a private player code. The QR code is generated locally from the same URL as Copy invite link and contains no player code or session token. QR codes are unavailable in the demo and after a Game ends.
+New invites use a cryptographically random 256-bit key (`?invite=…`), separate from the internal unique Game code. New Games cannot be joined or logged into with the short code alone. The public invite preview returns only the Game name, internal identifier and expiry; roles, players and scores require a player session. Anyone holding the invite can join, so keep it within the group. There is no manual Join button on the homepage or editable Game code in the UI. Old six-character `?game=` / `?room=` links remain valid for Games created before this change; they expire under the same seven-day policy.
+
+QR codes are generated locally from the same invitation URL as Share link and contain no personal player code or session token. Share link copies the invitation, ready to paste into a family or friends’ chat. QR codes are unavailable in the demo and for new joins after a Game ends. Returning players can still use their invite and private code to view completed scores until expiry.
 
 ## Two-player rounds
 
@@ -114,13 +116,13 @@ The site includes a demo with sample players and controls to move through the st
 
 ## Private codes and storage
 
-- Each player receives a unique six-digit code within their Game. The server keeps a salted SHA-256 hash of that code, not its plaintext. Code entry is throttled after eight failed attempts from the same network address in the same Game, with a one-minute block.
+- The admin chooses a six-digit code when creating a Game; others receive a generated code unique within that Game. Codes can be the same in different Games because login hashes and sessions are scoped to that Game. Older clients that omit the optional `adminPasscode` field still receive a generated admin code. The server keeps a salted SHA-256 hash of that code, not its plaintext. Code entry is throttled after eight failed attempts from the same network address in the same Game, with a one-minute block.
 - Signing in creates a long, random bearer session. Up to five sessions per player can remain valid, allowing the same identity to return on another device. A personal code never grants access to other players.
 - The current tab uses session storage for its own session and personal code. **Switch player** clears that tab’s credentials, role, ballot choice and cached Game view before presenting the entrance screen. It never keeps a selectable list of other players’ private codes.
 - Roles, ballots, private-code hashes and authentication data remain server-side. Public responses include only the current player’s active secrets; completed rounds reveal everyone’s game information as agreed.
 - D1 stores the shared state. Compare-and-swap updates prevent concurrent submissions from overwriting one another or awarding points twice.
 - Timers use server timestamps. Visible phones synchronise every six seconds and when the page becomes visible. Playing and voting advance on the next authenticated request after their deadlines; results only advance through an authorised `nextRound` action with the expected completed round number, preventing duplicate or stale starts. Old saved result countdowns are cleared without dealing roles. No background alarm or notification is included.
-- Games stop accepting access seven days after creation. Expired rows remain in storage until an operator removes them; automatic deletion is not implemented.
+- Games stop accepting access exactly seven days after creation. A Cloudflare scheduled handler runs every five minutes and permanently removes expired rows from the live database, including all names, scores, history, code hashes and sessions stored in that row. Reading an expired Game also deletes its row; creating a Game provides another cleanup backstop. Cloudflare Time Travel recovery backups on the Free plan may retain a copy for up to a further seven days. Create, invite and How to play screens explain expiry and deletion.
 - Earlier prototype Games are not migrated. Their API response asks users to create a new Game. No version of the earlier prototype was published.
 
 ## Development
@@ -142,9 +144,13 @@ pnpm test
 pnpm check
 # With a local preview running, exercise shared logins and a complete round:
 node tests/live-flow.mjs
+node tests/two-player-flow.mjs
+node tests/invites-isolation-flow.mjs
 ```
 
-The live-flow script creates its own disposable local Game and uses the admin’s next-round action to advance after results. It refuses remote origins and only uses normal game actions. The random-assignment checks cover weighted odds, eligibility, early roundtables, stored Game restoration and changing active groups of 3, 4, 3, 6 and 6 players. The live-flow script checks ten independent players, shared-code sign-in, configured round lengths, majority and minority murder scoring, saved murder methods, exact reveal wording, paused voting, late arrivals, new-round assignment, finishing a vote before halfway, concurrency and throttling.
+The live-flow script creates its own disposable local Game and uses the admin’s next-round action to advance after results. It refuses remote origins and only uses normal game actions. The separate invitation/expiry integration test changes only its disposable local rows to exercise old-format invites and expiry. The random-assignment checks cover weighted odds, eligibility, early roundtables, stored Game restoration and changing active groups of 3, 4, 3, 6 and 6 players. The live-flow script checks ten independent players, shared-code sign-in, configured round lengths, majority and minority murder scoring, saved murder methods, exact reveal wording, paused voting, late arrivals, new-round assignment, finishing a vote before halfway, concurrency and throttling.
+
+The invitation/isolation integration test creates simultaneous Games with identical names and chosen admin codes. It verifies distinct players, roles, sessions, state, scores and history; rejects cross-Game tokens and mismatched invites; checks per-Game login limits, old invites and physical expiry deletion. All integration tests refuse non-local origins. Cleanup unit tests execute real SQLite migrations and deletion queries, checking the exact expiry boundary and that active Games survive.
 
 ## GitHub and deployment
 
@@ -179,7 +185,7 @@ pnpm exec wrangler d1 migrations apply DB --remote --config dist/server/wrangler
 pnpm exec wrangler deploy --config dist/server/wrangler.standalone.json
 ```
 
-Use the actual database UUID. `CLOUDFLARE_WORKER_NAME` can override the default `in-plain-sight`. Configuration preparation itself does not deploy. Build output is ignored and must be regenerated for deployments. The live game is deployed to Cloudflare Workers with D1. Creation, joining, private codes, role privacy, pause/resume, early roundtables, voting, murder resolution and scoring have been checked against the live service.
+Use the actual database UUID. `CLOUDFLARE_WORKER_NAME` can override the default `in-plain-sight`. Configuration preparation includes the five-minute cleanup Cron trigger and itself does not deploy. Build output is ignored and must be regenerated for deployments. The live game is deployed to Cloudflare Workers with D1. Creation, joining, private codes, role privacy, pause/resume, early roundtables, voting, murder resolution and scoring have been checked against the live service.
 
 ### Sites deployment
 

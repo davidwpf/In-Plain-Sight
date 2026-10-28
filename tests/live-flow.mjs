@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 const origin=process.env.GAME_TEST_ORIGIN||'http://127.0.0.1:5173';
 if(!['localhost','127.0.0.1','[::1]'].includes(new URL(origin).hostname))throw new Error('This test only runs against a local preview.');
-async function raw(body,session){const res=await fetch(`${origin}/api/game`,{method:'POST',headers:{'Content-Type':'application/json',Origin:origin,...(session?{Authorization:`Bearer ${session.token}`}:{})},body:JSON.stringify({...body,...(session?{code:session.view.code}:{})})});return {status:res.status,data:await res.json()};}
+const invites=new Map();
+async function raw(body,s){
+ const payload={...body,...(s?{code:s.view.code}:{})};
+ if(payload.code&&!payload.invite)payload.invite=invites.get(payload.code);
+ const r=await fetch(`${origin}/api/game`,{method:'POST',headers:{'Content-Type':'application/json',Origin:origin,...(s?{Authorization:`Bearer ${s.token}`}:{})},body:JSON.stringify(payload)});
+ const data=await r.json();if(data.view?.inviteKey)invites.set(data.view.code,data.view.inviteKey);
+ return{status:r.status,data};
+}
 async function request(body,session){const {status,data}=await raw(body,session);if(status>=400)throw new Error(`${status}: ${data.error}`);return data;}
 async function view(s){const res=await fetch(`${origin}/api/game?code=${s.view.code}`,{headers:{Authorization:`Bearer ${s.token}`}});assert.equal(res.status,200);return res.json();}
 async function advance(){const current=await view(admin);await request({type:'nextRound',round:current.round},admin);}
