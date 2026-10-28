@@ -242,3 +242,5 @@ input::placeholder{color:#777}
 .lobby-invite-actions{justify-content:center;flex-wrap:wrap;margin:26px 0;gap:22px}
 .game-invite-actions{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 24px}
 .game-invite-actions .button{flex:1;min-height:44px}
+
+.task-changes{margin-top:20px}

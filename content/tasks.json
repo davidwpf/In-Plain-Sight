@@ -139,130 +139,165 @@
   ],
   "murders": [
     {
-      "id": "clothes-peg",
-      "title": "Clothes peg",
+      "id": "removable-sticker",
+      "title": "Removable sticker",
       "kind": "prop",
       "difficulty": "medium",
-      "instruction": "Clip a clothes peg onto your chosen person’s coat or clothing."
+      "instruction": "Place a small removable sticker on your chosen person’s clothing."
     },
     {
-      "id": "dagger-note",
-      "title": "Dagger note",
+      "id": "hold-object",
+      "title": "Hold an object",
       "kind": "prop",
-      "difficulty": "medium",
-      "instruction": "Place a paper note with a dagger drawn on it in your chosen person’s shoe, coat or pocket."
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to hold an object for you."
     },
     {
-      "id": "pat-on-back",
-      "title": "Pat on the back",
+      "id": "lend-object",
+      "title": "Lend an object",
+      "kind": "prop",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to lend you an ordinary object."
+    },
+    {
+      "id": "help-carry",
+      "title": "Help carry something",
       "kind": "action",
       "difficulty": "easy",
-      "instruction": "Give your chosen person a light pat on the back."
+      "instruction": "Get your chosen person to help you carry something."
     },
     {
-      "id": "tap-upper-arm",
-      "title": "Tap on the upper arm",
+      "id": "pick-up-object",
+      "title": "Pick up an object",
       "kind": "action",
       "difficulty": "easy",
-      "instruction": "Gently tap your chosen person’s upper arm."
+      "instruction": "Get your chosen person to pick up an object you have dropped."
     },
     {
-      "id": "hand-on-shoulder",
-      "title": "Hand on the shoulder",
+      "id": "put-in-bin",
+      "title": "Put something in the bin",
       "kind": "action",
       "difficulty": "easy",
-      "instruction": "Briefly place a hand on your chosen person’s shoulder."
+      "instruction": "Get your chosen person to put something in the bin."
     },
     {
-      "id": "tap-knee",
-      "title": "Tap on the knee",
+      "id": "open-door",
+      "title": "Open a door",
       "kind": "action",
       "difficulty": "easy",
-      "instruction": "Gently tap your chosen person’s knee."
+      "instruction": "Get your chosen person to open a door for you."
     },
     {
-      "id": "high-five",
-      "title": "High-five",
+      "id": "switch-light",
+      "title": "Switch a light",
       "kind": "action",
       "difficulty": "easy",
-      "instruction": "Get your chosen person to give you a high-five."
+      "instruction": "Get your chosen person to switch a light on or off."
     },
     {
-      "id": "fist-bump",
-      "title": "Fist bump",
+      "id": "another-room",
+      "title": "Another room",
       "kind": "action",
       "difficulty": "easy",
-      "instruction": "Get your chosen person to give you a fist bump."
+      "instruction": "Get your chosen person to walk into another room with you."
     },
     {
-      "id": "handshake",
-      "title": "Handshake",
-      "kind": "action",
+      "id": "write-word-number",
+      "title": "Write a word or number",
+      "kind": "prop",
       "difficulty": "easy",
-      "instruction": "Shake hands with your chosen person."
+      "instruction": "Get your chosen person to write down a word or number for you."
     },
     {
-      "id": "offer-food",
-      "title": "Offer some food",
-      "kind": "action",
+      "id": "fold-paper",
+      "title": "Fold some paper",
+      "kind": "prop",
       "difficulty": "easy",
-      "instruction": "Offer your chosen person some food. Making the offer completes the task."
+      "instruction": "Get your chosen person to fold a piece of paper."
     },
     {
-      "id": "offer-drink",
-      "title": "Offer a drink",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Offer your chosen person a drink. Making the offer completes the task."
-    },
-    {
-      "id": "pass-something",
-      "title": "Pass something",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Ask your chosen person to pass you something. The task is complete when they pass it to you."
-    },
-    {
-      "id": "offer-seat",
-      "title": "Offer a seat",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Offer your chosen person a seat. The task is complete when they sit down."
-    },
-    {
-      "id": "point-and-look",
-      "title": "Look over there",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to look at something you point to."
-    },
-    {
-      "id": "look-over-shoulder",
-      "title": "Look over a shoulder",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to look over their shoulder."
-    },
-    {
-      "id": "ask-the-time",
-      "title": "Ask for the time",
+      "id": "read-aloud",
+      "title": "Read aloud",
       "kind": "spoken",
       "difficulty": "easy",
-      "instruction": "Ask your chosen person for the time. Asking the question completes the task."
+      "instruction": "Get your chosen person to read something aloud."
     },
     {
-      "id": "say-yes",
-      "title": "Say yes",
-      "kind": "spoken",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to say “yes” in answer to a question."
-    },
-    {
-      "id": "say-your-name",
-      "title": "Say your name",
+      "id": "tell-joke",
+      "title": "Tell a joke",
       "kind": "spoken",
       "difficulty": "medium",
-      "instruction": "Get your chosen person to say your name."
+      "instruction": "Get your chosen person to tell you a joke."
+    },
+    {
+      "id": "sing-song",
+      "title": "Sing a few words",
+      "kind": "spoken",
+      "difficulty": "medium",
+      "instruction": "Get your chosen person to sing a few words of a song."
+    },
+    {
+      "id": "say-thank-you",
+      "title": "Say thank you",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to say “thank you” to you."
+    },
+    {
+      "id": "answer-number",
+      "title": "Answer with a number",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to answer a question with a number."
+    },
+    {
+      "id": "finish-phrase",
+      "title": "Finish a phrase",
+      "kind": "spoken",
+      "difficulty": "medium",
+      "instruction": "Get your chosen person to finish a familiar phrase you start."
+    },
+    {
+      "id": "wave-back",
+      "title": "Wave back",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to wave back at you."
+    },
+    {
+      "id": "clap-hands",
+      "title": "Clap their hands",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to clap their hands."
+    },
+    {
+      "id": "copy-gesture",
+      "title": "Copy a gesture",
+      "kind": "action",
+      "difficulty": "medium",
+      "instruction": "Get your chosen person to copy a gesture you make."
+    },
+    {
+      "id": "change-volume",
+      "title": "Change the volume",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to turn the volume up or down."
+    },
+    {
+      "id": "explain-something",
+      "title": "Explain how",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to explain how to do something."
+    },
+    {
+      "id": "say-dont-know",
+      "title": "Say I don’t know",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to say “I don’t know”."
     }
   ]
 }

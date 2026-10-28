@@ -1,6 +1,6 @@
 # Editing recognition signals and murder tasks
 
-Edit `tasks.json` in this folder. The library contains 34 recognition signals and 18 murder tasks. These are site content, separate from admin controls and player settings.
+Edit `tasks.json` in this folder. The library contains 34 recognition signals and 23 distinct murder tasks. These are site content, separate from admin controls and player settings.
 
 There are two independent lists. Add an entry by copying an existing one and changing its `id` and wording. Every entry needs a unique `id` within its list. Keep the JSON commas and quotation marks valid.
 
@@ -21,11 +21,11 @@ Only `id` and `prompt` are required. Older question-and-answer entries can still
 
 ```json
 {
-  "id": "offer-food",
-  "title": "Offer some food",
-  "kind": "action",
+  "id": "hold-object",
+  "title": "Hold an object",
+  "kind": "prop",
   "difficulty": "easy",
-  "instruction": "Offer your chosen person some food. Making the offer completes the task."
+  "instruction": "Get your chosen person to hold an object for you."
 }
 ```
 
@@ -36,13 +36,15 @@ All killers receive the same task. At least one must complete it. The app compar
 - `kind`: `spoken`, `action` or `prop`.
 - `difficulty`: `easy` or `medium`.
 
-Kind and difficulty help maintain the library; they do not change scoring or add Game settings. The selected food and drink tasks finish when the offer is made. Asking for the time finishes when the question is asked. The passing and seating tasks require the other person to carry out the action. The dagger-note task uses a drawing on paper.
+Kind and difficulty help maintain the library; they do not change scoring or add Game settings. These tasks require the action described in the instruction to happen. Keep wording broad enough to suit different settings. Keep one entry per distinct task, rather than adding duplicate entries that would make a task more likely to be offered.
 
 ## Variety between rounds
 
-Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. Recognition signals are only used up in rounds with multiple killers. The two lists cycle independently, and draw history is saved with the Game.
+Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. A solo Killer can change their task twice per round before the roundtable, with confirmation. Every replacement counts as a draw and excludes all tasks already offered that round, including across a deck-cycle boundary. Discarded tasks cannot be restored. The count is saved with the round and resets only at the next deal. Multiple Killers cannot change their shared task. A player must keep a task once they have completed it on anyone; the app cannot verify in-person completion.
 
-Edits take effect for new rounds after publication. Current rounds retain their assigned signal and task. New entries become available in the current cycle; removed entries are no longer drawn. Keep an existing entry's `id` when changing only its wording so the Game can recognise that it has already been used.
+Recognition signals are only used up in rounds with multiple killers. The two lists cycle independently, and draw history is saved with the Game.
+
+Edits take effect for new rounds and solo task replacements after publication. Current rounds retain their assigned signal and task unless an eligible solo Killer chooses a replacement. New entries become available in the current cycle; removed entries are no longer drawn. Keep an existing entry's `id` when changing only its wording so the Game can recognise that it has already been used.
 
 ## Edit on GitHub
 
