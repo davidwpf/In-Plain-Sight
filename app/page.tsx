@@ -33,7 +33,7 @@ function Rules(){return <div className="rules">
     <p><b>Innocents:</b> try to spot a Killer and notice if someone carries out a murder task on you.</p>
     <p><b>Killers:</b> complete your murder task without giving yourself away. Other Killers get the same task and recognition signal, but you won’t be told their names. Only one of you needs to do the task; more can take part.</p>
     <table><thead><tr><th>Players this round</th><th>Killers</th></tr></thead><tbody><tr><td>2</td><td>0 or 1</td></tr><tr><td>3–5</td><td>1</td></tr><tr><td>6–9</td><td>2</td></tr><tr><td>10–30</td><td>3</td></tr></tbody></table>
-    <p><b>Just two of you?</b> There’s an equal chance of both being Innocent or one being a Killer. You won’t find out how many Killers there are until the results. An Innocent can vote for the other player or choose <b>No killer this round</b>. Choosing No killer skips the question about a murder attempt on you.</p>
+    <p><b>Just two of you?</b> There may be one Killer, or you could both be Innocent. You won’t find out how many Killers there are until the results. An Innocent can vote for the other player or choose <b>No killer this round</b>. Choosing No killer skips the question about a murder attempt on you.</p>
     <p><b>Solo Killer?</b> You can change your murder task twice during the round. Each change replaces it permanently. Once you’ve completed a task on anyone, keep it. Task changes close at the roundtable.</p>
     <p>Roles are picked again each round. Players who have had fewer Killer turns get a better chance, but anyone can be picked again.</p>
   </div></details>

@@ -14,16 +14,16 @@ test('two ready players can start with the unchanged sixty-minute default',()=>{
   assert.equal(g.phase,'playing');assert.equal(g.active.length,2);assert.equal(g.roundMinutes,60);assert.equal(g.deadline,now+ROUND_MS);
   assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.equal(publicView(g,'p1',now).roundMode,'two-player');
 });
-test('the zero-or-one draw is separate from the weighted player draw',()=>{
+test('the 75/25 zero-or-one draw is exact and separate from the weighted player draw',()=>{
   const counts={0:0,1:0};
-  for(const first of [0,1])for(const playerDraw of [0,1]){
+  for(const first of [0,1,2,3])for(const playerDraw of [0,1]){
     const g=lobby(),ranges=[];startRound(g,now,n=>{ranges.push(n);return ranges.length===1?first:ranges.length===2?playerDraw:0;});
-    assert.equal(ranges[0],2);counts[g.traitorCount]++;
-    assert.equal(Object.values(g.roles).filter(role=>role==='traitor').length,first);
-    if(!first){assert.deepEqual(ranges,[2]);assert.equal(g.mission,null);assert.equal(g.signal,null);assert.equal(g.usedTaskIds,undefined);}
+    assert.equal(ranges[0],4);counts[g.traitorCount]++;
+    assert.equal(Object.values(g.roles).filter(role=>role==='traitor').length,first===0?0:1);
+    if(!first){assert.deepEqual(ranges,[4]);assert.equal(g.mission,null);assert.equal(g.signal,null);assert.equal(g.usedTaskIds,undefined);}
     else{assert.equal(g.roles[playerDraw===0?'p1':'p0'],'traitor');assert.ok(g.mission);assert.equal(g.signal,null);}
   }
-  assert.deepEqual(counts,{0:2,1:2});
+  assert.deepEqual(counts,{0:2,1:6});
 });
 test('two-player rounds use fresh cryptographic entropy and never assign two killers',t=>{
   let value=0;const entropy=t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=value;return array;});
@@ -175,4 +175,28 @@ test('version 5 preserves a locked awareness answer but lets unsubmitted No kill
   assert.equal(g.ballots.p0.suspectedAttempt,true);applyAction(g,'p1',{type:'ballot',target:null},now);
   assert.equal(result(g,'p0').delta,1);assert.equal(result(g,'p0').awareness.points,-1);assert.equal(result(g,'p0').awareness.skipped,undefined);
   assert.equal(result(g,'p1').delta,2);assert.equal(result(g,'p1').awareness.skipped,true);
+});
+
+test('a both-Innocent streak does not change the next round’s independent 75/25 draw',()=>{
+  for(const ticket of [0,1,2,3]){
+    const g=game(false);
+    for(let i=0;i<3;i++){openVoting(g);finishRound(g,now);nextRound(g,now,()=>0);assert.equal(g.traitorCount,0);}
+    openVoting(g);finishRound(g,now);let calls=0;
+    nextRound(g,now,n=>++calls===1?ticket:0);
+    assert.equal(g.traitorCount,ticket===0?0:1);
+  }
+});
+test('very early and full-length two-player rounds use identical independent role draws',()=>{
+  function sequence(early){
+    let seed=4521;const rng=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return Math.floor(seed/4294967296*n);};
+    const g=lobby();let time=now;applyAction(g,'p0',{type:'start'},time,rng);const draws=[];
+    for(let i=0;i<50;i++){
+      draws.push({count:g.traitorCount,roles:{...g.roles}});
+      if(early)applyAction(g,'p0',{type:'roundtable'},++time,rng);
+      else{time=g.deadline;tick(g,time,rng);}
+      applyAction(g,'p0',{type:'finishVoting'},++time,rng);
+      nextRound(g,++time,rng);
+    }return draws;
+  }
+  assert.deepEqual(sequence(true),sequence(false));
 });

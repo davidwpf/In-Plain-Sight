@@ -26,7 +26,7 @@ QR codes are generated locally from the same invitation URL as Share link and co
 
 ## Two-player rounds
 
-The default round length stays at 60 minutes, chosen before players join. The round type uses the number of ready players at each deal, rather than a fixed game setting. Exactly two active players draw a 50% chance of no killer and a 50% chance of one killer. When there is a killer, the existing weighted draw selects them. A both-Innocent round uses no murder task or recognition signal and consumes neither task deck. Three or more active players use the existing ratios and group rules.
+The default round length stays at 60 minutes, chosen before players join. The round type uses the number of ready players at each deal, rather than a fixed game setting. Exactly two active players draw a 25% chance of no killer and a 75% chance of one killer, independently at each new deal. Player-facing rules keep the odds unspecified: there may be one Killer, or both players may be Innocent. When there is a killer, the existing weighted draw selects them. A both-Innocent round uses no murder task or recognition signal and consumes neither task deck. Three or more active players use the existing ratios and group rules.
 
 The actual two-player killer count is hidden in `publicView`, including for waiting players and the admin, until that round's results. Both roles' private information remains separate. `roundMode` safely identifies the rule set; `traitorCount` is null while an unrevealed two-player round is in progress. `nextTraitorCount` is null for two ready players because the next count has not been drawn. Ending an unfinished round does not disclose its hidden count.
 
