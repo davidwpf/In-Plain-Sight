@@ -36,7 +36,7 @@ async function decrypt(body,browser){
 test('Web Push encrypts a generic alert and signs the correct push-service audience',async()=>{
   const f=fixture(),g=f.game(),browser=await browserSubscription(),keys=await pushKeys(f.db);let request;
   const status=await sendPush(browser.subscription,roundAlert(g,1),keys,async(url,options)=>{request={url,options};return new Response(null,{status:201});});
-  assert.equal(status,201);assert.equal(request.url,browser.subscription.endpoint);assert.equal(request.options.redirect,'error');assert.equal(request.options.headers['content-encoding'],'aes128gcm');
+  assert.equal(status,201);assert.equal(request.url,browser.subscription.endpoint);assert.equal(request.options.redirect,'manual');assert.equal(request.options.headers['content-encoding'],'aes128gcm');
   const data=await decrypt(request.options.body,browser);assert.equal(data.title,'Roundtable is open');assert.equal(data.url,'/');
   for(const secret of [g.inviteKey,'Admin','Player 1','traitor','faithful','token','loginHash'])assert.ok(!JSON.stringify(data).includes(secret));
   const jwt=request.options.headers.authorization.match(/^vapid t=([^,]+), k=/)[1].split('.'),claims=JSON.parse(Buffer.from(jwt[1],'base64url'));
@@ -129,4 +129,8 @@ test('two games reaching their timer together each alert only their own subscrip
   const f=fixture(),a=f.game('ABC234'),b=f.game('XYZ234'),sa=await listen(f,a,'p0','game-a'),sb=await listen(f,b,'p0','game-b');
   await advanceDueGames(f.db,a.deadline);const urls=[];await deliverNotifications(f.db,a.deadline+1000,async url=>{urls.push(url);return new Response(null,{status:201});});
   assert.deepEqual(urls.sort(),[sa.endpoint,sb.endpoint].sort());assert.equal(JSON.parse(f.row(a.code).state).phase,'voting');assert.equal(JSON.parse(f.row(b.code).state).phase,'voting');f.sql.close();
+});
+test('test delivery failures show a useful message without exposing runtime details',async()=>{
+  const f=fixture(),g=f.game(),sub=await listen(f,g);
+  await assert.rejects(notificationAction(f.db,g,{id:'p0'},{type:'testNotification',endpoint:sub.endpoint},now,async()=>{throw new Error('Private runtime detail');}),error=>error.message==='The test could not be delivered. Check your connection and try again.');f.sql.close();
 });
