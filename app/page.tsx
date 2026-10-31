@@ -3,7 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import {QRCodeSVG} from 'qrcode.react';
 import {roleLabel,roleWording} from '../lib/game/presentation.mjs';
 import {createGamePoller,POLL_REQUEST_TIMEOUT_MS} from '../lib/game/polling.mjs';
-import {DAGGER_PATHS} from '../lib/dagger.mjs';
+import {DAGGER_HANDLE,DAGGER_PATHS,DAGGER_TRANSFORM} from '../lib/dagger.mjs';
 import {ArrowLeft,ArrowRight,Check,CheckCheck,ChevronDown,Clock,Copy,Crown,Eye,EyeOff,HelpCircle,Hourglass,KeyRound,Link as LinkIcon,LoaderCircle,LogOut,MoreHorizontal,Pause,Play,QrCode,RefreshCw,Shield,Skull,Sparkles,Swords,Trophy,Users,Vote,X} from 'lucide-react';
 import {makeGame,addPlayer,startRound,applyAction,publicView,tick,traitorCountFor,DEFAULT_ROUND_MINUTES,ROUND_RULES_VERSION,AWARENESS_RULES_VERSION,MIN_PLAYERS,MAX_MISSION_CHANGES} from '../lib/game/engine.mjs';
 type Any=any;
@@ -12,7 +12,7 @@ const ROUND_HOUR_OPTIONS=Array.from({length:25},(_,i)=>i);
 const initials=(name:string)=>name.split(/\s+/).map(s=>s[0]).slice(0,2).join('').toUpperCase();
 const timeLeft=(end:number|null,now:number)=>{const seconds=Math.max(0,Math.ceil(((end??now)-now)/1000));return `${Math.floor(seconds/60).toString().padStart(2,'0')}:${(seconds%60).toString().padStart(2,'0')}`;};
 const names=(items:string[])=>items.length<2?items[0]||'':`${items.slice(0,-1).join(', ')} and ${items.at(-1)}`;
-function Mark(){return <svg className="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{DAGGER_PATHS.map(path=><path key={path} d={path}/>)}</svg>;}
+function Mark(){return <svg className="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><g transform={DAGGER_TRANSFORM}><rect {...DAGGER_HANDLE} fill="currentColor"/>{DAGGER_PATHS.map(({d,...attributes})=><path key={d} d={d} {...attributes}/>)}</g></svg>;}
 function Logo(){return <span className="brand"><Mark/><span>IN PLAIN SIGHT</span></span>;}
 function Modal({title,close,children,wide=false}:{title:string;close:()=>void;children:React.ReactNode;wide?:boolean}){
   const ref=useRef<HTMLDivElement>(null),closeRef=useRef(close);closeRef.current=close;
