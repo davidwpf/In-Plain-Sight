@@ -23,7 +23,8 @@ self.addEventListener('push',event=>{
   const test=data.type==='test';
   event.waitUntil(self.registration.showNotification(test?'Notifications are working':'Roundtable is open',{
     body:test?'You’ll be notified when the roundtable opens.':'The round has ended. Open In Plain Sight to vote.',
-    icon:'/icons/icon-192.png',badge:'/icons/badge-96.png',silent:true,
+    // Omit silent to respect the device’s normal sound/vibration settings.
+    icon:'/icons/icon-192.png',badge:'/icons/badge-96.png',
     tag:test?'in-plain-sight-test':/^roundtable-[A-Z2-9]{6}-\d+$/.test(data.tag)?data.tag:'in-plain-sight-roundtable',
     data:{game:/^[A-Z2-9]{6}$/.test(data.game)?data.game:null},
   }));

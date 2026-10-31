@@ -11,6 +11,7 @@ export function RoundAlerts({session}:{session:any}){
     if(supported==='supported'){
       setPermission(Notification.permission);
       navigator.serviceWorker.getRegistration('/').then(async registration=>{
+        void registration?.update().catch(()=>{});
         const subscription=await registration?.pushManager.getSubscription();
         if(!subscription)return;const data=await notificationRequest(session,'notificationStatus',{endpoint:subscription.endpoint});
         if(alive.current){setEnabled(data.enabled&&Notification.permission==='granted');if(data.enabled)rememberNotificationGame(registration,session);}
@@ -51,7 +52,7 @@ export function RoundAlerts({session}:{session:any}){
       <p className="alert-setting-status"><b>Round alerts: {enabled?'On':'Off'}</b></p>
       {permission==='denied'&&<p>Notifications are blocked. Allow them in your browser or phone settings to turn alerts on.</p>}
       {enabled?<><button className="button primary full" disabled={busy} onClick={()=>change('testNotification')}>{busy?<LoaderCircle size={16} className="spin"/>:<Bell size={16}/>} Send test notification</button><button className="button secondary full" disabled={busy} onClick={()=>change('disableNotifications')}><BellOff size={16}/> Turn off alerts</button></>:<button className="button primary full" disabled={busy||permission==='denied'} onClick={enable}>{busy?<LoaderCircle size={16} className="spin"/>:<Bell size={16}/>} Enable notifications</button>}
-      <p className="fine">For this player on this device. Alerts turn off when you switch players or leave the game. Your phone may delay notifications.</p>
+      <p className="fine">For this player on this device. Alerts turn off when you switch players or leave the game. Sound follows your device settings. Your phone may delay notifications.</p>
     </>}
     {message&&<p className="alert-setting-message" role="status">{message}</p>}{error&&<p className="form-error" role="alert">{error}</p>}
   </div>;

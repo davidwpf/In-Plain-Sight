@@ -11,9 +11,9 @@ function worker(windows=[]){
   async function event(type,value){let done;handlers[type]({...value,waitUntil:promise=>done=promise});await done;}
   return {event,shown,opened};
 }
-test('service worker shows a silent generic persistent notification with the correct dagger icon',async()=>{
+test('service worker shows a generic persistent notification using device sound settings with the correct dagger icon',async()=>{
   const w=worker();await w.event('push',{data:{json:()=>({type:'roundtable',game:'ABC234',tag:'roundtable-ABC234-2',title:'Private fake title',body:'Private fake body',url:'https://evil.test'})}});
-  assert.equal(w.shown.length,1);const notification=w.shown[0];assert.equal(notification.title,'Roundtable is open');assert.equal(notification.options.silent,true);assert.equal(notification.options.icon,'/icons/icon-192.png');assert.equal(notification.options.tag,'roundtable-ABC234-2');
+  assert.equal(w.shown.length,1);const notification=w.shown[0];assert.equal(notification.title,'Roundtable is open');assert.equal(Object.hasOwn(notification.options,'silent'),false);assert.equal(notification.options.icon,'/icons/icon-192.png');assert.equal(notification.options.tag,'roundtable-ABC234-2');
   assert.ok(!JSON.stringify(notification).includes('Private'));assert.ok(!JSON.stringify(notification).includes('evil.test'));
 });
 test('malformed push data still produces the visible fallback required by mobile browsers',async()=>{
@@ -26,5 +26,5 @@ test('notification click focuses the matching game instead of navigating a diffe
   await w.event('notificationclick',{notification:{data:{game:'ABC234'},close(){closed=true;}}});assert.equal(closed,true);assert.deepEqual(actions,['right:roundtable-opened','right:focus']);assert.deepEqual(w.opened,[]);
 });
 test('a test notification uses the same push display path without private gameplay details',async()=>{
-  const w=worker();await w.event('push',{data:{json:()=>({type:'test'})}});assert.equal(w.shown[0].title,'Notifications are working');assert.equal(w.shown[0].options.silent,true);
+  const w=worker();await w.event('push',{data:{json:()=>({type:'test'})}});assert.equal(w.shown[0].title,'Notifications are working');assert.equal(Object.hasOwn(w.shown[0].options,'silent'),false);
 });
