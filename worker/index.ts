@@ -1,12 +1,16 @@
 import handler from "vinext/server/fetch-handler";
 import {deleteExpiredGames} from "../lib/game/storage.mjs";
+import {advanceDueGames,deliverNotifications} from "../lib/notifications/server.mjs";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 const worker = {
   async scheduled(controller: ScheduledController, env: Cloudflare.Env) {
     if(!env.DB)throw new Error('Game storage is unavailable.');
-    await deleteExpiredGames(env.DB,controller.scheduledTime);
+    const now=controller.scheduledTime;
+    if(new Date(now).getUTCMinutes()%5===0)await deleteExpiredGames(env.DB,now);
+    await advanceDueGames(env.DB,now);
+    await deliverNotifications(env.DB,now);
   },
   async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
     let binding = ctx.props?.CONNECTORS;
@@ -30,6 +34,10 @@ const worker = {
     }
     const response=await runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
     const secured=new Response(response.body,response);
+    if(secured.headers.get('X-IPS-Dispatch')==='1'&&env.DB){
+      secured.headers.delete('X-IPS-Dispatch');
+      ctx.waitUntil(deliverNotifications(env.DB).catch(()=>console.error('Round notification delivery will retry.')));
+    }
     secured.headers.set('Referrer-Policy','no-referrer');
     secured.headers.set('X-Content-Type-Options','nosniff');
     return secured;

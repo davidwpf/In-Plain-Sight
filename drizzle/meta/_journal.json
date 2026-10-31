@@ -15,6 +15,13 @@
       "when": 1793179950419,
       "tag": "0001_invites_and_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793476030456,
+      "tag": "0002_bizarre_apocalypse",
+      "breakpoints": true
     }
   ]
 }

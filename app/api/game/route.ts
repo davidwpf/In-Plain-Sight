@@ -1,9 +1,10 @@
 import {env} from 'cloudflare:workers';
 import {makeGame,addPlayer,applyAction,tick,publicView,randomInt,validateRoundMinutes} from '../../../lib/game/engine.mjs';
 import {GAME_RETENTION_MS,deleteExpiredGames,validInviteKey,makeInviteKey,hashSecret,validatePlayerCode} from '../../../lib/game/storage.mjs';
+import {saveGame,pushKeys,notificationAction} from '../../../lib/notifications/server.mjs';
 export const dynamic='force-dynamic';
 type Outcome={body:any;status:number};
-type GameRow={code:string;state:string;version:number;expires_at:number;invite_hash:string|null};
+type GameRow={code:string;state:string;version:number;expires_at:number;invite_hash:string|null;notification_round:number};
 const headers={'Cache-Control':'no-store, private','Content-Type':'application/json','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
 const ok=(body:any,status=200):Outcome=>({body,status});
 const fail=(error:string,status=400):Outcome=>ok({error},status);
@@ -25,12 +26,12 @@ async function expired(row:GameRow){
 }
 async function update(gameCode:string,operation:(g:any,row:GameRow)=>Outcome|Promise<Outcome>){
   for(let attempt=0;attempt<12;attempt++){
-    const row=await db().prepare('SELECT code, state, version, expires_at, invite_hash FROM games WHERE code = ?').bind(gameCode).first<GameRow>();
+    const row=await db().prepare('SELECT code, state, version, expires_at, invite_hash, notification_round FROM games WHERE code = ?').bind(gameCode).first<GameRow>();
     if(!row||await expired(row))return respond(unavailable());
     const g=JSON.parse(row.state);if(g.schemaVersion!==2)return respond(fail('This is an earlier prototype game. Please create a new game.',410));
     const result=await operation(g,row),state=JSON.stringify(g);if(state===row.state)return respond(result);
-    const written=await db().prepare('UPDATE games SET state = ?, version = version + 1 WHERE code = ? AND version = ? AND expires_at > ?').bind(state,gameCode,row.version,Date.now()).run();
-    if(written.meta.changes===1)return respond(result);
+    const written=await saveGame(db(),row,g);
+    if(written.changed){const response=respond(result);if(written.notify)response.headers.set('X-IPS-Dispatch','1');return response;}
   }return respond(fail('Several players submitted at once. Please try again.',409));
 }
 async function tokenPlayer(req:Request,g:any){const token=req.headers.get('Authorization')?.replace(/^Bearer /,'');if(!token)return null;const digest=await hashSecret(token);return g.players.find((p:any)=>p.tokenHashes?.includes(digest));}
@@ -69,6 +70,13 @@ export async function POST(req:Request){
       }throw new Error('Could not create the game. Please try again.');
     }
     const gameCode=readCode(body.code);
+    if(['notificationKey','notificationStatus','enableNotifications','disableNotifications','testNotification'].includes(body.type)){
+      const row=await db().prepare('SELECT code, state, version, expires_at, invite_hash, notification_round FROM games WHERE code = ?').bind(gameCode).first<GameRow>();
+      if(!row||await expired(row))return respond(unavailable());const g=JSON.parse(row.state),p=await tokenPlayer(req,g);
+      if(!p)return respond(fail('Enter your player code to return to the game.',401));
+      if(body.type==='notificationKey')return respond(ok({publicKey:(await pushKeys(db())).publicKey}));
+      return respond(ok(await notificationAction(db(),g,p,body)));
+    }
     if(body.type==='join'){
       const name=clean(body.name);if(!name)return respond(fail('Enter your name.'));const token=crypto.randomUUID()+crypto.randomUUID(),tokenHash=await hashSecret(token),id=crypto.randomUUID();
       return await update(gameCode,async(g,row)=>{if(!await matchingInvite(row,body.invite))return unavailable();tick(g);const login=await newLogin(g);addPlayer(g,{id,name,loginHash:login.loginHash,tokenHashes:[tokenHash]});return ok({token,passcode:login.passcode,view:gameView(g,id,row.expires_at)});});

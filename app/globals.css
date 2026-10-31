@@ -226,3 +226,6 @@ input::placeholder{color:#777}
 .game-invite-actions .button{flex:1;min-height:44px}
 
 .task-changes{margin-top:20px}
+
+/* Optional roundtable notifications */
+.game-bottom{flex-wrap:wrap;column-gap:20px;row-gap:8px}.round-alert-settings>.button{margin-top:14px}.round-alert-settings>p{margin-bottom:14px}.round-alert-settings .fine{margin-top:18px}.alert-setting-status{padding:14px 0;border-bottom:1px solid var(--border)}.alert-setting-message{padding-top:12px}
