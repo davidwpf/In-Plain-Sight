@@ -12,7 +12,7 @@ const ROUND_HOUR_OPTIONS=Array.from({length:25},(_,i)=>i);
 const initials=(name:string)=>name.split(/\s+/).map(s=>s[0]).slice(0,2).join('').toUpperCase();
 const timeLeft=(end:number|null,now:number)=>{const seconds=Math.max(0,Math.ceil(((end??now)-now)/1000));return `${Math.floor(seconds/60).toString().padStart(2,'0')}:${(seconds%60).toString().padStart(2,'0')}`;};
 const names=(items:string[])=>items.length<2?items[0]||'':`${items.slice(0,-1).join(', ')} and ${items.at(-1)}`;
-function Mark(){return <svg className="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{DAGGER_PATHS.map(path=><path key={path} d={path}/>)}</svg>;}
+function Mark(){return <svg className="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{DAGGER_PATHS.map(path=><path key={path} d={path}/>)}</svg>;}
 function Logo(){return <span className="brand"><Mark/><span>IN PLAIN SIGHT</span></span>;}
 function Modal({title,close,children,wide=false}:{title:string;close:()=>void;children:React.ReactNode;wide?:boolean}){
   const ref=useRef<HTMLDivElement>(null),closeRef=useRef(close);closeRef.current=close;
