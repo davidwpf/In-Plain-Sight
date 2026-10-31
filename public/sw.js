@@ -26,6 +26,7 @@ self.addEventListener('push',event=>{
     // Omit silent to respect the device’s normal sound/vibration settings.
     icon:'/icons/icon-192.png',badge:'/icons/badge-96.png',
     tag:test?'in-plain-sight-test':/^roundtable-[A-Z2-9]{6}-\d+$/.test(data.tag)?data.tag:'in-plain-sight-roundtable',
+    ...(test?{renotify:true}:{}),
     data:{game:/^[A-Z2-9]{6}$/.test(data.game)?data.game:null},
   }));
 });
