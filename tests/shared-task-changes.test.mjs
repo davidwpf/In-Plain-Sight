@@ -27,11 +27,13 @@ for(const count of [6,10,30])test(`${count} players: all Killers must accept bef
 for(const requester of ['p0','p1','p2'])test(`any Killer can request the change, including ${requester}`,()=>{
  const g=game(10);assert.ok(team(g).includes(requester));agree(g,requester);assert.equal(g.missionChanges,1);
 });
-for(const count of [6,10])test(`one rejection keeps the task and spends no change with ${team(game(count)).length} Killers`,()=>{
+for(const count of [6,10])test(`one rejection keeps the task and locks further requests with ${team(game(count)).length} Killers`,()=>{
  const g=game(count),ids=team(g),old=snapshot(g.mission),used=snapshot(g.usedTaskIds);ask(g);
  if(ids.length===3)answer(g,ids[1]);answer(g,ids.at(-1),false);
  assert.equal(g.missionChangeRequest.status,'rejected');assert.deepEqual(g.mission,old);assert.deepEqual(g.usedTaskIds,used);assert.equal(g.missionChanges,0);
- const rejected=g.missionChangeRequest.id;agree(g,ids.at(-1));assert.notEqual(g.missionChangeRequest.id,rejected);assert.equal(g.missionChanges,1);
+ const before=snapshot(g);
+ for(const id of ids){assert.equal(publicView(g,id,now).secret.missionChangesRemaining,0);assert.throws(()=>ask(g,id),/No more requests/);assert.deepEqual(g,before);}
+ next(g);assert.ok(team(g).every(id=>publicView(g,id,now).secret.missionChangesRemaining===2));agree(g);assert.equal(g.missionChanges,1);
 });
 test('the two changes are shared across all Killers and cannot return to an earlier task',()=>{
  const g=game(10),ids=team(g),seen=[g.mission.id];
@@ -39,18 +41,29 @@ test('the two changes are shared across all Killers and cannot return to an earl
  assert.equal(new Set(seen).size,3);assert.deepEqual(g.roundMissionIds,seen);assert.equal(g.missionChanges,2);
  for(const id of ids){assert.equal(publicView(g,id,now).secret.missionChangesRemaining,0);const before=snapshot(g);assert.throws(()=>ask(g,id),/No change left/);assert.deepEqual(g,before);}
 });
-test('rejections do not use up the two approved changes',()=>{
- const g=game(),ids=team(g);for(let i=0;i<5;i++){ask(g);answer(g,ids[1],false);assert.equal(g.missionChanges,0);}
- agree(g);ask(g);answer(g,ids[1],false);agree(g);assert.equal(g.missionChanges,2);assert.equal(g.missionChangeRevision,8);
+test('a rejection after one approved change locks the remaining change for every Killer',()=>{
+ const g=game(10),ids=team(g);agree(g);const task=snapshot(g.mission);ask(g,ids[1]);answer(g,ids[2],false);
+ assert.equal(g.missionChanges,1);assert.equal(g.missionChangeRevision,2);assert.deepEqual(g.mission,task);
+ for(const id of ids){assert.equal(publicView(g,id,now).secret.missionChangesRemaining,0);assert.throws(()=>ask(g,id),/No more requests/);}
+ next(g);assert.equal(g.missionChanges,0);assert.equal(g.missionChangeRequest,null);agree(g);assert.equal(g.missionChanges,1);
 });
 test('replayed or competing requests cannot create another request or replace the task',()=>{
  const g=game(),ids=team(g),action=askAction(g);applyAction(g,ids[0],action,now);const before=snapshot(g);
  for(const id of ids)assert.throws(()=>applyAction(g,id,action,now),/already changed/);
  assert.deepEqual(g,before);answer(g,ids[1],false);const closed=snapshot(g);assert.throws(()=>applyAction(g,ids[0],action,now),/already changed/);assert.deepEqual(g,closed);
 });
-test('an answer from a rejected request cannot answer a later request for the same task',()=>{
- const g=game(),ids=team(g);ask(g);const stale=replyAction(g,true);answer(g,ids[1],false);ask(g);const before=snapshot(g);
- assert.throws(()=>applyAction(g,ids[1],stale,now),/no longer open/);assert.deepEqual(g,before);answer(g,ids[1]);assert.equal(g.missionChanges,1);
+test('a stale acceptance cannot undo a rejection or answer a request next round',()=>{
+ const g=game(10),ids=team(g);ask(g);const stale=replyAction(g,true);answer(g,ids[1],false);const before=snapshot(g);
+ assert.throws(()=>applyAction(g,ids[2],stale,now),/no longer open/);assert.deepEqual(g,before);
+ next(g);ask(g);const fresh=snapshot(g);assert.throws(()=>applyAction(g,team(g)[1],stale,now),/already changed/);assert.deepEqual(g,fresh);
+ for(const id of team(g).slice(1))answer(g,id);assert.equal(g.missionChanges,1);
+});
+test('a rejection lock survives storage, sign-in views and pause/resume',()=>{
+ let g=game(10),ids=team(g);ask(g);answer(g,ids[1],false);g=snapshot(g);const saved=snapshot(g);
+ for(const id of g.active)publicView(g,id,now);assert.deepEqual(g,saved);
+ applyAction(g,g.adminId,{type:'pause'},now);applyAction(g,g.adminId,{type:'resume'},now+100);
+ for(const id of ids){assert.equal(publicView(g,id,now+100).secret.missionChange.status,'rejected');assert.equal(publicView(g,id,now+100).secret.missionChangesRemaining,0);assert.throws(()=>ask(g,id),/No more requests/);}
+ assert.equal(g.missionChanges,0);assert.deepEqual(g.mission,saved.mission);
 });
 test('an answer is locked, including the implicit acceptance by the requester',()=>{
  const g=game(10),ids=team(g);ask(g);

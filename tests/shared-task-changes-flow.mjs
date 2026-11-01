@@ -11,26 +11,31 @@ async function create(count,name){const r=await request(null,{type:'create',name
 const killers=players=>players.filter(p=>p.view.secret?.role==='traitor');
 const groups=[];
 try{
- const large=await create(10,'Shared-task integration');groups.push(large);const a=large[0],team=killers(large),original=structuredClone(team[0].view.secret.mission),scores=a.view.players.map(p=>p.score);
+ const large=await create(10,'Shared-task integration');groups.push(large);const a=large[0];let team=killers(large),original=structuredClone(team[0].view.secret.mission),scores=a.view.players.map(p=>p.score);
  const simultaneous=await Promise.all(team.slice(0,2).map(p=>request(p,ask(p))));assert.deepEqual(simultaneous.map(r=>r.status).sort(),[200,400]);await Promise.all(large.map(read));
  const proposer=team.find(p=>p.view.secret.missionChange.requestedByMe),others=team.filter(p=>p!==proposer),oldAnswer=answer(others[0],true);
  for(const p of large.filter(p=>!team.includes(p)))assert.equal(p.view.secret.missionChange,undefined);
  await act(large.find(p=>!team.includes(p)),ask(proposer),400);await act(a,{type:'pause'});await act(others[0],answer(others[0],true),400);await act(a,{type:'resume'});
- await act(others[0],answer(others[0],true));await act(others[1],answer(others[1],false));await Promise.all(team.map(read));assert.deepEqual(team[0].view.secret.mission,original);assert.equal(team[0].view.secret.missionChangesRemaining,2);
- await act(others[1],ask(others[1]));await Promise.all(team.map(read));await act(others[0],oldAnswer,400);
+ await act(others[0],answer(others[0],true));await act(others[1],answer(others[1],false));await Promise.all(team.map(read));assert.deepEqual(team[0].view.secret.mission,original);
+ for(const p of team){assert.equal(p.view.secret.missionChangesRemaining,0);assert.match((await act(p,ask(p),400)).error,/No more requests/);}
+ await act(others[1],oldAnswer,400);
+ const signIn=await request(a,{type:'login',invite:a.view.inviteKey,passcode:others[1].passcode});assert.equal(signIn.status,200);assert.equal(signIn.data.view.secret.missionChange.status,'rejected');assert.equal(signIn.data.view.secret.missionChangesRemaining,0);
+ await act(a,{type:'roundtable'});await act(a,{type:'finishVoting'});await act(a,{type:'nextRound',round:1,expectedFinalRound:null,asFinal:false});await Promise.all(large.map(read));
+ team=killers(large);original=structuredClone(team[0].view.secret.mission);scores=a.view.players.map(p=>p.score);assert.ok(team.every(p=>p.view.secret.missionChangesRemaining===2&&p.view.secret.missionChange===null));
+ await act(team[0],ask(team[0]));await Promise.all(team.map(read));await act(team[1],oldAnswer,400);
  const pending=team.filter(p=>p.view.secret.missionChange.canRespond);const duplicate=await Promise.all([request(pending[0],answer(pending[0],true)),request(pending[0],answer(pending[0],true))]);assert.deepEqual(duplicate.map(r=>r.status).sort(),[200,400]);
  await act(pending[1],answer(pending[1],true));await Promise.all(team.map(read));const second=team[0].view.secret.mission.id;assert.notEqual(second,original.id);assert.ok(team.every(p=>p.view.secret.missionChangesRemaining===1));
  await act(team[0],ask(team[0]));await Promise.all(team.map(read));const acceptors=team.filter(p=>p.view.secret.missionChange.canRespond);const together=await Promise.all(acceptors.map(p=>request(p,answer(p,true))));assert.ok(together.every(r=>r.status===200));await Promise.all(team.map(read));const final=structuredClone(team[0].view.secret.mission);
  assert.equal(new Set([original.id,second,final.id]).size,3);assert.ok(team.every(p=>p.view.secret.mission.id===final.id&&p.view.secret.missionChangesRemaining===0));await act(team[0],ask(team[0]),400);assert.deepEqual(team[0].view.players.map(p=>p.score),scores);
  await act(a,{type:'roundtable'});await Promise.all(large.map(read));const victim=large.find(p=>p.view.secret.role==='faithful');
  for(const p of large)await act(p,{type:'ballot',target:team.includes(p)?victim.view.me.id:team[0].view.me.id,...(team.includes(p)?{performed:p===team[0]}:{suspectedAttempt:p===victim})});await read(a);assert.equal(a.view.phase,'results');assert.deepEqual(a.view.results.murderMethod,final);const history=structuredClone(a.view.history);
- await act(a,{type:'nextRound',round:1,expectedFinalRound:null,asFinal:false});await Promise.all(large.map(read));assert.deepEqual(a.view.history,history);assert.ok(killers(large).every(p=>p.view.secret.missionChangesRemaining===2&&p.view.secret.missionChange===null));
+ await act(a,{type:'nextRound',round:2,expectedFinalRound:null,asFinal:false});await Promise.all(large.map(read));assert.deepEqual(a.view.history,history);assert.ok(killers(large).every(p=>p.view.secret.missionChangesRemaining===2&&p.view.secret.missionChange===null));
  const small=await create(6,'Court and approval race');groups.push(small);const admin=small[0],pair=killers(small);
  await act(pair[0],ask(pair[0]));await read(pair[1]);await act(pair[1],answer(pair[1],true));await Promise.all(pair.map(read));assert.ok(pair.every(p=>p.view.secret.missionChangesRemaining===1));
  await act(pair[1],ask(pair[1]));await read(pair[0]);const before=structuredClone(pair[0].view.secret.mission),approval=answer(pair[0],true);
  await act({...pair[0],view:{...pair[0].view,code:a.view.code}},approval,401);
  const race=await Promise.all([request(admin,{type:'roundtable'}),request(pair[0],approval)]);assert.equal(race[0].status,200);assert.ok([200,400].includes(race[1].status));await Promise.all(small.map(read));assert.equal(admin.view.phase,'voting');assert.equal(pair[0].view.secret.missionChange,null);assert.equal(pair[0].view.secret.missionChangesRemaining,race[1].status===200?0:1);assert.equal(pair[0].view.secret.mission.id===before.id,race[1].status!==200);
  await act(admin,{type:'finishVoting'});
- console.log('PASS: concurrent requests, locked/replayed responses, rejection without spending, all-three acceptance, two shared changes, private status, pauses, task snapshots in results/history, round reset, cross-game authentication and approval-versus-Court race.');
+ console.log('PASS: concurrent requests, locked/replayed responses, final rejection for every Killer, sign-in persistence, all-three acceptance, two shared changes, private status, pauses, task snapshots in results/history, round reset, cross-game authentication and approval-versus-Court race.');
 }finally{for(const players of groups){await read(players[0]);if(players[0].view.phase!=='ended')await act(players[0],{type:'end'});}}
 if(process.env.GAME_SHARED_TASK_FIXTURES){const groups=[];for(const count of [6,10])groups.push({count,players:await create(count,`${count===6?'Evening':'Weekend'} game`)});const {writeFile}=await import('node:fs/promises');await writeFile(process.env.GAME_SHARED_TASK_FIXTURES,JSON.stringify(groups,null,2));console.log('Created separate local games for the two- and three-Killer UI checks.');}

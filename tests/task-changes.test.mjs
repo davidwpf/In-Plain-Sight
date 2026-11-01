@@ -12,10 +12,12 @@ const change=g=>({type:'changeMission',round:g.round,missionId:g.mission.id});
 const replace=g=>applyAction(g,killer(g),change(g),now,()=>0);
 function nextRound(g,rng=n=>n-1){openVoting(g);finishRound(g,now);applyAction(g,g.adminId,{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,rng);}
 
-test('the approved library has 31 distinct murder tasks and keeps all 34 recognition signals',()=>{
-  const ids=["removable-sticker","hold-object","lend-object","pick-up-object","switch-light","another-room","fold-paper","read-aloud","tell-joke","sing-song","say-thank-you","answer-number","finish-phrase","wave-back","clap-hands","copy-gesture","explain-something","say-dont-know","say-cheers","bless-you","high-five","fist-bump","look-over-there","swap-places","say-what","say-please","nod-agreement","make-choice","ask-question","rock-paper-scissors","join-countdown"];
-  assert.deepEqual(CONTENT.murders.map(t=>t.id),ids);assert.equal(CONTENT.recognition.length,34);
-  assert.equal(new Set(CONTENT.murders.map(t=>t.instruction)).size,31);
+test('the editable library uses distinct task IDs, instructions and supported metadata',()=>{
+  for(const key of ['recognition','murders']){
+    assert.ok(CONTENT[key].length>0);assert.equal(new Set(CONTENT[key].map(t=>t.id)).size,CONTENT[key].length);
+  }
+  assert.equal(new Set(CONTENT.murders.map(t=>t.instruction.trim().toLowerCase())).size,CONTENT.murders.length);
+  for(const task of CONTENT.murders){assert.ok(['prop','action','spoken'].includes(task.kind));assert.ok(['easy','medium'].includes(task.difficulty));}
 });
 test('a solo Killer can make exactly two changes, with three different tasks even for the same random draw',()=>{
   const g=fixture(),id=killer(g),seen=[g.mission.id];

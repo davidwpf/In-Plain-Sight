@@ -10,9 +10,9 @@ export function TaskChangeControls({solo,remaining,request,disabled,onRequest,on
       <button className="button secondary full" onClick={onReview}>Review task change</button>
     </>:<>
       {request&&<p className="task-change-status" role="status">{request.status==='accepted'?'All Killers accepted. The task has changed.':'The request was rejected. The task stays the same.'}</p>}
-      {remaining>0?<button className="button secondary full" disabled={disabled} onClick={onRequest}><RefreshCw size={15}/>{solo?'Change task':'Request change'} · {remaining} left</button>:<p className="fine">No change left.</p>}
+      {request?.status==='rejected'?<p className="fine">No more task-change requests this round.</p>:remaining>0?<button className="button secondary full" disabled={disabled} onClick={onRequest}><RefreshCw size={15}/>{solo?'Change task':'Request change'} · {remaining} left</button>:<p className="fine">No change left.</p>}
     </>}
-    {!solo&&<p className="fine">Every Killer must accept a change. A new task may be harder, and you cannot go back.</p>}
+    {!solo&&remaining>0&&<p className="fine">Every Killer must accept a change. A new task may be harder, and you cannot go back.</p>}
   </div>;
 }
 
@@ -25,12 +25,12 @@ export function TaskChangeDialog({request,task,remaining,paused,busy,error,onDec
       <p className="fine">{remaining>0?`${remaining} shared change left this round.`:'No change left.'}</p>
     </>:request.status==='rejected'?<>
       <p>A Killer rejected the request. Keep the current task.</p>
-      <p className="fine">This request did not use a change.</p>
+      <p className="fine">No more task-change requests this round. You can try again next round.</p>
     </>:<>
       <p>{request.canRespond?'Another Killer wants to change the shared murder task.':request.requestedByMe?request.total===2?'The other Killer needs to open their role and respond.':'Both other Killers need to open their roles and respond.':'You accepted the change. The remaining Killer must also accept.'}</p>
       <p className="task-change-progress" role="status">{request.acceptedCount} of {request.total} Killers accepted.</p>
       <div className="task-change-current"><span className="eyebrow">CURRENT TASK</span><b>{task.title}</b><p>{task.instruction}</p></div>
-      <p>{request.total===2?'Both Killers must accept.':'All three Killers must accept.'} If anyone rejects, the task stays the same and no change is used.</p>
+      <p>{request.total===2?'Both Killers must accept.':'All three Killers must accept.'} A rejection keeps the current task and stops further requests this round.</p>
       <p className="fine">Wait before attempting a murder. Reject if you have already completed this task. A new task may be harder and cannot be undone. Court closes unanswered requests.</p>
       {request.canRespond&&<p className="fine">Your answer cannot be changed for this request.</p>}
     </>}

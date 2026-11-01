@@ -40,9 +40,9 @@ Kind and difficulty help maintain the library; they do not change scoring or add
 
 ## Variety between rounds
 
-Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. The Killers share two task changes per round before Court. A solo Killer changes directly. With multiple Killers, any one can request a change, but every other Killer must accept. This requires all three in a three-Killer round. A rejection keeps the current task and spends no change. Only one request can be open at a time. Court closes unanswered requests; pausing blocks new requests and responses.
+Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. The Killers share two task changes per round before Court. A solo Killer changes directly. With multiple Killers, any one can request a change, but every other Killer must accept. This requires all three in a three-Killer round. A rejection keeps the current task and blocks all further task-change requests until the next round, even if approved changes remain unused. Only one request can be open at a time. Court closes unanswered requests; pausing blocks new requests and responses.
 
-Every approved replacement counts as a draw and excludes all tasks already offered that round, including across a deck-cycle boundary. Discarded tasks cannot be restored. The count, pending request and private responses survive signing in and server restarts; they reset at the next deal. Request status shows anonymous counts and only the current Killer's own answer. Names, voter identities and request details are not exposed to Innocents or waiting players.
+Every approved replacement counts as a draw and excludes all tasks already offered that round, including across a deck-cycle boundary. Discarded tasks cannot be restored. The count, pending request and private responses survive signing in and server restarts; they reset at the next deal. A rejection lock also survives signing in and server restarts. Request status shows anonymous counts and only the current Killer's own answer. Names, voter identities and request details are not exposed to Innocents or waiting players.
 
 Only change a task before anyone has completed it. While a request is open, wait before attempting a murder. Reject if you have already completed the current task. The replacement may be harder or less suitable, and it cannot be undone. Physical completion uses the same honour system as murder reports.
 
@@ -62,4 +62,4 @@ Open [tasks.json on GitHub](https://github.com/davidwpf/In-Plain-Sight/blob/main
 
 ## Check changes locally
 
-Run `pnpm test` to check the content structure, draw cycles and game rules. The library is bundled with the app, so editing the file requires a new build and deployment before it appears on the live site.
+Run `pnpm test` to check the content structure, draw cycles and game rules. The library is bundled with the app, so editing the file requires a new build and deployment before it appears on the live site. Adding tasks does not require updating a hardcoded list in the tests; the checks validate content quality and game behaviour.
