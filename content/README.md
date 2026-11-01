@@ -29,7 +29,7 @@ Only `id` and `prompt` are required. Older question-and-answer entries can still
 }
 ```
 
-All killers receive the same task. At least one must complete it. The app compares their victim reports at the roundtable; it does not observe the real-world action.
+All killers receive the same task. At least one must complete it. The app compares their victim reports at Court; it does not observe the real-world action.
 
 - `title`: the short name shown on the killer screen and beside a confirmed victim in results.
 - `instruction`: what the killer must do and what completes the task.
@@ -40,11 +40,15 @@ Kind and difficulty help maintain the library; they do not change scoring or add
 
 ## Variety between rounds
 
-Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. A solo Killer can change their task twice per round before the roundtable, with confirmation. Every replacement counts as a draw and excludes all tasks already offered that round, including across a deck-cycle boundary. Discarded tasks cannot be restored. The count is saved with the round and resets only at the next deal. Multiple Killers cannot change their shared task. A player must keep a task once they have completed it on anyone; the app cannot verify in-person completion.
+Each Game draws from each list randomly without repeating an entry until the whole list has been used. It then starts a new random cycle, avoiding an immediate repeat when alternatives exist. The Killers share two task changes per round before Court. A solo Killer changes directly. With multiple Killers, any one can request a change, but every other Killer must accept. This requires all three in a three-Killer round. A rejection keeps the current task and spends no change. Only one request can be open at a time. Court closes unanswered requests; pausing blocks new requests and responses.
+
+Every approved replacement counts as a draw and excludes all tasks already offered that round, including across a deck-cycle boundary. Discarded tasks cannot be restored. The count, pending request and private responses survive signing in and server restarts; they reset at the next deal. Request status shows anonymous counts and only the current Killer's own answer. Names, voter identities and request details are not exposed to Innocents or waiting players.
+
+Only change a task before anyone has completed it. While a request is open, wait before attempting a murder. Reject if you have already completed the current task. The replacement may be harder or less suitable, and it cannot be undone. Physical completion uses the same honour system as murder reports.
 
 Recognition signals are only used up in rounds with multiple killers. The two lists cycle independently, and draw history is saved with the Game.
 
-Edits take effect for new rounds and solo task replacements after publication. Current rounds retain their assigned signal and task unless an eligible solo Killer chooses a replacement. New entries become available in the current cycle; removed entries are no longer drawn. Keep an existing entry's `id` when changing only its wording so the Game can recognise that it has already been used.
+Edits take effect for new rounds and approved task replacements after publication. Current rounds retain their assigned signal and task until an eligible replacement is approved. New entries become available in the current cycle; removed entries are no longer drawn. Keep an existing entry's `id` when changing only its wording so the Game can recognise that it has already been used.
 
 ## Edit on GitHub
 

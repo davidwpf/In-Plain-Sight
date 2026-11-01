@@ -13,7 +13,7 @@ const replace=g=>applyAction(g,killer(g),change(g),now,()=>0);
 function nextRound(g,rng=n=>n-1){openVoting(g);finishRound(g,now);applyAction(g,g.adminId,{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,rng);}
 
 test('the approved library has 31 distinct murder tasks and keeps all 34 recognition signals',()=>{
-  const ids=['removable-sticker','hold-object','lend-object','help-carry','pick-up-object','put-in-bin','open-door','switch-light','another-room','write-word-number','fold-paper','read-aloud','tell-joke','sing-song','say-thank-you','answer-number','finish-phrase','wave-back','clap-hands','copy-gesture','change-volume','explain-something','say-dont-know','say-cheers','bless-you','high-five','fist-bump','look-over-there','swap-places','strike-pose','say-what'];
+  const ids=["removable-sticker","hold-object","lend-object","pick-up-object","switch-light","another-room","fold-paper","read-aloud","tell-joke","sing-song","say-thank-you","answer-number","finish-phrase","wave-back","clap-hands","copy-gesture","explain-something","say-dont-know","say-cheers","bless-you","high-five","fist-bump","look-over-there","swap-places","say-what","say-please","nod-agreement","make-choice","ask-question","rock-paper-scissors","join-countdown"];
   assert.deepEqual(CONTENT.murders.map(t=>t.id),ids);assert.equal(CONTENT.recognition.length,34);
   assert.equal(new Set(CONTENT.murders.map(t=>t.instruction)).size,31);
 });
@@ -35,10 +35,10 @@ test('Innocents, waiting players and an Innocent admin cannot change a task',()=
     const saved=structuredClone(g);assert.throws(()=>applyAction(g,id,change(g),now),/Only a solo Killer/);assert.deepEqual(g,saved);
   }
 });
-for(const count of [6,10])test(`all Killers in a ${count}-player round must keep their shared task`,()=>{
+for(const count of [6,10])test(`all Killers in a ${count}-player round cannot change the shared task without consent`,()=>{
   const g=fixture(count),saved=structuredClone(g);
   for(const id of g.active.filter(id=>g.roles[id]==='traitor')){
-    assert.equal(publicView(g,id,now).secret.missionChangesRemaining,undefined);
+    assert.equal(publicView(g,id,now).secret.missionChangesRemaining,2);
     assert.throws(()=>applyAction(g,id,change(g),now),/Only a solo Killer/);assert.deepEqual(g,saved);
   }
 });

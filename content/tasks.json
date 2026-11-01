@@ -140,7 +140,7 @@
   "murders": [
     {
       "id": "removable-sticker",
-      "title": "Removable sticker",
+      "title": "Sticker",
       "kind": "prop",
       "difficulty": "medium",
       "instruction": "Put a sticker on your chosen person’s clothing."
@@ -160,32 +160,11 @@
       "instruction": "Get your chosen person to pass you an object."
     },
     {
-      "id": "help-carry",
-      "title": "Help carry something",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to help you carry something."
-    },
-    {
       "id": "pick-up-object",
       "title": "Pick up an object",
       "kind": "action",
       "difficulty": "easy",
       "instruction": "Get your chosen person to pick up an object you have dropped."
-    },
-    {
-      "id": "put-in-bin",
-      "title": "Put something in the bin",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to put something in the bin."
-    },
-    {
-      "id": "open-door",
-      "title": "Open a door",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to open a door for you."
     },
     {
       "id": "switch-light",
@@ -200,13 +179,6 @@
       "kind": "action",
       "difficulty": "easy",
       "instruction": "Get your chosen person to follow you into another room."
-    },
-    {
-      "id": "write-word-number",
-      "title": "Write a word or number",
-      "kind": "prop",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to write down a word or number for you."
     },
     {
       "id": "fold-paper",
@@ -279,13 +251,6 @@
       "instruction": "Get your chosen person to copy a gesture you make."
     },
     {
-      "id": "change-volume",
-      "title": "Change the volume",
-      "kind": "action",
-      "difficulty": "easy",
-      "instruction": "Get your chosen person to turn the volume up or down."
-    },
-    {
       "id": "explain-something",
       "title": "Explain how",
       "kind": "spoken",
@@ -342,18 +307,53 @@
       "instruction": "Get your chosen person to swap seats or places with you."
     },
     {
-      "id": "strike-pose",
-      "title": "Strike a pose",
-      "kind": "action",
-      "difficulty": "medium",
-      "instruction": "Get your chosen person to pose for a photograph with you."
-    },
-    {
       "id": "say-what",
       "title": "Say What?",
       "kind": "spoken",
       "difficulty": "easy",
       "instruction": "Get your chosen person to say “What?” to you."
+    },
+    {
+      "id": "say-please",
+      "title": "Say please",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to say “please” to you."
+    },
+    {
+      "id": "nod-agreement",
+      "title": "Nod in agreement",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to nod in answer to a question."
+    },
+    {
+      "id": "make-choice",
+      "title": "Make a choice",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Offer your chosen person two options and get them to choose one."
+    },
+    {
+      "id": "ask-question",
+      "title": "Ask a question",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to ask you a question."
+    },
+    {
+      "id": "rock-paper-scissors",
+      "title": "Rock, paper, scissors",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to play a round of rock, paper, scissors with you."
+    },
+    {
+      "id": "join-countdown",
+      "title": "Join the countdown",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to join you in counting down from five."
     }
   ]
 }

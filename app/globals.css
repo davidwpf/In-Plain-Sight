@@ -432,3 +432,14 @@ input::placeholder{color:#777}
 .round-start-buttons{display:grid;gap:12px;margin:24px 0 6px}
 .round-start-buttons .button{white-space:normal;line-height:1.4;min-height:48px}
 .round-start-choice>.form-error{margin-top:14px}
+.task-change-status,.task-change-progress{font-size:14px;line-height:1.65;margin:14px 0}
+.task-change-progress{font-weight:600}
+.task-change-current{border:1px solid var(--border);padding:16px;margin:18px 0;text-align:left}
+.task-change-current>b{display:block;font-size:18px;line-height:1.4;margin-top:5px}
+.task-change-current>p{font-size:15px;line-height:1.65;margin-top:8px}
+.task-change-dialog>.fine{font-size:14px;line-height:1.7}
+.task-change-buttons{display:grid;gap:12px;margin:22px 0 14px}
+.task-change-dialog>.text-button{min-height:44px}
+.task-change-dialog>p{font-size:14px;line-height:1.6}
+.modal-top-actions{display:flex;align-items:center;gap:12px}
+.modal-top-actions>.text-button{font-size:12px;min-height:44px;gap:6px;white-space:nowrap}

@@ -37,6 +37,6 @@ try{
   killer=players.find(p=>p.view.secret?.role==='traitor');assert.equal(killer.view.secret.missionChangesRemaining,2);
   await join('Player five');await join('Player six');await action(admin,{type:'roundtable'});await action(admin,{type:'finishVoting'});await action(admin,{type:'nextRound',round:admin.view.round,expectedFinalRound:null,asFinal:false});
   await Promise.all(players.map(read));const team=players.filter(p=>p.view.secret?.role==='traitor');assert.equal(team.length,2);
-  for(const p of team){assert.equal(p.view.secret.missionChangesRemaining,undefined);assert.match((await action(p,{type:'changeMission',round:p.view.round,missionId:p.view.secret.mission.id},400)).error,/Only a solo Killer/);}
+  for(const p of team){assert.equal(p.view.secret.missionChangesRemaining,2);assert.match((await action(p,{type:'changeMission',round:p.view.round,missionId:p.view.secret.mission.id},400)).error,/Only a solo Killer/);}
   console.log('PASS: private solo task changes, paused/unauthorised rejection, simultaneous stale-request protection, sign-in persistence, exactly two replacements, final murder method, reset next round and multiple-Killer rejection.');
 }finally{if(admin)await action(admin,{type:'end'}).catch(()=>{});}

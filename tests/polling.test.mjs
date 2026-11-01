@@ -40,6 +40,13 @@ test('an hour of an unchanged visible round uses 120 checks; lobby, voting and r
     assert.equal(f.calls.length,10,phase);f.poller.stop();
   }
 });
+test('only Killers waiting on an open task request use six-second playing checks',()=>{
+ const state={phase:'playing',paused:false,secret:{role:'traitor',missionChange:{status:'open'}}};
+ assert.equal(pollDelay(state,0,0),6_000);
+ for(const role of ['faithful',undefined])assert.equal(pollDelay({...state,secret:{...state.secret,role}},0,0),30_000);
+ for(const status of ['accepted','rejected',undefined])assert.equal(pollDelay({...state,secret:{...state.secret,missionChange:{status}}},0,0),30_000);
+ assert.equal(pollDelay({...state,paused:true},0,0),30_000);assert.equal(pollDelay(state,1,0),12_000);
+});
 test('phase changes reschedule immediately, with slower checks while paused',async()=>{
   const f=fixture();await f.time.advance(5_000);
   f.state.phase='playing';f.poller.updated();
