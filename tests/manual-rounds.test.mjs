@@ -30,7 +30,7 @@ test('duplicate and stale start requests cannot deal twice or skip future result
  assert.throws(()=>applyAction(g,'admin',action,now+day+4),/moved on/);assert.deepEqual(g,saved);
 });
 test('readiness changes during the discussion apply when the admin starts',()=>{
- const g=completed();applyAction(g,'sam',{type:'ready',ready:false},now+3000);addPlayer(g,{id:'late',name:'Taylor'});applyAction(g,'admin',{type:'leave'},now+4000);
+ const g=completed();applyAction(g,'sam',{type:'ready',ready:false},now+3000);addPlayer(g,{id:'late',name:'Taylor'});applyAction(g,'admin',{type:'ready',ready:false},now+4000);
  assert.equal(publicView(g,'late',now).secret,null);assert.equal(g.active.length,3);next(g);
  assert.deepEqual(g.active,['jo','late']);assert.equal(g.players.find(p=>p.id==='admin').nextActive,false);assert.equal(publicView(g,'admin',now+day).me.isAdmin,true);assert.equal(publicView(g,'admin',now+day).secret,null);assert.ok(publicView(g,'late',now+day).secret);
 });

@@ -90,7 +90,7 @@ export async function POST(req:Request){
         if(attempts?.blockedUntil>now)return fail('Too many incorrect codes. Please wait a minute and try again.',429);
         const loginHash=await hashSecret(`${g.authSalt}:${body.passcode}`);const p=g.players.find((p:any)=>p.loginHash===loginHash);
         if(!p){const record=!attempts||now-attempts.since>300000?{count:0,since:now,blockedUntil:0}:attempts;record.count++;if(record.count>=8){record.blockedUntil=now+60000;record.count=0;}g.loginAttempts[clientKey]=record;return fail('That player code was not recognised. Check you opened the right game invite.',401);}
-        delete g.loginAttempts[clientKey];const token=crypto.randomUUID()+crypto.randomUUID();p.tokenHashes=[...(p.tokenHashes||[]).slice(-4),await hashSecret(token)];tick(g);return ok({token,passcode:body.passcode,view:gameView(g,p.id,row.expires_at)});
+        delete g.loginAttempts[clientKey];const token=crypto.randomUUID()+crypto.randomUUID();p.tokenHashes=[...(p.tokenHashes||[]).slice(-4),await hashSecret(token)];p.left=false;tick(g);return ok({token,passcode:body.passcode,view:gameView(g,p.id,row.expires_at)});
       });
     }
     return await update(gameCode,async(g,row)=>{const p=await tokenPlayer(req,g);if(!p)return fail('Enter your player code to return to the game.',401);applyAction(g,p.id,body);return ok(gameView(g,p.id,row.expires_at));});

@@ -136,7 +136,7 @@ test('leaving marks only the authenticated player out of future rounds and prese
   assert.equal(g.active.length,3);assert.equal(g.players[2].score,score);assert.ok(publicView(g,'p2',now).secret);
 });
 test('an admin can sit out without losing admin access while two others keep playing',()=>{
-  const g=lobby(3);startRound(g,now,n=>n-1);applyAction(g,'p0',{type:'leave'},now);openVoting(g);finishRound(g,now);nextRound(g,now,()=>0);
+  const g=lobby(3);startRound(g,now,n=>n-1);applyAction(g,'p0',{type:'ready',ready:false},now);openVoting(g);finishRound(g,now);nextRound(g,now,()=>0);
   const admin=publicView(g,'p0',now);assert.equal(admin.me.isAdmin,true);assert.equal(admin.me.active,false);assert.equal(admin.secret,null);assert.equal(admin.traitorCount,null);
   applyAction(g,'p0',{type:'roundtable'},now);assert.equal(g.phase,'voting');applyAction(g,'p0',{type:'finishVoting'},now);assert.equal(g.phase,'results');
 });
