@@ -37,7 +37,7 @@ test('Web Push encrypts a generic alert and signs the correct push-service audie
   const f=fixture(),g=f.game(),browser=await browserSubscription(),keys=await pushKeys(f.db);let request;
   const status=await sendPush(browser.subscription,roundAlert(g,1),keys,async(url,options)=>{request={url,options};return new Response(null,{status:201});});
   assert.equal(status,201);assert.equal(request.url,browser.subscription.endpoint);assert.equal(request.options.redirect,'manual');assert.equal(request.options.headers['content-encoding'],'aes128gcm');
-  const data=await decrypt(request.options.body,browser);assert.equal(data.title,'Roundtable is open');assert.equal(data.url,'/');
+  const data=await decrypt(request.options.body,browser);assert.equal(data.title,'Court is in session');assert.equal(data.url,'/');
   for(const secret of [g.inviteKey,'Admin','Player 1','traitor','faithful','token','loginHash'])assert.ok(!JSON.stringify(data).includes(secret));
   const jwt=request.options.headers.authorization.match(/^vapid t=([^,]+), k=/)[1].split('.'),claims=JSON.parse(Buffer.from(jwt[1],'base64url'));
   assert.equal(claims.aud,'https://fcm.googleapis.com');assert.equal(claims.sub,'https://in-plain-sight.plain-sight-games.workers.dev');

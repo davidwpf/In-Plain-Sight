@@ -13,12 +13,12 @@ function worker(windows=[]){
 }
 test('service worker shows a generic persistent notification using device sound settings with the correct dagger icon',async()=>{
   const w=worker();await w.event('push',{data:{json:()=>({type:'roundtable',game:'ABC234',tag:'roundtable-ABC234-2',title:'Private fake title',body:'Private fake body',url:'https://evil.test'})}});
-  assert.equal(w.shown.length,1);const notification=w.shown[0];assert.equal(notification.title,'Roundtable is open');assert.equal(Object.hasOwn(notification.options,'silent'),false);assert.equal(notification.options.icon,'/icons/icon-192.png');assert.equal(notification.options.tag,'roundtable-ABC234-2');
+  assert.equal(w.shown.length,1);const notification=w.shown[0];assert.equal(notification.title,'Court is in session');assert.equal(Object.hasOwn(notification.options,'silent'),false);assert.equal(notification.options.icon,'/icons/icon-192.png');assert.equal(notification.options.tag,'roundtable-ABC234-2');
   assert.ok(!JSON.stringify(notification).includes('Private'));assert.ok(!JSON.stringify(notification).includes('evil.test'));
   assert.equal(notification.options.renotify,undefined);
 });
 test('malformed push data still produces the visible fallback required by mobile browsers',async()=>{
-  const w=worker();await w.event('push',{data:{json:()=>{throw new Error('broken');}}});assert.equal(w.shown.length,1);assert.equal(w.shown[0].title,'Roundtable is open');
+  const w=worker();await w.event('push',{data:{json:()=>{throw new Error('broken');}}});assert.equal(w.shown.length,1);assert.equal(w.shown[0].title,'Court is in session');
 });
 test('notification click focuses the matching game instead of navigating a different game',async()=>{
   const actions=[];

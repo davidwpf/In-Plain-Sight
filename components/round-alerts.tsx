@@ -47,7 +47,7 @@ export function RoundAlerts({session}:{session:any}){
     finally{if(alive.current)setBusy(false);}
   }
   return <div className="round-alert-settings">
-    <p className="modal-description">Get a notification when the roundtable opens, even with the game closed.</p>
+    <p className="modal-description">Get a notification when Court opens, even with the game closed.</p>
     {support==='loading'?<p role="status">Checking this device…</p>:support==='install'?<p>On iPhone or iPad, open the game’s invite link in Safari, tap Share, then <b>Add to Home Screen</b>. Open the saved game, sign in and enable notifications.</p>:support==='demo'?<p>Round alerts are available in a real game.</p>:support==='unsupported'?<p>This browser can’t receive round alerts. Try opening the game in Safari, Chrome, Firefox or Edge.</p>:<>
       <p className="alert-setting-status"><b>Round alerts: {enabled?'On':'Off'}</b></p>
       {permission==='denied'&&<p>Notifications are blocked. Allow them in your browser or phone settings to turn alerts on.</p>}

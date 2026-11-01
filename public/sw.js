@@ -21,8 +21,8 @@ self.addEventListener('message',event=>{
 self.addEventListener('push',event=>{
   let data={};try{data=event.data?.json()||{};}catch{}
   const test=data.type==='test';
-  event.waitUntil(self.registration.showNotification(test?'Notifications are working':'Roundtable is open',{
-    body:test?'You’ll be notified when the roundtable opens.':'The round has ended. Open In Plain Sight to vote.',
+  event.waitUntil(self.registration.showNotification(test?'Notifications are working':'Court is in session',{
+    body:test?'You’ll be notified when Court opens.':'The round has ended. Open In Plain Sight to vote.',
     // Omit silent to respect the device’s normal sound/vibration settings.
     icon:'/icons/icon-192.png',badge:'/icons/badge-96.png',
     tag:test?'in-plain-sight-test':/^roundtable-[A-Z2-9]{6}-\d+$/.test(data.tag)?data.tag:'in-plain-sight-roundtable',

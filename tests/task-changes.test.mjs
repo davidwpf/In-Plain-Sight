@@ -86,10 +86,10 @@ test('pauses block changes without spending them, and resuming does not reset th
 test('the roundtable, results and ended games do not allow task changes',()=>{
   for(const phase of ['voting','results','ended']){
     const g=fixture();openVoting(g);if(phase!=='voting')finishRound(g,now);if(phase==='ended')applyAction(g,g.adminId,{type:'end'},now);
-    const saved=structuredClone(g);assert.throws(()=>replace(g),/before the roundtable/);assert.deepEqual(g,saved);
+    const saved=structuredClone(g);assert.throws(()=>replace(g),/before Court opens/);assert.deepEqual(g,saved);
   }
   const g=fixture(),task=structuredClone(g.mission),deadline=g.deadline;
-  assert.throws(()=>applyAction(g,killer(g),change(g),deadline),/before the roundtable/);
+  assert.throws(()=>applyAction(g,killer(g),change(g),deadline),/before Court opens/);
   assert.equal(g.phase,'voting');assert.deepEqual(g.mission,task);
 });
 test('a new round resets the two changes and discarded tasks remain used in the draw cycle',()=>{

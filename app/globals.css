@@ -227,5 +227,113 @@ input::placeholder{color:#777}
 
 .task-changes{margin-top:20px}
 
-/* Optional roundtable notifications */
+/* Optional Court notifications */
 .game-bottom{flex-wrap:wrap;column-gap:20px;row-gap:8px}.round-alert-settings>.button{margin-top:14px}.round-alert-settings>p{margin-bottom:14px}.round-alert-settings .fine{margin-top:18px}.alert-setting-status{padding:14px 0;border-bottom:1px solid var(--border)}.alert-setting-message{padding-top:12px}
+
+/* Keep the current action close to the top, with details available on demand. */
+.game-heading{margin-bottom:16px}
+.game-heading h1.round-heading{font-size:42px;margin-bottom:4px}
+.round-notice{padding:8px 12px;margin-bottom:12px}
+.game-invite-actions{gap:8px;margin-bottom:12px}
+.game-invite-actions .button{min-height:40px;padding:8px 12px;font-size:13px}
+.admin-toolbar{padding:10px 12px;gap:12px;margin-bottom:12px}
+.admin-toolbar .button{min-height:40px;padding:8px 11px}
+.clock-panel{padding:14px 0 18px;gap:9px}
+.clock-panel>div:first-child{width:100%;flex-direction:row;justify-content:space-between;gap:16px;text-align:left}
+.clock-panel .eyebrow{font-size:11px;letter-spacing:1px;line-height:1.5}
+.clock-panel strong,.clock-panel strong.submission-clock{font-size:42px;margin:0;letter-spacing:-1.5px;white-space:nowrap}
+.clock-panel>p{font-size:13px;line-height:1.6;margin:0;max-width:none;text-align:left;align-self:flex-start}
+.clock-panel .vote-progress{width:100%;max-width:none;margin:0}
+.clock-panel .vote-progress>span{font-size:12px}
+.role-reveal{padding:20px 0;gap:8px}
+.role-reveal h2{font-size:44px}
+.sealed-role{padding:22px 8px 18px}
+.sealed-role .seal{width:62px;height:62px;margin-bottom:18px}
+.sealed-role>p{margin:12px 0 18px}
+.sealed-role h2{font-size:35px}
+.secret-details>section{padding:18px 0}
+.secret-details p{font-size:15px;line-height:1.7}
+.secret-details .fine{font-size:13px;line-height:1.6}
+.secret-details h3{font-size:26px;margin:10px 0}
+.secret-details .signal-instruction{margin:10px 0;font-size:20px}
+.mission-note{font-size:14px;line-height:1.6;padding:10px 12px;margin-top:12px}
+.task-changes{margin-top:14px}
+.innocent-note{padding:18px 0}
+.innocent-note p{font-size:15px;line-height:1.7}
+.innocent-note .fine{font-size:13px}
+.role-rules{border-top:1px solid var(--border)}
+.role-rules>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;font-size:15px;line-height:1.5;font-weight:500;padding:15px 0;min-height:48px}
+.role-rules>summary::-webkit-details-marker,.result-row>summary::-webkit-details-marker{display:none}
+.role-rules>summary::marker,.result-row>summary::marker{content:''}
+.role-rules[open]>summary>svg,.result-row[open]>summary>.result-chevron{transform:rotate(180deg)}
+.role-rules>summary:focus-visible,.result-row>summary:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.role-rules-body{padding:0 0 16px}
+.role-rules-body p{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 14px}
+.role-rules-body b{color:var(--ink);font-weight:600}
+.role-rules-body .text-button{font-size:14px;min-height:44px}
+.role-hide-action{min-height:48px;font-size:14px;margin-top:0}
+.ballot-intro{margin-top:18px}
+.ballot-intro h2{font-size:34px;line-height:1.15;margin:10px 0}
+.ballot-intro p{font-size:15px;line-height:1.6}
+.ballot-next-step{font-size:14px;font-weight:600;padding:12px 14px;background:#f5f5f5;border-left:2px solid var(--ink);margin:20px 0 0}
+.ballot-guidance{font-size:14px;line-height:1.6;margin:18px 0 12px;color:var(--muted)}
+.participation-step{margin-top:18px;padding-top:18px}
+.results-help{font-size:13px;line-height:1.6;color:var(--muted);margin:14px 0 4px}
+.result-row{border-bottom:1px solid var(--border)}
+.result-row:last-child{border-bottom:0}
+.result-row>summary{cursor:pointer;list-style:none;padding:16px 0;min-height:76px}
+.result-row .result-identity{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.result-row .result-identity b{font-size:15px;overflow-wrap:anywhere}
+.result-row .result-identity b>small{font-size:10px;margin-left:4px;color:var(--muted)}
+.result-row .result-role{font-size:13px;line-height:1.4}
+.result-row .result-points{flex-shrink:0;min-width:62px}
+.result-row .result-points strong{font-size:27px;font-weight:500}
+.result-row .result-points>span{font-size:12px;line-height:1.5}
+.result-chevron{flex-shrink:0;margin-left:4px;color:var(--muted)}
+.result-expanded{padding:0 0 18px 47px}
+.result-expanded>p{font-size:14px;line-height:1.7;margin:0 0 10px}
+.result-outcome{font-weight:600;color:var(--ink)}
+.result-outcome:empty{display:none}
+.result-reason{color:var(--muted)}
+.result-expanded .result-detail,.past-rounds .result-expanded .result-detail{display:flex;flex-direction:column;align-items:flex-start;gap:5px;margin:0;font-size:13px;line-height:1.6}
+.result-expanded .result-detail>span:last-child{text-align:left}
+.past-rounds .result-row .result-identity b{font-size:14px}
+.past-rounds .result-expanded{padding-left:39px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:600px){
+  .game-heading{margin-bottom:14px}
+  .game-heading h1.round-heading{font-size:36px}
+  .game-heading .game-name{font-size:14px}
+  .admin-toolbar{padding:10px}
+  .admin-toolbar-label{margin-bottom:8px;font-size:11px}
+  .admin-toolbar-actions{gap:6px}
+  .admin-toolbar .button{min-height:42px;font-size:12px;padding:8px 6px;white-space:normal}
+  .clock-panel{padding:12px 0 16px}
+  .clock-panel strong,.clock-panel strong.submission-clock{font-size:38px}
+  .role-card{padding:17px}
+  .role-reveal{padding:18px 0;gap:7px}
+  .role-reveal h2{font-size:40px}
+  .role-reveal>svg{width:24px;height:24px}
+  .role-reveal>p{font-size:14px}
+  .sealed-role .seal{width:56px;height:56px;margin-bottom:16px}
+  .sealed-role h2{font-size:32px}
+  .sealed-role>p{font-size:15px}
+  .secret-details>section{padding:17px 0}
+  .private-role-open .game-main{padding-bottom:100px}
+  .role-hide-action{position:fixed;z-index:25;left:0;right:0;bottom:0;width:100%;margin:0;border-top:1px solid var(--ink);background:#fff;color:var(--ink);min-height:60px;padding:14px 20px calc(14px + env(safe-area-inset-bottom));font-size:15px}
+  .role-hide-action:hover{background:#f5f5f5}
+  .ballot-intro h2{font-size:32px}
+  .result-row>summary{gap:9px;padding:14px 0}
+  .result-expanded{padding-left:0}
+  .past-rounds .result-expanded{padding-left:0}
+  .result-row .result-points{min-width:55px}
+  .result-row .result-points strong{font-size:25px}
+  .admin-toolbar{display:flex;align-items:center;gap:9px}
+  .admin-toolbar-label{display:flex;flex-direction:column;gap:4px;margin:0;font-size:9px;letter-spacing:.5px}
+  .admin-toolbar-actions{flex:1}
+  .admin-toolbar-actions.three-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .admin-toolbar-actions.three-actions>.button:first-child{grid-column:auto}
+  .role-reveal{display:grid;grid-template-columns:26px 1fr;text-align:left;column-gap:10px;row-gap:5px;padding:16px 0}
+  .role-reveal h2{font-size:36px;letter-spacing:-1px}
+  .role-reveal>p{grid-column:2;margin:0}
+}
