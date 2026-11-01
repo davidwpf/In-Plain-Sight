@@ -5,12 +5,12 @@ const now=1000000,day=86400000;
 function completed(){
  const g=makeGame('ABC234','Manual rounds',{id:'admin',name:'Alex'},now,90);
  addPlayer(g,{id:'sam',name:'Sam'});addPlayer(g,{id:'jo',name:'Jo'});
- applyAction(g,'admin',{type:'start'},now,()=>0);
+ applyAction(g,'admin',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,()=>0);
  applyAction(g,'admin',{type:'roundtable'},now+1000);
  applyAction(g,'admin',{type:'finishVoting'},now+2000);
  return g;
 }
-const next=(g,at=now+day)=>applyAction(g,'admin',{type:'nextRound',round:g.round},at,()=>0);
+const next=(g,at=now+day)=>applyAction(g,'admin',{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},at,()=>0);
 for(const oldDeadline of [undefined,now+120000,now-120000,null])test(`results wait indefinitely, including saved deadline ${oldDeadline}`,()=>{
  const g=completed();assert.equal(g.deadline,null);const saved=structuredClone(g.results),scores=g.players.map(p=>p.score),roles={...g.roles},tasks=structuredClone(g.usedTaskIds);
  if(oldDeadline!==undefined)g.deadline=oldDeadline;
@@ -19,12 +19,12 @@ for(const oldDeadline of [undefined,now+120000,now-120000,null])test(`results wa
 });
 test('only an admin can start the next round and requests must name the completed round',()=>{
  const g=completed(),before=structuredClone(g);
- assert.throws(()=>applyAction(g,'sam',{type:'nextRound',round:1},now+day),/Only the admin/);
+ assert.throws(()=>applyAction(g,'sam',{type:'nextRound',round:1,expectedFinalRound:g.finalRound??null,asFinal:false},now+day),/Only the admin/);
  for(const round of [undefined,null,0,2,'1'])assert.throws(()=>applyAction(g,'admin',{type:'nextRound',round},now+day),/moved on/);
  assert.deepEqual(g,before);next(g);assert.equal(g.round,2);assert.equal(g.phase,'playing');assert.equal(g.deadline,now+day+90*60000);assert.deepEqual(g.ballots,{});assert.equal(g.results,null);assert.deepEqual(g.history,before.history);assert.deepEqual(g.players.map(p=>p.score),before.players.map(p=>p.score));
 });
 test('duplicate and stale start requests cannot deal twice or skip future results',()=>{
- const g=completed(),action={type:'nextRound',round:1};applyAction(g,'admin',action,now+day,()=>0);const deadline=g.deadline;
+ const g=completed(),action={type:'nextRound',round:1,expectedFinalRound:null,asFinal:false};applyAction(g,'admin',action,now+day,()=>0);const deadline=g.deadline;
  assert.throws(()=>applyAction(g,'admin',action,now+day+1),/after the results/);assert.equal(g.round,2);assert.equal(g.deadline,deadline);
  applyAction(g,'admin',{type:'roundtable'},now+day+2);applyAction(g,'admin',{type:'finishVoting'},now+day+3);const saved=structuredClone(g);
  assert.throws(()=>applyAction(g,'admin',action,now+day+4),/moved on/);assert.deepEqual(g,saved);

@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,ROUND_RULES_VERSION} from '../lib/game/engine.mjs';
-const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},at,rng);
 const now=1000000;
 function game(count=8){
   const g=makeGame('ABC234','Mistaken attacks',{id:'p0',name:'Alice'},now);

@@ -7,6 +7,15 @@ const choice=(g,asFinal)=>({type:g.round?'nextRound':'start',round:g.round,expec
 const start=(g,final=false)=>applyAction(g,'p0',choice(g,final),now+10,n=>n-1);
 const complete=g=>{applyAction(g,'p0',{type:'roundtable'},now+20);applyAction(g,'p0',{type:'finishVoting'},now+21);};
 const snapshot=g=>JSON.parse(JSON.stringify(g));
+for(const phase of ['lobby','results'])for(const savedPlan of [false,true])test(`an older direct start cannot bypass confirmation in ${phase}, saved plan ${savedPlan}`,()=>{
+ const g=game();if(phase==='results'){start(g);complete(g);}if(savedPlan)g.finalRound=g.round+1;
+ const before=snapshot(g),type=phase==='lobby'?'start':'nextRound';
+ for(const action of [{type,round:g.round},{type,round:g.round,expectedFinalRound:g.finalRound??null}]){
+  assert.throws(()=>applyAction(g,'p0',action,now+30,()=>{throw new Error('Unconfirmed starts must not draw roles');}),/Choose Start.*Refresh the page/);
+  assert.deepEqual(g,before);
+ }
+ start(g,savedPlan);assert.equal(g.phase,'playing');assert.equal(g.round,before.round+1);assert.equal(g.finalRound,savedPlan?g.round:null);
+});
 for(const final of [false,true])test(`the first round can start directly with asFinal ${final}`,()=>{
  const g=game();start(g,final);assert.equal(g.round,1);assert.equal(g.phase,'playing');assert.equal(g.finalRound,final?1:null);assert.equal(g.deadline,now+10+60*60000);assert.equal(g.history.length,0);assert.ok(publicView(g,'p0').secret);
 });

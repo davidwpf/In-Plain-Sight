@@ -13,7 +13,7 @@ async function create(count,name){
   return players;
 }
 async function complete(players){
-  const a=players[0];await action(a,{type:a.view.round?'nextRound':'start',...(a.view.round?{round:a.view.round}:{})});await Promise.all(players.map(read));
+  const a=players[0];await action(a,{type:a.view.round?'nextRound':'start',round:a.view.round,expectedFinalRound:null,asFinal:false});await Promise.all(players.map(read));
   const victim=players.find(p=>p.view.secret?.role==='faithful'),killer=players.find(p=>p.view.secret?.role==='traitor');await action(a,{type:'roundtable'});
   for(const p of players)await action(p,{type:'ballot',target:p.view.secret.role==='traitor'?victim.view.me.id:killer?.view.me.id??null,...(p.view.secret.role==='traitor'?{performed:true}:killer?{suspectedAttempt:p===victim}:{})});
   await Promise.all(players.map(read));assert.equal(a.view.phase,'results');
@@ -22,7 +22,7 @@ const groups=[];
 try{
   const players=await create(6,'Concurrent dispute checks');groups.push(players);await complete(players);const a=players[0],scores=a.view.players.map(p=>p.score),saved=structuredClone(a.view.results);
   const opened=await Promise.all([request(players[1],{type:'openDispute',round:1}),request(players[2],{type:'openDispute',round:1})]);assert.deepEqual(opened.map(r=>r.status).sort(),[200,400]);
-  await action(a,{type:'nextRound',round:1},400);await action(a,{type:'end'},400);
+  await action(a,{type:'nextRound',round:1,expectedFinalRound:null,asFinal:false},400);await action(a,{type:'end'},400);
   await action(a,{type:'disputeVote',round:1,choice:'discard'});await action(players[1],{type:'disputeVote',round:1,choice:'discard'});
   const voted=await Promise.all([request(players[2],{type:'disputeVote',round:1,choice:'discard'}),request(players[3],{type:'disputeVote',round:1,choice:'discard'})]);assert.deepEqual(voted.map(r=>r.status),[200,200]);
   await read(a);assert.equal(a.view.results.review.status,'discarded');assert.deepEqual(a.view.players.map(p=>p.score),[0,0,0,0,0,0]);assert.deepEqual(a.view.results,a.view.history[0]);
@@ -32,7 +32,7 @@ try{
   await action(other[0],{type:'openDispute',round:1});const pair=await Promise.all([request(other[0],{type:'disputeVote',round:1,choice:'discard'}),request(other[1],{type:'disputeVote',round:1,choice:'keep'})]);assert.deepEqual(pair.map(r=>r.status),[200,200]);await read(other[0]);assert.equal(other[0].view.results.review.adminTieBreak,'discard');
   // Race a new deal against opening a dispute: only one may commit.
   const race=await create(3,'Start versus dispute checks');groups.push(race);await complete(race);
-  const raced=await Promise.all([request(race[0],{type:'nextRound',round:1}),request(race[1],{type:'openDispute',round:1})]);assert.deepEqual(raced.map(r=>r.status).sort(),[200,400]);await read(race[0]);assert.ok(race[0].view.phase==='playing'&&race[0].view.round===2||race[0].view.phase==='results'&&race[0].view.dispute.status==='open');
+  const raced=await Promise.all([request(race[0],{type:'nextRound',round:1,expectedFinalRound:null,asFinal:false}),request(race[1],{type:'openDispute',round:1})]);assert.deepEqual(raced.map(r=>r.status).sort(),[200,400]);await read(race[0]);assert.ok(race[0].view.phase==='playing'&&race[0].view.round===2||race[0].view.phase==='results'&&race[0].view.dispute.status==='open');
   console.log('PASS: concurrent opening, parallel majority votes, exactly-once point reversal, locked decisions, two-player admin tie-break, cross-game authentication, and next-round/dispute race.');
 }finally{
   for(const players of groups){const a=players[0];await read(a);if(a.view.dispute?.status==='open'){for(const p of players)await action(p,{type:'disputeVote',round:a.view.round,choice:'keep'}).catch(()=>{});}await action(a,{type:'end'}).catch(()=>{});}

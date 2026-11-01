@@ -11,17 +11,17 @@ async function raw(body,s){
 }
 async function request(body,session){const {status,data}=await raw(body,session);if(status>=400)throw new Error(`${status}: ${data.error}`);return data;}
 async function view(s){const res=await fetch(`${origin}/api/game?code=${s.view.code}`,{headers:{Authorization:`Bearer ${s.token}`}});assert.equal(res.status,200);return res.json();}
-async function advance(){const current=await view(admin);await request({type:'nextRound',round:current.round},admin);}
+async function advance(){const current=await view(admin);await request({type:'nextRound',round:current.round,expectedFinalRound:null,asFinal:false},admin);}
 assert.equal((await raw({type:'create',name:'Test Admin',gameName:'Invalid duration',roundMinutes:45})).status,400);
 const admin=await request({type:'create',name:'Test Admin',gameName:'Shared-device integration test',roundMinutes:90});const sessions=[admin];
 assert.equal(admin.view.roundMinutes,90);
 assert.match(admin.passcode,/^\d{6}$/);assert.ok(admin.view.me.isAdmin);
 const joined=await Promise.all(Array.from({length:9},(_,i)=>request({type:'join',code:admin.view.code,name:`Guest ${i+1}`})));sessions.push(...joined);
 assert.equal(new Set(sessions.map(s=>s.passcode)).size,10);assert.equal((await view(admin)).players.length,10);
-await assert.rejects(()=>request({type:'start'},sessions[1]),/Only the admin/);
+await assert.rejects(()=>request({type:'start',round:0,expectedFinalRound:null,asFinal:false},sessions[1]),/Only the admin/);
 for(const s of sessions){const logged=await request({type:'login',code:s.view.code,passcode:s.passcode});assert.equal(logged.view.me.id,s.view.me.id);assert.equal(logged.view.me.isAdmin,s===admin);}
 const bad=await raw({type:'login',code:admin.view.code,passcode:'not-a-code'});assert.equal(bad.status,400);
-await request({type:'start'},admin);
+await request({type:'start',round:0,expectedFinalRound:null,asFinal:false},admin);
 const initial=await Promise.all(sessions.map(view));const traitors=sessions.filter((_,i)=>initial[i].secret.role==='traitor'),faithful=sessions.filter((_,i)=>initial[i].secret.role==='faithful');assert.equal(traitors.length,3);
 assert.ok(initial[0].deadline>Date.now()+89*60000);assert.ok(initial[0].deadline<=Date.now()+90*60000);
 for(const v of initial){for(const p of v.players){assert.equal(p.role,undefined);assert.equal(p.passcode,undefined);assert.equal(p.loginHash,undefined);}const text=JSON.stringify(v);for(const secret of ['tokenHashes','loginHash','authSalt','loginAttempts','"ballots"'])assert.ok(!text.includes(secret));assert.equal(v.murderedId,undefined);assert.equal(v.results,null);}

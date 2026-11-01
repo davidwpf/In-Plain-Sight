@@ -7,7 +7,7 @@ async function read(p){const r=await request(p);assert.equal(r.status,200);p.vie
 async function create(count,name){const r=await request(null,{type:'create',name:'Alex',gameName:name,adminPasscode:'123456'});assert.equal(r.status,201);const players=[r.data];for(const name of ['Ben','Charlie','Isla','Jamie','Alexandria Montgomery'].slice(0,count-1))await join(players,name);return players;}
 async function join(players,name){const r=await request(players[0],{type:'join',name,invite:players[0].view.inviteKey});assert.equal(r.status,200);players.push(r.data);return r.data;}
 const finalPlan=(p,enabled)=>({type:'setFinalRound',round:p.view.round,expectedFinalRound:p.view.finalRound??null,enabled});
-async function start(players){const a=players[0];await action(a,{type:a.view.round?'nextRound':'start',...(a.view.round?{round:a.view.round}:{})});await Promise.all(players.map(read));}
+async function start(players){const a=players[0];await action(a,{type:a.view.round?'nextRound':'start',round:a.view.round,expectedFinalRound:a.view.finalRound??null,asFinal:a.view.finalRound===a.view.round+1||a.view.finalRound===a.view.round&&a.view.results?.review?.status==='discarded'});await Promise.all(players.map(read));}
 async function complete(players){
  const a=players[0];await read(a);if(a.view.phase==='playing')await action(a,{type:'roundtable'});await Promise.all(players.map(read));
  const active=players.filter(p=>p.view.me.active),killer=active.find(p=>p.view.secret.role==='traitor'),victim=active.find(p=>p.view.secret.role==='faithful');

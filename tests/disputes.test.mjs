@@ -9,7 +9,7 @@ const now=1800000000000;
 function completed(n=6){
   const g=makeGame('ABC234','Disputes',{id:'p0',name:'Alex'},now);
   for(let i=1;i<n;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});
-  applyAction(g,'p0',{type:'start'},now,n=>n-1);
+  applyAction(g,'p0',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,n=>n-1);
   applyAction(g,'p0',{type:'roundtable'},now+1);
   // A real scored round, with positive points, negative points and extras.
   const victim=g.active.find(id=>g.roles[id]==='faithful'),killer=g.active.find(id=>g.roles[id]==='traitor');
@@ -46,11 +46,11 @@ test('direct in-memory results/history aliases do not zero original deltas twice
 });
 test('discarding the latest round preserves all earlier points, history and role exposure weights',()=>{
   const g=completed(),first=restored(g.history),old=scores(g);
-  applyAction(g,'p0',{type:'nextRound',round:1},now+10,n=>n-1);applyAction(g,'p0',{type:'roundtable'},now+11);applyAction(g,'p0',{type:'finishVoting'},now+12);
+  applyAction(g,'p0',{type:'nextRound',round:1,expectedFinalRound:g.finalRound??null,asFinal:false},now+10,n=>n-1);applyAction(g,'p0',{type:'roundtable'},now+11);applyAction(g,'p0',{type:'finishVoting'},now+12);
   const weights=traitorWeights(g,g.active);open(g);for(let i=0;i<4;i++)vote(g,`p${i}`,'discard');
   assert.deepEqual(scores(g),old);assert.deepEqual(g.history[0],first[0]);assert.deepEqual(traitorWeights(g,g.active),weights);
   for(let i=0;i<6;i++)assert.equal(g.results.players[i].score,old[i]);
-  applyAction(g,'p0',{type:'nextRound',round:2},now+300,n=>n-1);assert.equal(g.round,3);assert.equal(g.dispute,null);assert.deepEqual(scores(g),old);
+  applyAction(g,'p0',{type:'nextRound',round:2,expectedFinalRound:g.finalRound??null,asFinal:false},now+300,n=>n-1);assert.equal(g.round,3);assert.equal(g.dispute,null);assert.deepEqual(scores(g),old);
   applyAction(g,'p0',{type:'roundtable'},now+301);applyAction(g,'p0',{type:'finishVoting'},now+302);open(g);assert.equal(g.dispute.round,3);
 });
 test('a majority to keep resolves early without modifying a single point or recorded result',()=>{
@@ -105,7 +105,7 @@ test('only one dispute is allowed, including retries, and stale round numbers ca
   const g=completed();open(g);assert.throws(()=>open(g,'p1'),/already had/);vote(g,'p0','keep');assert.throws(()=>vote(g,'p0','discard'),/locked/);
   for(const choice of [null,undefined,'yes',true,{},'__proto__'])assert.throws(()=>vote(g,'p1',choice),/Choose Keep/);
   for(const round of [undefined,null,'1',0,2])assert.throws(()=>applyAction(g,'p1',{type:'disputeVote',round,choice:'discard'},now+200),/moved on/);
-  tick(g,g.dispute.deadline);applyAction(g,'p0',{type:'nextRound',round:1},now+DISPUTE_MS+200,n=>n-1);
+  tick(g,g.dispute.deadline);applyAction(g,'p0',{type:'nextRound',round:1,expectedFinalRound:g.finalRound??null,asFinal:false},now+DISPUTE_MS+200,n=>n-1);
   assert.throws(()=>applyAction(g,'p1',{type:'openDispute',round:1},now+DISPUTE_MS+201),/results/);
   applyAction(g,'p0',{type:'roundtable'},now+DISPUTE_MS+202);applyAction(g,'p0',{type:'finishVoting'},now+DISPUTE_MS+203);assert.throws(()=>applyAction(g,'p1',{type:'openDispute',round:1},now+DISPUTE_MS+204),/moved on/);
 });
@@ -136,7 +136,7 @@ for(let n=2;n<=30;n++)test(`${n}-player majority keeps or discards with the same
 
 test('discarding restores mixed accusation, awareness, missed-report and mistaken-Killer penalties',()=>{
   const g=makeGame('ABC234','Penalty reversal',{id:'p0',name:'Alex'},now);
-  for(let i=1;i<8;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});applyAction(g,'p0',{type:'start'},now,n=>n-1);
+  for(let i=1;i<8;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});applyAction(g,'p0',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,n=>n-1);
   assert.deepEqual(g.active.filter(id=>g.roles[id]==='traitor'),['p0','p1']);applyAction(g,'p0',{type:'roundtable'},now+1);
   voteReport('p0','p1',{performed:true});voteReport('p1','p2',{performed:true});
   for(const id of ['p2','p3','p5','p6'])voteReport(id,id==='p3'?'p2':'p3',{suspectedAttempt:false});voteReport('p7','p0',{suspectedAttempt:true});

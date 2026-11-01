@@ -195,7 +195,7 @@ export default function Home(){
     catch(e){setError(e instanceof Error?e.message:'Could not enter the game. Try again.');}finally{setBusy(false);}
   }
   async function act(action:Any){
-    if(busy)return false;setBusy(true);pending.current=true;mutation.current++;setError('');
+    if(busy||pending.current)return false;setBusy(true);pending.current=true;mutation.current++;setError('');
     try{if(session?.demo){applyAction(demoGame.current,'demo-me',action);accept(publicView(demoGame.current,'demo-me'));}
       else{const res=await fetch('/api/game',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.token}`},body:JSON.stringify({...action,code:session.code})});const data:Any=await res.json();if(!res.ok)throw new Error(data.error);accept(data);}
       if(action.type==='setFinalRound'){notify(action.enabled?'The next round is marked as the final round.':'The final-round plan has been cancelled.');}if(action.type==='disputeVote'){notify('Your dispute vote is locked.');}if(action.type==='changeMission'){setTaskToChange(null);notify('Murder task changed.');}if(action.type==='ballot'){setRevealed(false);notify('Your submission is locked.');}if(action.type==='leave'){entrance(session.code,v.inviteKey||'',v.name);notify('You have left the game. Use your player code to return.');return true;}if(action.newAdminId)notify(`${v.players.find((p:Any)=>p.id===action.newAdminId)?.name||'The chosen player'} is now the admin.`);setModal(null);return true;
@@ -215,7 +215,7 @@ export default function Home(){
       const reported=g.active.find((id:string)=>g.roles[id]==='traitor'&&g.ballots[id]?.targetId&&g.roles[g.ballots[id].targetId]==='faithful');
       const victim=reported?g.ballots[reported].targetId:g.active.find((id:string)=>g.roles[id]==='faithful'),suspect=g.active.find((id:string)=>g.roles[id]==='traitor');
       for(const id of g.active)if(g.phase==='voting'&&!g.ballots[id]){const killer=g.roles[id]==='traitor',target=killer?victim:suspect;applyAction(g,id,{type:'ballot',target,...(killer?{performed:g.traitorCount===1||!g.active.some((other:string)=>g.roles[other]==='traitor'&&g.ballots[other]?.targetId===victim&&g.ballots[other].performed===true)}:{suspectedAttempt:id===victim})});}
-    }else if(g.phase==='results'){applyAction(g,'demo-me',{type:'nextRound',round:g.round});}else{demo();return;}
+    }else if(g.phase==='results'){openRoundStart();return;}else{demo();return;}
     accept(publicView(g,'demo-me'));setError('');
   }
   const v=view,me=v?.me,phase=v?.phase,players=v?.players||[],gameNow=v?.paused?v.pausedAt:now+offset;
@@ -247,7 +247,7 @@ export default function Home(){
   const discardedFinal=isFinalRound&&v?.results?.review?.status==='discarded';
   const finalResults=phase==='results'&&isFinalRound&&!discardedFinal;
   const cancelFinal=()=>{setError('');setFinalPlan({round:v.round,expectedFinalRound:v.finalRound??null,enabled:false});setModal('finalPlan');};
-  const openRoundStart=()=>{if(busy)return;setError('');setRoundToStart({type:phase==='lobby'?'start':'nextRound',round:v.round,expectedFinalRound:v.finalRound??null});setModal('roundStart');};
+  const openRoundStart=()=>{if(busy||pending.current)return;setError('');setRoundToStart({type:phase==='lobby'?'start':'nextRound',round:v.round,expectedFinalRound:v.finalRound??null});setModal('roundStart');};
   const startRoundHint=!me?.isAdmin?'Only the admin can start a round.':reviewOpen?'Wait for the dispute vote to finish.':v?.paused?'Resume the game before starting a round.':v?.readyCount<MIN_PLAYERS?'At least two players need to be ready.':!roundToStart||roundToStart.round!==v?.round||roundToStart.expectedFinalRound!==(v?.finalRound??null)?'The round has changed. Close this window and try again.':null;
   const finalPlanStale=!finalPlan||finalPlan.round!==v?.round||finalPlan.expectedFinalRound!==(v?.finalRound??null);
   const closeModal=()=>{if(!busy){setModal(null);setTaskToChange(null);setError('');}};

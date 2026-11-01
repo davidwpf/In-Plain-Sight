@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeGame,addPlayer,startRound,openVoting,applyAction,finishRound,publicView,tick,traitorWeights,MIN_PLAYERS,ROUND_RULES_VERSION,VOTE_MS,ROUND_MS} from '../lib/game/engine.mjs';
-const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},at,rng);
 const now=1000000;
 function lobby(count=2){const g=makeGame('ABC234','Two-player test',{id:'p0',name:'Alex'},now);for(let i=1;i<count;i++)addPlayer(g,{id:`p${i}`,name:`Guest ${i}`});return g;}
 function game(killer=false){const g=lobby();startRound(g,now,killer?n=>n-1:()=>0);return g;}
@@ -10,7 +10,7 @@ const report=(g,target,time=now)=>applyAction(g,'p0',{type:'ballot',target},time
 const result=(g,id)=>g.results.players.find(p=>p.id===id);
 
 test('two ready players can start with the unchanged sixty-minute default',()=>{
-  const g=lobby();assert.equal(MIN_PLAYERS,2);applyAction(g,'p0',{type:'start'},now,()=>0);
+  const g=lobby();assert.equal(MIN_PLAYERS,2);applyAction(g,'p0',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,()=>0);
   assert.equal(g.phase,'playing');assert.equal(g.active.length,2);assert.equal(g.roundMinutes,60);assert.equal(g.deadline,now+ROUND_MS);
   assert.equal(g.roundRulesVersion,ROUND_RULES_VERSION);assert.equal(publicView(g,'p1',now).roundMode,'two-player');
 });
@@ -189,7 +189,7 @@ test('a both-Innocent streak does not change the next round’s independent 75/2
 test('very early and full-length two-player rounds use identical independent role draws',()=>{
   function sequence(early){
     let seed=4521;const rng=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return Math.floor(seed/4294967296*n);};
-    const g=lobby();let time=now;applyAction(g,'p0',{type:'start'},time,rng);const draws=[];
+    const g=lobby();let time=now;applyAction(g,'p0',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},time,rng);const draws=[];
     for(let i=0;i<50;i++){
       draws.push({count:g.traitorCount,roles:{...g.roles}});
       if(early)applyAction(g,'p0',{type:'roundtable'},++time,rng);

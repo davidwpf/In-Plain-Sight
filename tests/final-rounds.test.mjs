@@ -5,7 +5,7 @@ import {gameStandings,gameFinishSummary} from '../lib/game/standings.mjs';
 const now=1800000000000;
 function game(count=3){const g=makeGame('ABC234','The finish',{id:'p0',name:'Alex'},now);for(let i=1;i<count;i++)addPlayer(g,{id:`p${i}`,name:`Player ${i}`});return g;}
 const mark=(g,enabled=true,id='p0',at=now+1)=>applyAction(g,id,{type:'setFinalRound',round:g.round,expectedFinalRound:g.finalRound??null,enabled},at);
-const start=g=>applyAction(g,'p0',{type:g.round?'nextRound':'start',...(g.round?{round:g.round}:{})},now+10,n=>n-1);
+const start=g=>applyAction(g,'p0',{type:g.round?'nextRound':'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:g.finalRound===g.round+1||g.finalRound===g.round&&g.results?.review?.status==='discarded'},now+10,n=>n-1);
 const complete=g=>{applyAction(g,'p0',{type:'roundtable'},now+20);applyAction(g,'p0',{type:'finishVoting'},now+21);};
 const restore=g=>JSON.parse(JSON.stringify(g));
 
@@ -22,7 +22,7 @@ test('choosing Keep playing does not deal roles, alter points or end a round',()
  const g=game();mark(g);start(g);complete(g);const before=restore(g);mark(g,false);assert.equal(g.finalRound,null);assert.equal(g.phase,'results');assert.deepEqual(g.history,before.history);assert.deepEqual(g.players,before.players);start(g);assert.equal(g.round,2);
 });
 test('final results wait for explicit confirmation and cannot start another round accidentally',()=>{
- const g=game();mark(g);start(g);complete(g);const before=restore(g);tick(g,now+86400000);assert.deepEqual(g,before);assert.throws(()=>start(g),/final round/);assert.equal(g.phase,'results');applyAction(g,'p0',{type:'finishGame',round:1},now+30);assert.equal(g.phase,'ended');assert.deepEqual(g.players,before.players);assert.deepEqual(g.history,before.history);assert.equal(publicView(g,'p0').finishSummary.completedRounds,1);
+ const g=game();mark(g);start(g);complete(g);const before=restore(g);tick(g,now+86400000);assert.deepEqual(g,before);assert.throws(()=>applyAction(g,'p0',{type:'nextRound',round:g.round},now+30),/Choose Start/);assert.equal(g.phase,'results');applyAction(g,'p0',{type:'finishGame',round:1},now+30);assert.equal(g.phase,'ended');assert.deepEqual(g.players,before.players);assert.deepEqual(g.history,before.history);assert.equal(publicView(g,'p0').finishSummary.completedRounds,1);
 });
 test('confirmation is restricted to an admin looking at the same final-round results',()=>{
  const g=game();mark(g);start(g);assert.throws(()=>applyAction(g,'p0',{type:'finishGame',round:1}),/results have changed/);complete(g);

@@ -23,12 +23,12 @@ try{
   for(const type of ['start','pause','end'])assert.equal((await raw({type,code:b.view.code},a)).status,401);
   const returned=await act({type:'login',code:a.view.code,invite:a.view.inviteKey,passcode:'031415'});assert.equal(returned.view.me.id,a.view.me.id);assert.ok(returned.view.me.isAdmin);
  }
- await Promise.all(admins.map(a=>act({type:'start'},a)));
+ await Promise.all(admins.map(a=>act({type:'start',round:0,expectedFinalRound:null,asFinal:false},a)));
  const current=await Promise.all(groups.map(g=>Promise.all(g.map(async s=>(await get(s)).data))));
  for(const[i,views]of current.entries()){assert.equal(views.length,[2,3,6][i]);assert.ok(views.every(v=>v.activeCount===views.length&&v.round===1&&v.players.length===views.length));assert.deepEqual(new Set(views.map(v=>v.me.id)),new Set(groups[i].map(s=>s.view.me.id)));}
  await act({type:'pause'},admins[0]);assert.equal((await get(admins[0])).data.paused,true);assert.equal((await get(admins[1])).data.paused,false);await act({type:'resume'},admins[0]);
  await act({type:'roundtable'},admins[0]);await act({type:'finishVoting'},admins[0]);assert.equal((await get(admins[0])).data.history.length,1);assert.equal((await get(admins[1])).data.history.length,0);assert.equal((await get(admins[1])).data.phase,'playing');
- await act({type:'nextRound',round:1},admins[0]);assert.equal((await get(admins[0])).data.round,2);assert.equal((await get(admins[1])).data.round,1);
+ await act({type:'nextRound',round:1,expectedFinalRound:null,asFinal:false},admins[0]);assert.equal((await get(admins[0])).data.round,2);assert.equal((await get(admins[1])).data.round,1);
  await act({type:'end'},admins[0]);const ended=await preview({invite:admins[0].view.inviteKey});assert.equal(ended.status,200);assert.equal((await act({type:'login',code:admins[0].view.code,invite:admins[0].view.inviteKey,passcode:'031415'})).view.phase,'ended');
  const a=admins[1],b=admins[2];let wrong='999999';while(groups[1].some(s=>s.passcode===wrong))wrong=String((Number(wrong)+1)%1000000).padStart(6,'0');for(let i=0;i<8;i++)assert.equal((await raw({type:'login',code:a.view.code,invite:a.view.inviteKey,passcode:wrong})).status,401);
  assert.equal((await raw({type:'login',code:a.view.code,invite:a.view.inviteKey,passcode:a.passcode})).status,429);assert.equal((await act({type:'login',code:b.view.code,invite:b.view.inviteKey,passcode:b.passcode})).view.me.isAdmin,true);

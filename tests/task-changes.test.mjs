@@ -10,7 +10,7 @@ function fixture(count=3,rng=n=>n-1){
 const killer=g=>g.active.find(id=>g.roles[id]==='traitor');
 const change=g=>({type:'changeMission',round:g.round,missionId:g.mission.id});
 const replace=g=>applyAction(g,killer(g),change(g),now,()=>0);
-function nextRound(g,rng=n=>n-1){openVoting(g);finishRound(g,now);applyAction(g,g.adminId,{type:'nextRound',round:g.round},now,rng);}
+function nextRound(g,rng=n=>n-1){openVoting(g);finishRound(g,now);applyAction(g,g.adminId,{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,rng);}
 
 test('the approved library has 31 distinct murder tasks and keeps all 34 recognition signals',()=>{
   const ids=['removable-sticker','hold-object','lend-object','help-carry','pick-up-object','put-in-bin','open-door','switch-light','another-room','write-word-number','fold-paper','read-aloud','tell-joke','sing-song','say-thank-you','answer-number','finish-phrase','wave-back','clap-hands','copy-gesture','change-volume','explain-something','say-dont-know','say-cheers','bless-you','high-five','fist-bump','look-over-there','swap-places','strike-pose','say-what'];
@@ -127,6 +127,6 @@ test('the final task is saved as the murder method, while scoring and roles are 
   assert.equal(g.results.murderedId,victim);assert.deepEqual(g.results.murderMethod,method);
   assert.equal(g.results.players.find(p=>p.id===id).delta,1);
   assert.equal(g.results.players.find(p=>p.id===victim).delta,5);
-  applyAction(g,g.adminId,{type:'nextRound',round:g.round},now,n=>n-1);replace(g);
+  applyAction(g,g.adminId,{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,n=>n-1);replace(g);
   assert.deepEqual(g.history[0].murderMethod,method);
 });

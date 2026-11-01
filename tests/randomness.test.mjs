@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeGame,addPlayer,startRound,openVoting,finishRound,tick,drawTraitors,traitorWeights,traitorCountFor,applyAction,publicView} from '../lib/game/engine.mjs';
-const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round},at,rng);
+const nextRound=(g,at,rng)=>applyAction(g,g.adminId,{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},at,rng);
 const base=1000000;
 function lobby(count){
   const g=makeGame('ABC234','Random roles',{id:'p0',name:'Player 0'},base);
@@ -77,7 +77,7 @@ test('weighted assignment recalculates the correct ratio without duplicate trait
 test('admin starts redraw after early roundtables with 3, 4, 3, 6 and 6 players',t=>{
   const entropy=t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=0;return array;});
   let g=lobby(3),now=base;const act=(id,action)=>{applyAction(g,id,action,now);g=JSON.parse(JSON.stringify(g));};
-  act('p0',{type:'start'});
+  act('p0',{type:'start',round:g.round,expectedFinalRound:null,asFinal:false});
   for(const [i,count] of [3,4,3,6,6].entries()){
     assert.equal(g.round,i+1);assert.equal(g.active.length,count);assert.equal(traitors(g).length,traitorCountFor(count));
     const before={...g.roles},calls=entropy.mock.callCount();now+=1000;act('p0',{type:'roundtable'});
@@ -97,7 +97,7 @@ test('admin starts redraw after early roundtables with 3, 4, 3, 6 and 6 players'
 });
 test('an early roundtable cannot redraw roles while results wait for the admin',t=>{
   const entropy=t.mock.method(globalThis.crypto,'getRandomValues',array=>{array[0]=0;return array;});
-  const g=lobby(3);applyAction(g,'p0',{type:'start'},base);const first=traitors(g);
+  const g=lobby(3);applyAction(g,'p0',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},base);const first=traitors(g);
   applyAction(g,'p0',{type:'roundtable'},base+1000);
   for(const id of g.active)applyAction(g,id,{type:'ballot',target:first.includes(id)?null:first[0],...(g.roles[id]==='faithful'?{suspectedAttempt:false}:{})},base+1000);
   const calls=entropy.mock.callCount();assert.equal(g.phase,'results');

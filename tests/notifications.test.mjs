@@ -117,7 +117,7 @@ test('enabling during a vote does not replay it; the following round still alert
   const f=fixture(),g=f.game();await open(f,g);await listen(f,g);let calls=0;const send=async()=>{calls++;return new Response(null,{status:201});};
   await deliverNotifications(f.db,now+2000,send);assert.equal(calls,0);
   let row=f.row(g.code);applyAction(g,'p0',{type:'finishVoting'},now+3000);await saveGame(f.db,row,g,now+3000);
-  row=f.row(g.code);applyAction(g,'p0',{type:'nextRound',round:g.round},now+4000,n=>n-1);await saveGame(f.db,row,g,now+4000);
+  row=f.row(g.code);applyAction(g,'p0',{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now+4000,n=>n-1);await saveGame(f.db,row,g,now+4000);
   await open(f,g,now+5000);await deliverNotifications(f.db,now+6000,send);assert.equal(calls,1);f.sql.close();
 });
 test('a paused roundtable waits for resume before sending and no longer waits after resume',async()=>{
@@ -145,7 +145,7 @@ test('a dispute deadline settles and reverses points with every client closed, w
   await advanceDueGames(f.db,now+200000);const saved=JSON.parse(f.row(g.code).state);assert.deepEqual(saved.players.map(p=>p.score),[0,0]);assert.equal(saved.results.review.adminTieBreak,'discard');assert.equal(f.row(g.code).next_event_at,null);assert.equal(f.sql.prepare('SELECT count(*) AS n FROM push_events').get().n,1);f.sql.close();
   const timed=fixture(),h=timed.game();addPlayer(h,{id:'p2',name:'Third'});addPlayer(h,{id:'p3',name:'Fourth'});addPlayer(h,{id:'p4',name:'Fifth'});
   // Start a fresh five-player round, with no real sleeping or clock patching.
-  applyAction(h,'p0',{type:'roundtable'},now+1000);applyAction(h,'p0',{type:'finishVoting'},now+2000);applyAction(h,'p0',{type:'nextRound',round:1},now+3000,n=>n-1);applyAction(h,'p0',{type:'roundtable'},now+4000);applyAction(h,'p0',{type:'finishVoting'},now+5000);
+  applyAction(h,'p0',{type:'roundtable'},now+1000);applyAction(h,'p0',{type:'finishVoting'},now+2000);applyAction(h,'p0',{type:'nextRound',round:1,expectedFinalRound:h.finalRound??null,asFinal:false},now+3000,n=>n-1);applyAction(h,'p0',{type:'roundtable'},now+4000);applyAction(h,'p0',{type:'finishVoting'},now+5000);
   applyAction(h,'p0',{type:'openDispute',round:2},now+6000);for(let i=0;i<4;i++)applyAction(h,`p${i}`,{type:'disputeVote',round:2,choice:i%2?'keep':'discard'},now+7000);
   await saveGame(timed.db,timed.row(h.code),h,now+7000);assert.equal(timed.row(h.code).next_event_at,h.dispute.deadline);
   await advanceDueGames(timed.db,h.dispute.deadline-1);assert.equal(JSON.parse(timed.row(h.code).state).dispute.status,'open');

@@ -12,7 +12,7 @@ try{
   const created=await request({type:'create',name:'Alex',gameName:'Task-change integration',adminPasscode:'031415'});assert.equal(created.status,201);admin=created.data;
   const players=[admin],invite=admin.view.inviteKey;
   async function join(name){const r=await request({type:'join',name,code:admin.view.code,invite});assert.equal(r.status,200);players.push(r.data);return r.data;}
-  await join('Sam');await join('Jo');await action(admin,{type:'start'});await Promise.all(players.map(read));
+  await join('Sam');await join('Jo');await action(admin,{type:'start',round:0,expectedFinalRound:null,asFinal:false});await Promise.all(players.map(read));
   let killer=players.find(p=>p.view.secret?.role==='traitor'),innocent=players.find(p=>p.view.secret?.role==='faithful');
   const first=killer.view.secret.mission,round=killer.view.round;
   const change={type:'changeMission',round,missionId:first.id};
@@ -33,9 +33,9 @@ try{
   await action(killer,{type:'ballot',target:innocent.view.me.id});
   for(const p of players.filter(p=>p!==killer&&p!==late))await action(p,{type:'ballot',target:killer.view.me.id,suspectedAttempt:p===innocent});
   await read(admin);assert.equal(admin.view.phase,'results');assert.deepEqual(admin.view.results.murderMethod,finalTask);
-  await action(admin,{type:'nextRound',round});await Promise.all(players.map(read));
+  await action(admin,{type:'nextRound',round,expectedFinalRound:null,asFinal:false});await Promise.all(players.map(read));
   killer=players.find(p=>p.view.secret?.role==='traitor');assert.equal(killer.view.secret.missionChangesRemaining,2);
-  await join('Player five');await join('Player six');await action(admin,{type:'roundtable'});await action(admin,{type:'finishVoting'});await action(admin,{type:'nextRound',round:admin.view.round});
+  await join('Player five');await join('Player six');await action(admin,{type:'roundtable'});await action(admin,{type:'finishVoting'});await action(admin,{type:'nextRound',round:admin.view.round,expectedFinalRound:null,asFinal:false});
   await Promise.all(players.map(read));const team=players.filter(p=>p.view.secret?.role==='traitor');assert.equal(team.length,2);
   for(const p of team){assert.equal(p.view.secret.missionChangesRemaining,undefined);assert.match((await action(p,{type:'changeMission',round:p.view.round,missionId:p.view.secret.mission.id},400)).error,/Only a solo Killer/);}
   console.log('PASS: private solo task changes, paused/unauthorised rejection, simultaneous stale-request protection, sign-in persistence, exactly two replacements, final murder method, reset next round and multiple-Killer rejection.');

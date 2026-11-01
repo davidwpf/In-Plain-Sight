@@ -7,7 +7,7 @@ function game(phase='lobby'){
   const g=makeGame('ABC234','Admin handover',{id:'a',name:'Alex',loginHash:'alex-code',tokenHashes:['alex-token']},now);
   addPlayer(g,{id:'b',name:'Ben',loginHash:'ben-code',tokenHashes:['ben-token']});
   addPlayer(g,{id:'c',name:'Charlie'});
-  if(phase!=='lobby')applyAction(g,'a',{type:'start'},now,n=>n-1);
+  if(phase!=='lobby')applyAction(g,'a',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,n=>n-1);
   if(['voting','results'].includes(phase))applyAction(g,'a',{type:'roundtable'},now);
   if(phase==='results')applyAction(g,'a',{type:'finishVoting'},now);
   return g;
@@ -28,7 +28,7 @@ for(const phase of ['lobby','playing','voting','results'])for(const action of ['
 
 test('an admin can sit out and keep every admin permission',()=>{
   const g=game();applyAction(g,'a',{type:'ready',ready:false},now);assert.equal(g.adminId,'a');assert.equal(g.adminRevision,0);
-  applyAction(g,'a',{type:'start'},now,n=>n-1);assert.equal(publicView(g,'a',now).secret,null);
+  applyAction(g,'a',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,n=>n-1);assert.equal(publicView(g,'a',now).secret,null);
   applyAction(g,'a',{type:'roundtable'},now);applyAction(g,'a',{type:'finishVoting'},now);assert.equal(g.phase,'results');
 });
 
@@ -41,10 +41,10 @@ test('the old admin immediately loses all admin actions, including in a stale ta
 test('the new admin can manage every phase using their existing player identity',()=>{
   const g=game(),credentials=structuredClone(player(g,'b'));transfer(g);
   assert.equal(player(g,'b').loginHash,credentials.loginHash);assert.deepEqual(player(g,'b').tokenHashes,credentials.tokenHashes);
-  applyAction(g,'b',{type:'start'},now,n=>n-1);assert.deepEqual(g.active,['b','c']);
+  applyAction(g,'b',{type:'start',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,n=>n-1);assert.deepEqual(g.active,['b','c']);
   applyAction(g,'b',{type:'pause'},now);applyAction(g,'b',{type:'resume'},now);
   applyAction(g,'b',{type:'roundtable'},now);applyAction(g,'b',{type:'finishVoting'},now);
-  applyAction(g,'b',{type:'nextRound',round:g.round},now,n=>n-1);assert.equal(g.round,2);
+  applyAction(g,'b',{type:'nextRound',round:g.round,expectedFinalRound:g.finalRound??null,asFinal:false},now,n=>n-1);assert.equal(g.round,2);
   applyAction(g,'b',{type:'end'},now);assert.equal(g.phase,'ended');
 });
 
@@ -128,7 +128,7 @@ test('handover works for saved games without the new optional fields and survive
   const g=game('results');delete g.adminRevision;transfer(g,'ready');
   const restored=JSON.parse(JSON.stringify(g));assert.equal(restored.adminId,'b');assert.equal(restored.adminRevision,1);
   assert.equal(publicView(restored,'b',now).me.isAdmin,true);assert.equal(player(restored,'a').nextActive,false);
-  applyAction(restored,'b',{type:'nextRound',round:restored.round},now,n=>n-1);assert.equal(restored.phase,'playing');
+  applyAction(restored,'b',{type:'nextRound',round:restored.round,expectedFinalRound:restored.finalRound??null,asFinal:false},now,n=>n-1);assert.equal(restored.phase,'playing');
 });
 
 test('ended games cannot transfer admin control or change readiness',()=>{
