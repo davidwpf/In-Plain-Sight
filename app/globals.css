@@ -371,3 +371,21 @@ input::placeholder{color:#777}
   .murdered-badge{font-size:12px}
   .score-breakdown li{gap:12px;font-size:14px;line-height:1.6}
 }
+/* Dispute decisions stay with the results, without adding another game phase. */
+.dispute-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;margin-bottom:18px;border-block:1px solid var(--border);font-size:14px;color:var(--muted)}
+.dispute-entry .text-button{font-size:14px;white-space:normal;text-align:right}
+.dispute-panel,.review-notice{border:1px solid var(--ink);padding:22px;margin:0 0 24px;overflow-wrap:anywhere}
+.dispute-heading{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.dispute-heading h2{font-size:23px;line-height:1.2;margin:8px 0 14px}
+.dispute-clock{font-size:24px;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.dispute-panel p,.review-notice p{font-size:15px;line-height:1.6;margin:0 0 12px}
+.dispute-panel .fine,.review-notice .fine{font-size:13px;line-height:1.6}
+.dispute-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 14px}
+.dispute-actions .button{min-height:48px;white-space:normal;line-height:1.4}
+.dispute-locked{display:flex;align-items:start;gap:10px;padding:15px;background:var(--panel);border:1px solid var(--border);margin:18px 0 14px;font-size:15px;line-height:1.5}
+.dispute-locked svg{flex-shrink:0;margin-top:2px}
+.dispute-panel .dispute-progress{font-size:13px;color:var(--muted);margin:0}
+.review-notice>b{display:block;font-size:17px;margin-bottom:8px}
+.admin-dispute-note{font-size:13px;line-height:1.5;margin:0 0 18px;color:var(--muted)}
+.reveal-story{margin-bottom:24px}
+@media(max-width:480px){.dispute-entry{align-items:start;flex-direction:column;gap:6px}.dispute-entry .text-button{text-align:left}.dispute-panel,.review-notice{padding:18px}.dispute-heading h2{font-size:21px}.dispute-clock{font-size:21px}.dispute-actions{grid-template-columns:1fr;gap:10px}}

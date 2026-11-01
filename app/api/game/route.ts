@@ -93,6 +93,6 @@ export async function POST(req:Request){
         delete g.loginAttempts[clientKey];const token=crypto.randomUUID()+crypto.randomUUID();p.tokenHashes=[...(p.tokenHashes||[]).slice(-4),await hashSecret(token)];p.left=false;tick(g);return ok({token,passcode:body.passcode,view:gameView(g,p.id,row.expires_at)});
       });
     }
-    return await update(gameCode,async(g,row)=>{const p=await tokenPlayer(req,g);if(!p)return fail('Enter your player code to return to the game.',401);applyAction(g,p.id,body);return ok(gameView(g,p.id,row.expires_at));});
+    return await update(gameCode,async(g,row)=>{const p=await tokenPlayer(req,g);if(!p)return fail('Enter your player code to return to the game.',401);tick(g);const candidate=structuredClone(g);try{applyAction(candidate,p.id,body);}catch(e){return fail(e instanceof Error?e.message:'Unable to update the game.');}Object.assign(g,candidate);return ok(gameView(g,p.id,row.expires_at));});
   }catch(e){return respond(fail(e instanceof Error?e.message:'Unable to update the game.'));}
 }

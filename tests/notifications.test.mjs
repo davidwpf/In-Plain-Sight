@@ -134,3 +134,21 @@ test('test delivery failures show a useful message without exposing runtime deta
   const f=fixture(),g=f.game(),sub=await listen(f,g);
   await assert.rejects(notificationAction(f.db,g,{id:'p0'},{type:'testNotification',endpoint:sub.endpoint},now,async()=>{throw new Error('Private runtime detail');}),error=>error.message==='The test could not be delivered. Check your connection and try again.');f.sql.close();
 });
+
+test('a dispute deadline settles and reverses points with every client closed, without a Court alert',async()=>{
+  const f=fixture(),g=f.game();await open(f,g);let row=f.row(g.code);
+  applyAction(g,'p0',{type:'finishVoting'},now+2000);await saveGame(f.db,row,g,now+2000);
+  const original=g.players.map(p=>p.score);assert.deepEqual(original,[-2,-2]);
+  row=f.row(g.code);applyAction(g,'p0',{type:'openDispute',round:1},now+3000);applyAction(g,'p0',{type:'disputeVote',round:1,choice:'discard'},now+4000);applyAction(g,'p1',{type:'disputeVote',round:1,choice:'keep'},now+4001);await saveGame(f.db,row,g,now+4001);
+  // Both ballots already settle this tie. Neither a new Court event nor a
+  // repeated scheduled invocation can reverse those points a second time.
+  await advanceDueGames(f.db,now+200000);const saved=JSON.parse(f.row(g.code).state);assert.deepEqual(saved.players.map(p=>p.score),[0,0]);assert.equal(saved.results.review.adminTieBreak,'discard');assert.equal(f.row(g.code).next_event_at,null);assert.equal(f.sql.prepare('SELECT count(*) AS n FROM push_events').get().n,1);f.sql.close();
+  const timed=fixture(),h=timed.game();addPlayer(h,{id:'p2',name:'Third'});addPlayer(h,{id:'p3',name:'Fourth'});addPlayer(h,{id:'p4',name:'Fifth'});
+  // Start a fresh five-player round, with no real sleeping or clock patching.
+  applyAction(h,'p0',{type:'roundtable'},now+1000);applyAction(h,'p0',{type:'finishVoting'},now+2000);applyAction(h,'p0',{type:'nextRound',round:1},now+3000,n=>n-1);applyAction(h,'p0',{type:'roundtable'},now+4000);applyAction(h,'p0',{type:'finishVoting'},now+5000);
+  applyAction(h,'p0',{type:'openDispute',round:2},now+6000);for(let i=0;i<4;i++)applyAction(h,`p${i}`,{type:'disputeVote',round:2,choice:i%2?'keep':'discard'},now+7000);
+  await saveGame(timed.db,timed.row(h.code),h,now+7000);assert.equal(timed.row(h.code).next_event_at,h.dispute.deadline);
+  await advanceDueGames(timed.db,h.dispute.deadline-1);assert.equal(JSON.parse(timed.row(h.code).state).dispute.status,'open');
+  await advanceDueGames(timed.db,h.dispute.deadline);const ended=JSON.parse(timed.row(h.code).state);assert.equal(ended.dispute.status,'discarded');assert.deepEqual(ended.players.map(p=>p.score),[-2,-2,0,0,0]);assert.equal(timed.row(h.code).next_event_at,null);
+  const stable=timed.row(h.code).state;await advanceDueGames(timed.db,h.dispute.deadline+60000);assert.equal(timed.row(h.code).state,stable);timed.sql.close();
+});
