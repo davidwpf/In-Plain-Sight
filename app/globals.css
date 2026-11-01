@@ -271,7 +271,11 @@ input::placeholder{color:#777}
 .role-rules-body p{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 14px}
 .role-rules-body b{color:var(--ink);font-weight:600}
 .role-rules-body .text-button{font-size:14px;min-height:44px}
-.role-hide-action{min-height:48px;font-size:14px;margin-top:0}
+.role-card>.private-heading{flex-wrap:wrap;gap:8px 15px}
+.role-heading-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-left:auto}
+.role-heading-actions>span{font-size:11px;letter-spacing:1px;white-space:nowrap}
+.role-heading-actions .role-hide-inline{min-height:44px;padding:8px 0;font-size:14px;white-space:nowrap}
+.role-hide-action{display:none;min-height:48px;font-size:14px;margin-top:0}
 .ballot-intro{margin-top:18px}
 .ballot-intro h2{font-size:34px;line-height:1.15;margin:10px 0}
 .ballot-intro p{font-size:15px;line-height:1.6}
@@ -320,7 +324,7 @@ input::placeholder{color:#777}
   .sealed-role>p{font-size:15px}
   .secret-details>section{padding:17px 0}
   .private-role-open .game-main{padding-bottom:100px}
-  .role-hide-action{position:fixed;z-index:25;left:0;right:0;bottom:0;width:100%;margin:0;border-top:1px solid var(--ink);background:#fff;color:var(--ink);min-height:60px;padding:14px 20px calc(14px + env(safe-area-inset-bottom));font-size:15px}
+  .role-hide-action{display:flex;position:fixed;z-index:25;left:0;right:0;bottom:0;width:100%;margin:0;border-top:1px solid var(--ink);background:#fff;color:var(--ink);min-height:60px;padding:14px 20px calc(14px + env(safe-area-inset-bottom));font-size:15px}
   .role-hide-action:hover{background:#f5f5f5}
   .ballot-intro h2{font-size:32px}
   .result-row>summary{gap:9px;padding:14px 0}
@@ -337,3 +341,8 @@ input::placeholder{color:#777}
   .role-reveal h2{font-size:36px;letter-spacing:-1px}
   .role-reveal>p{grid-column:2;margin:0}
 }
+
+/* Make the matching victim reports an essential part of the task, not a footnote. */
+.mission-note p{font-size:14px;line-height:1.65;color:inherit;margin:0 0 12px}
+.mission-note p:last-child{margin-bottom:0}
+.mission-note .matching-report-rule b{font-weight:650}
