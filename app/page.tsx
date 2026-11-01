@@ -17,7 +17,19 @@ function Mark(){return <svg className="mark" viewBox="0 0 64 64" fill="none" str
 function Logo(){return <span className="brand"><Mark/><span>IN PLAIN SIGHT</span></span>;}
 function Modal({title,close,children,wide=false}:{title:string;close:()=>void;children:React.ReactNode;wide?:boolean}){
   const ref=useRef<HTMLDivElement>(null),closeRef=useRef(close);closeRef.current=close;
-  useEffect(()=>{const previous=document.activeElement as HTMLElement;ref.current?.querySelector<HTMLElement>('button,input,select')?.focus();const key=(event:KeyboardEvent)=>{if(event.key==='Escape')closeRef.current();if(event.key==='Tab'){const items=ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled),input,select,a[href],summary');if(!items?.length)return;const first=items[0],last=items[items.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}};document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);previous?.focus();};},[]);
+  useEffect(()=>{
+    const previous=document.activeElement as HTMLElement;
+    const key=(event:KeyboardEvent)=>{
+      if(event.key==='Escape')closeRef.current();
+      if(event.key!=='Tab')return;
+      const items=Array.from(ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],summary,[tabindex]:not([tabindex="-1"])')??[]).filter(item=>item.tabIndex>=0&&item.getClientRects().length>0);
+      if(!items.length)return;
+      const first=items[0],last=items[items.length-1],outside=!ref.current?.contains(document.activeElement);
+      if(outside||event.shiftKey&&document.activeElement===first||!event.shiftKey&&document.activeElement===last){event.preventDefault();(event.shiftKey?last:first).focus();}
+    };
+    document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);if(previous?.isConnected)previous.focus();};
+  },[]);
+  useEffect(()=>{ref.current?.querySelector<HTMLElement>('button,input,select')?.focus();},[title]);
   return <div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)close();}}><div ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`modal ${wide?'wide':''}`}><div className="modal-top"><span className="eyebrow">IN PLAIN SIGHT</span><button className="icon-button" onClick={close} aria-label="Close dialog"><X size={20}/></button></div><h2>{title}</h2>{children}</div></div>;
 }
 function Rules(){return <div className="rules">

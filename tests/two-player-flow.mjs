@@ -41,7 +41,8 @@ try{
  await action({type:'ready',ready:true},returned);assert.equal((await view(admin)).activeCount,2);
  await action({type:'roundtable'},admin);await action({type:'finishVoting'},admin);await advance();
  assert.equal((await view(returned)).activeCount,3);assert.ok((await view(returned)).secret);
- await action({type:'leave'},admin);await action({type:'roundtable'},admin);await action({type:'finishVoting'},admin);await advance();
+ assert.equal((await raw({type:'leave'},admin)).status,400);
+ await action({type:'ready',ready:false},admin);await action({type:'roundtable'},admin);await action({type:'finishVoting'},admin);await advance();
  const spectator=await view(admin);assert.equal(spectator.me.isAdmin,true);assert.equal(spectator.me.active,false);assert.equal(spectator.secret,null);assert.equal(spectator.traitorCount,null);assert.equal(spectator.activeCount,2);
  await action({type:'leave'},returned);await action({type:'roundtable'},admin);await action({type:'finishVoting'},admin);
  const held=await view(other);assert.equal(held.phase,'results');assert.equal(held.readyCount,1);assert.equal(held.roundMinutes,60);assert.equal((await raw({type:'nextRound',round:held.round,expectedFinalRound:null,asFinal:false},admin)).status,400);

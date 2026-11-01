@@ -29,7 +29,7 @@ try{
   assert.equal(new Set([first.id,second.id,finalTask.id]).size,3);assert.equal(killer.view.secret.missionChangesRemaining,0);
   assert.match((await action(killer,{type:'changeMission',round,missionId:finalTask.id},400)).error,/No change left\./);
   await read(innocent);assert.equal(innocent.view.secret.mission,undefined);assert.equal(innocent.view.secret.missionChangesRemaining,undefined);
-  await action(admin,{type:'roundtable'});assert.match((await action(killer,{type:'changeMission',round,missionId:finalTask.id},400)).error,/before the roundtable/);
+  await action(admin,{type:'roundtable'});assert.match((await action(killer,{type:'changeMission',round,missionId:finalTask.id},400)).error,/before Court opens/);
   await action(killer,{type:'ballot',target:innocent.view.me.id});
   for(const p of players.filter(p=>p!==killer&&p!==late))await action(p,{type:'ballot',target:killer.view.me.id,suspectedAttempt:p===innocent});
   await read(admin);assert.equal(admin.view.phase,'results');assert.deepEqual(admin.view.results.murderMethod,finalTask);
