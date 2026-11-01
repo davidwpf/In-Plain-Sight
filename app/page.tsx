@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {QRCodeSVG} from 'qrcode.react';
-import {roleLabel,scoreBreakdown,resultDetails,personalResult,roundSummary,pointsLabel} from '../lib/game/presentation.mjs';
+import {roleLabel,scoreBreakdown,resultDetails,resultOutcome,personalResult,roundSummary,pointsLabel} from '../lib/game/presentation.mjs';
 import {createGamePoller,POLL_REQUEST_TIMEOUT_MS} from '../lib/game/polling.mjs';
 import {DAGGER_HANDLE,DAGGER_PATHS,DAGGER_TRANSFORM} from '../lib/dagger.mjs';
 import {detachNotifications} from '../lib/notifications/client.mjs';
@@ -332,7 +332,7 @@ function Results({results,me,showMurderSummary=true}:{results:Any;me:string;show
         <ChevronDown size={17} className="result-chevron" aria-hidden="true"/>
       </summary>
       <div className="result-expanded">
-        <p className="result-outcome">{[results.rulesVersion>=2&&p.role==='traitor'?(p.killed?'Murderer':p.accomplice?'Accomplice':p.reportedVictim&&p.performed?'Failed attempt':null):null,p.attempted?(p.attemptedBy?.length?'Survived attempt':'Named in a report'):null,p.caught&&(p.role==='traitor'||results.mode!=='two-player')?(p.role==='traitor'?'Caught':'Received most votes'):null].filter(Boolean).join(' · ')}</p>
+        <p className="result-outcome">{resultOutcome(p,results)}</p>
         <ul className="score-breakdown" aria-label={`Points breakdown for ${p.name}`}>{scoreBreakdown(p,results).map((line:Any,i:number)=><li key={i}><span>{line.text}.</span><strong>{pointsLabel(line.points)}</strong></li>)}</ul>
         <div className="result-detail">{resultDetails(p,results).map((detail:string,i:number)=><span key={i}>{detail}</span>)}</div>
       </div>

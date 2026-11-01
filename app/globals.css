@@ -296,7 +296,7 @@ input::placeholder{color:#777}
 .result-chevron{flex-shrink:0;margin-left:4px;color:var(--muted)}
 .result-expanded{padding:0 0 18px 47px}
 .result-expanded>p{font-size:14px;line-height:1.7;margin:0 0 10px}
-.result-outcome{font-weight:600;color:var(--ink)}
+.result-outcome{font-size:15px;line-height:1.7;font-weight:500;color:var(--ink);overflow-wrap:anywhere}
 .result-outcome:empty{display:none}
 .result-reason{color:var(--muted)}
 .result-expanded .result-detail,.past-rounds .result-expanded .result-detail{display:flex;flex-direction:column;align-items:flex-start;gap:5px;margin:0;font-size:13px;line-height:1.6}
