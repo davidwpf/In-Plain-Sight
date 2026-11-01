@@ -391,8 +391,6 @@ input::placeholder{color:#777}
 @media(max-width:480px){.dispute-entry{align-items:start;flex-direction:column;gap:6px}.dispute-entry .text-button{text-align:left}.dispute-panel,.review-notice{padding:18px}.dispute-heading h2{font-size:21px}.dispute-clock{font-size:21px}.dispute-actions{grid-template-columns:1fr;gap:10px}}
 
 /* A clear finish, with the same small-screen layout as the rest of the game. */
-.final-plan-entry{display:flex;justify-content:flex-end;margin:-3px 0 12px}
-.final-plan-entry .text-button{font-size:13px;line-height:1.4}
 .final-round-banner{display:flex;align-items:flex-start;gap:12px;padding:15px 16px;border:1px solid var(--ink);margin:0 0 18px;background:#f6f6f6;overflow-wrap:anywhere}
 .final-round-banner>svg{margin-top:3px}
 .final-round-banner>div{min-width:0;flex:1}
@@ -429,4 +427,8 @@ input::placeholder{color:#777}
 .award-result>strong{font-size:26px;font-weight:450;line-height:1.2}
 .award-card>.fine{font-size:12px}
 .finish-actions{border-top:1px solid var(--border);padding-top:24px}
-@media(max-width:640px){.game-awards{grid-template-columns:1fr}.winner-panel{padding:30px 18px}.final-round-banner{flex-wrap:wrap}.final-round-banner>.text-button{margin-left:29px}.final-plan-entry .text-button{min-height:36px}.leaderboard-identity>span{font-size:12px}.leaderboard strong>small{font-size:8px}.finish-panel .winner-panel h2{font-size:36px}}
+@media(max-width:640px){.game-awards{grid-template-columns:1fr}.winner-panel{padding:30px 18px}.final-round-banner{flex-wrap:wrap}.final-round-banner>.text-button{margin-left:29px}.leaderboard-identity>span{font-size:12px}.leaderboard strong>small{font-size:8px}.finish-panel .winner-panel h2{font-size:36px}}
+
+.round-start-buttons{display:grid;gap:12px;margin:24px 0 6px}
+.round-start-buttons .button{white-space:normal;line-height:1.4;min-height:48px}
+.round-start-choice>.form-error{margin-top:14px}
