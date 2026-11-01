@@ -1,6 +1,6 @@
 # Editing recognition signals and murder tasks
 
-Edit `tasks.json` in this folder. The library contains 34 recognition signals and 23 distinct murder tasks. These are site content, separate from admin controls and player settings.
+Edit `tasks.json` in this folder. The library contains 34 recognition signals and 31 distinct murder tasks. These are site content, separate from admin controls and player settings.
 
 There are two independent lists. Add an entry by copying an existing one and changing its `id` and wording. Every entry needs a unique `id` within its list. Keep the JSON commas and quotation marks valid.
 

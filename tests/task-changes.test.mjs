@@ -12,10 +12,10 @@ const change=g=>({type:'changeMission',round:g.round,missionId:g.mission.id});
 const replace=g=>applyAction(g,killer(g),change(g),now,()=>0);
 function nextRound(g,rng=n=>n-1){openVoting(g);finishRound(g,now);applyAction(g,g.adminId,{type:'nextRound',round:g.round},now,rng);}
 
-test('the approved library has 23 distinct murder tasks and keeps all 34 recognition signals',()=>{
-  const ids=['removable-sticker','hold-object','lend-object','help-carry','pick-up-object','put-in-bin','open-door','switch-light','another-room','write-word-number','fold-paper','read-aloud','tell-joke','sing-song','say-thank-you','answer-number','finish-phrase','wave-back','clap-hands','copy-gesture','change-volume','explain-something','say-dont-know'];
+test('the approved library has 31 distinct murder tasks and keeps all 34 recognition signals',()=>{
+  const ids=['removable-sticker','hold-object','lend-object','help-carry','pick-up-object','put-in-bin','open-door','switch-light','another-room','write-word-number','fold-paper','read-aloud','tell-joke','sing-song','say-thank-you','answer-number','finish-phrase','wave-back','clap-hands','copy-gesture','change-volume','explain-something','say-dont-know','say-cheers','bless-you','high-five','fist-bump','look-over-there','swap-places','strike-pose','say-what'];
   assert.deepEqual(CONTENT.murders.map(t=>t.id),ids);assert.equal(CONTENT.recognition.length,34);
-  assert.equal(new Set(CONTENT.murders.map(t=>t.instruction)).size,23);
+  assert.equal(new Set(CONTENT.murders.map(t=>t.instruction)).size,31);
 });
 test('a solo Killer can make exactly two changes, with three different tasks even for the same random draw',()=>{
   const g=fixture(),id=killer(g),seen=[g.mission.id];
