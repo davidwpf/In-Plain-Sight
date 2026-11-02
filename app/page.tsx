@@ -323,11 +323,7 @@ export default function Home(){
             <div className="secret-details">
               {v.secret.signal&&<section className="recognition-block"><span className="eyebrow">RECOGNITION SIGNAL</span>{v.secret.signal.reply?<><p className="signal-question">“{v.secret.signal.prompt}”</p><p>Reply:</p><blockquote>“{v.secret.signal.reply}”</blockquote><p className="fine">All Killers have this question and reply.</p></>:<><p className="signal-instruction">{v.secret.signal.prompt}</p><p className="fine">Use this signal to find the other Killers.</p></>}</section>}
               <section className="murder-task-block"><span className="eyebrow">MURDER TASK</span><h3>{v.secret.mission.title}</h3><p className="murder-task-instruction">{v.secret.mission.instruction}</p>
-                <div className="mission-note killer-team-note">{soloKiller?<p>Complete the task, then report your victim at Court.</p>:<>
-                  <p>At least one Killer reporting the victim must complete the task.</p>
-                  <p className="matching-report-rule"><b>{v.traitorCount===2?'Both Killers must report the same victim at Court.':'At least two of the three Killers must report the same victim at Court.'}</b></p>
-                </>}</div>
-                <p className="fine murder-task-limit">One person per round. Keep your victim secret until results.</p>
+                <div className="mission-note killer-team-note"><p className="matching-report-rule">Choose one victim per round and keep them secret until results. {soloKiller?'Complete the task, then report your victim at Court.':<><b>{v.traitorCount===2?'Both Killers':'At least two of the three Killers'} must report that victim at Court</b>, including at least one who completed the task.</>}</p></div>
               </section>
             </div>
             <TaskChangeControls solo={soloKiller} remaining={taskChangesRemaining} request={missionRequest} disabled={busy||v.paused} onRequest={()=>{setError('');setTaskChangeError('');setTaskToChange({round:v.round,missionId:v.secret.mission.id,requestRevision:v.secret.missionChangeRevision??0});setModal('changeMission');polling.current?.checkNow();}} onReview={()=>{setError('');setTaskChangeError('');setModal('missionChange');polling.current?.checkNow();}}/>
