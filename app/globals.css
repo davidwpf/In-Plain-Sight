@@ -443,3 +443,51 @@ input::placeholder{color:#777}
 .task-change-dialog>p{font-size:14px;line-height:1.6}
 .modal-top-actions{display:flex;align-items:center;gap:12px}
 .modal-top-actions>.text-button{font-size:12px;min-height:44px;gap:6px;white-space:nowrap}
+
+/* Keep private instructions ahead of optional task controls. */
+.killer-role-card .role-reveal{display:grid;grid-template-columns:32px minmax(0,1fr);text-align:left;column-gap:12px;row-gap:5px;padding:22px 0}
+.killer-role-card .role-reveal>svg{grid-row:1/3;width:28px;height:28px;align-self:start;margin-top:5px}
+.killer-role-card .role-reveal h2{font-size:36px;letter-spacing:-1px;line-height:1.15}
+.killer-role-card .role-reveal>p{grid-column:2;font-size:14px;line-height:1.5;margin:0}
+.killer-role-card .secret-details{display:grid;gap:20px}
+.killer-role-card .secret-details .eyebrow{font-size:11px;letter-spacing:1.2px}
+.killer-role-card .secret-details>.recognition-block{border:0;background:#f5f5f5;padding:16px 18px}
+.killer-role-card .recognition-block .signal-instruction,.killer-role-card .secret-details .signal-question,.killer-role-card .secret-details blockquote{font-size:22px;line-height:1.4;letter-spacing:-.35px;font-weight:400;margin:8px 0}
+.killer-role-card .secret-details p,.killer-role-card .secret-details .fine{font-size:15px;line-height:1.65}
+.killer-role-card .recognition-block .fine{margin:0}
+.killer-role-card .secret-details>.murder-task-block{border:0;padding:0 0 20px}
+.killer-role-card .secret-details h3{font-size:22px;line-height:1.4;letter-spacing:-.35px;margin:8px 0}
+.killer-role-card .secret-details .murder-task-instruction{color:var(--ink);margin:0}
+.killer-role-card .killer-team-note{background:transparent;border-left:2px solid var(--border);margin-top:16px;padding:0 0 0 14px}
+.killer-role-card .killer-team-note p{font-size:15px;line-height:1.65;margin:0 0 7px;color:var(--muted)}
+.killer-role-card .killer-team-note .matching-report-rule{color:var(--ink)}
+.killer-role-card .killer-team-note p:last-child{margin-bottom:0}
+.killer-role-card .secret-details .murder-task-limit{margin-top:12px}
+.killer-role-card .role-rules-body p{font-size:15px;line-height:1.65}
+.task-options{border-top:1px solid var(--border)}
+.task-options>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:15px 0;min-height:50px;font-size:15px;line-height:1.5;font-weight:500}
+.task-options>summary::-webkit-details-marker{display:none}
+.task-options>summary::marker{content:''}
+.task-options>summary>span{display:flex;align-items:center;gap:9px}
+.task-options>summary>.task-options-meta{font-size:13px;font-weight:400;color:var(--muted);gap:10px;white-space:nowrap}
+.task-options[open]>summary .task-options-meta>svg{transform:rotate(180deg)}
+.task-options>summary:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.task-options-body{padding:0 0 18px}
+.task-options-body>p{font-size:15px;line-height:1.65;color:var(--muted);margin:0 0 14px}
+.task-options-body>p:last-child{margin-bottom:0}
+.task-options-body>.button{margin:0;font-size:14px}
+.task-change-pending{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#f5f5f5;border-left:2px solid var(--ink);padding:16px;margin-bottom:18px}
+.task-change-pending b{display:block;font-size:15px;line-height:1.5;font-weight:600}
+.task-change-pending p{font-size:15px;line-height:1.65;color:var(--muted);margin-top:4px}
+.task-change-pending>.button{flex-shrink:0;font-size:14px;min-height:44px;gap:8px;padding:10px 14px;background:#fff}
+@media(max-width:640px){
+  .killer-role-card .role-reveal{padding:18px 0;grid-template-columns:28px minmax(0,1fr);gap:4px 10px}
+  .killer-role-card .role-reveal h2{font-size:32px}
+  .killer-role-card .role-reveal>svg{width:24px;height:24px}
+  .killer-role-card .secret-details{gap:18px}
+  .killer-role-card .secret-details>.recognition-block{padding:14px}
+  .task-options>summary{gap:8px}
+  .task-options>summary>span{gap:7px}
+  .task-options>summary>.task-options-meta{gap:7px}
+  .task-change-pending{align-items:stretch;flex-direction:column;gap:12px;padding:14px}
+}

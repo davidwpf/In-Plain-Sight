@@ -1,19 +1,23 @@
-import {EyeOff,RefreshCw} from 'lucide-react';
+import {ChevronDown,EyeOff,RefreshCw} from 'lucide-react';
 
 export type TaskChangeRequest={id:string;status:'open'|'accepted'|'rejected';total:number;acceptedCount:number;requestedByMe:boolean;myDecision:boolean|null;canRespond:boolean};
 type Task={title:string;instruction:string};
 
 export function TaskChangeControls({solo,remaining,request,disabled,onRequest,onReview}:{solo:boolean;remaining:number;request:TaskChangeRequest|null;disabled:boolean;onRequest:()=>void;onReview:()=>void}){
-  return <div className="task-changes">
-    {request?.status==='open'?<>
-      <p className="task-change-status">{request.canRespond?'Another Killer has requested a task change.':`Waiting for the other ${request.total===2?'Killer':'Killers'} to agree.`}</p>
-      <button className="button secondary full" onClick={onReview}>Review task change</button>
-    </>:<>
-      {request&&<p className="task-change-status" role="status">{request.status==='accepted'?'All Killers accepted. The task has changed.':'The request was rejected. The task stays the same.'}</p>}
-      {request?.status==='rejected'?<p className="fine">No more task-change requests this round.</p>:remaining>0?<button className="button secondary full" disabled={disabled} onClick={onRequest}><RefreshCw size={15}/>{solo?'Change task':'Request change'} · {remaining} left</button>:<p className="fine">No change left.</p>}
-    </>}
-    {!solo&&remaining>0&&<p className="fine">Every Killer must accept a change. A new task may be harder, and you cannot go back.</p>}
+  if(request?.status==='open')return <div className="task-change-pending">
+    <div role="status"><b>{request.canRespond?'Task change requested':'Task change pending'}</b><p>{request.canRespond?'Open the request to accept or reject.':'Wait for a decision before attempting a murder.'}</p></div>
+    <button className="button secondary" onClick={onReview}>Review task change</button>
   </div>;
+  return <details className="task-options" key={request?.id??'initial'}>
+    <summary><span><RefreshCw size={15} aria-hidden="true"/> Task options</span><span className="task-options-meta">{request?.status==='rejected'?'Locked this round':remaining>0?`${remaining} left`:'No change left.'}<ChevronDown size={17} aria-hidden="true"/></span></summary>
+    <div className="task-options-body">
+      {request&&<p className="task-change-status" role="status">{request.status==='accepted'?'All Killers accepted. The task has changed.':'The request was rejected. The task stays the same.'}</p>}
+      {request?.status==='rejected'?<p>No more task-change requests this round. You can try again next round.</p>:remaining>0?<>
+        <p>{solo?'You can change your task twice per round.':'Every Killer must accept a change. One rejection stops further requests this round.'} A new task may be harder, and you cannot go back.</p>
+        <button className="button secondary full" disabled={disabled} onClick={onRequest}><RefreshCw size={15}/>{solo?'Change task':'Request change'} · {remaining} left</button>
+      </>:<p>You have used the two changes for this round.</p>}
+    </div>
+  </details>;
 }
 
 export function TaskChangeDialog({request,task,remaining,paused,busy,error,onDecision,onClose,onHide,onDemoDecision}:{request:TaskChangeRequest|null;task:Task;remaining:number;paused:boolean;busy:boolean;error:string;onDecision:(accept:boolean)=>void;onClose:()=>void;onHide:()=>void;onDemoDecision?:(accept:boolean)=>void}){
