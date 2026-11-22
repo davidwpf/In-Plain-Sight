@@ -11,7 +11,6 @@ export function MostLikelyQuestionCard({data,players,busy,paused,error,onAnswer,
 }){
   const [choice,setChoice]=useState('');
   return <section className="most-likely-question" aria-label="A question for you">
-    <p className="most-likely-role-task">Your task is to identify a Killer.</p>
     <span className="eyebrow">A QUESTION FOR YOU…</span>
     {data.answerId?<>
       <h3>{data.question.prompt}</h3>
@@ -24,7 +23,7 @@ export function MostLikelyQuestionCard({data,players,busy,paused,error,onAnswer,
           <span>{player.name}</span>
         </label>)}</div>
       </fieldset>
-      <p id="most-likely-help" className="most-likely-help">Just for fun. There are no right or wrong answers, and no points at stake.</p>
+      <p id="most-likely-help" className="most-likely-help">Just for fun. Answering is optional and has no effect on points.</p>
       {error&&<p className="form-error" role="alert">{error}</p>}
       <button className="button primary full" type="submit" disabled={!choice||busy||paused}>{busy?<><LoaderCircle className="spin" size={17} aria-hidden="true"/> Saving answer</>:'Submit answer'}</button>
       <p className="most-likely-help" role="status">{paused?'The game is paused. You can answer when it resumes.':choice?'Your answer stays private. The reveal comes with the Court results.':'Choose one person, then submit your answer.'}</p>
@@ -35,7 +34,7 @@ export function MostLikelyQuestionCard({data,players,busy,paused,error,onAnswer,
 export function MostLikelyResult({result}:{result?:{question:Question;winners:Player[]}|null}){
   if(!result)return null;
   return <section className="most-likely-result" aria-label="Most Likely To result">
-    <span className="eyebrow">THE INNOCENTS HAVE SPOKEN</span>
+    <span className="eyebrow">THE GROUP HAS SPOKEN</span>
     <h3>{result.question.prompt}</h3>
     {result.winners.length>0?<><p>{result.winners.length>1?'A shared title for:':'The title goes to:'}</p><ul>{result.winners.map(player=><li key={player.id}>{player.name}</li>)}</ul></>:<p>No answers this round.</p>}
   </section>;

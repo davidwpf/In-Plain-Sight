@@ -77,6 +77,6 @@ The separate [most-likely.json](https://github.com/davidwpf/In-Plain-Sight/blob/
 
 Edit `prompt` to change wording. Keep its existing `id` so games remember which questions they have used. Add an entry with a new unique ID to expand the bank. Prompts must also be unique. The same GitHub edit, commit and automatic publication process described above applies.
 
-In a round with at least three active players, every Innocent sees the same one question. Killers are included as possible answers but do not answer themselves. A player cannot choose themselves or someone outside that round. Two-player rounds consume no question. Questions use their own non-repeating draw cycle, separate from recognition signals and murder tasks.
+In a round with at least three active players, every active player sees the same one question. Killers and Innocents can both answer, and either role can be chosen. A player cannot choose themselves or someone outside that round. Two-player rounds consume no question. Questions use their own non-repeating draw cycle, separate from recognition signals and murder tasks.
 
 Only the top chosen names are revealed with Court results, including all ties. Questions have no scoring effect. Current questions and completed result snapshots keep their saved wording after edits; new eligible rounds use the updated bank. Run `pnpm test` before publishing to validate the file and game behaviour.

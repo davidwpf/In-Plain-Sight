@@ -511,7 +511,6 @@ input::placeholder{color:#777}
 
 /* Private, unscored round question and its Court-only reveal. */
 .most-likely-question{border-top:1px solid var(--border);padding:20px 0}
-.most-likely-question .most-likely-role-task{font-size:16px;line-height:1.65;margin:0 0 22px}
 .most-likely-question>.eyebrow,.most-likely-result>.eyebrow{font-size:13px;letter-spacing:1px}
 .most-likely-question fieldset{border:0;padding:0;margin:10px 0 0;min-width:0}
 .most-likely-question legend,.most-likely-question h3,.most-likely-result h3{font-family:var(--sans);font-size:22px;line-height:1.4;font-weight:400;letter-spacing:-.35px;margin:8px 0 16px;padding:0;overflow-wrap:anywhere}

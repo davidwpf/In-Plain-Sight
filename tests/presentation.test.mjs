@@ -219,6 +219,38 @@ test('names are displayed verbatim, including apostrophes, without rewriting rol
   assert.match(resultOutcome(storyPlayer(r,'p1'),r),/murder of Killer Queen\. Faithful O’Connor completed the task/);
   assert.match(resultOutcome(storyPlayer(r,'p3'),r),/identified Faithful O’Connor as a Killer/);
 });
+test('another player’s result names them while the viewer’s own result stays personal',()=>{
+  const g=storyGame();storyReport(g,'p0','p2',true);storyReport(g,'p1','p2',false);storyVote(g,'p3','p0');
+  const r=storyResults(g),murderer=storyPlayer(r,'p0'),accomplice=storyPlayer(r,'p1'),voter=storyPlayer(r,'p3');
+  assert.equal(resultOutcome(murderer,r,'p7'),'Alice murdered Ben, but Alice was caught.');
+  assert.equal(resultOutcome(accomplice,r,'p7'),'Jamie helped with the murder of Ben. Alice completed the task. Jamie was not caught, but Alice was.');
+  assert.equal(resultOutcome(voter,r,'p7'),'Charlie correctly identified Alice as a Killer. Alice was caught.');
+  assert.equal(resultOutcome(murderer,r,murderer.id),resultOutcome(murderer,r));
+  assert.equal(resultOutcome(murderer,r),'You murdered Ben, but you were caught.');
+});
+test('other-player awareness details and point labels never address the viewer',()=>{
+  const g=storyGame();storyVote(g,'p2','p0',false);storyVote(g,'p3','p0',true);
+  const r=storyResults(g),ben=storyPlayer(r,'p2'),charlie=storyPlayer(r,'p3');
+  assert.ok(resultDetails(ben,r,'p7').includes('Ben suspected a murder attempt: No.'));
+  assert.ok(scoreBreakdown(ben,r,'p7').some(line=>line.text==='Correctly recognised that nobody tried to murder Ben'));
+  assert.ok(scoreBreakdown(charlie,r,'p7').some(line=>line.text==='Suspected an attempt, but nobody completed the task on Charlie'));
+  assert.ok(resultDetails(ben,r,ben.id).includes('You suspected a murder attempt: No.'));
+  assert.ok(scoreBreakdown(ben,r,ben.id).some(line=>line.text==='Correctly recognised that nobody tried to murder you'));
+});
+test('third-person results preserve names and recorded totals across outcome types',()=>{
+  const g=storyGame();g.players[0].name='You Know Who';storyReport(g,'p0','p1',true);storyReport(g,'p1',null,false);
+  const r=storyResults(g);
+  assert.match(resultOutcome(storyPlayer(r,'p0'),r,'p7'),/^You Know Who attempted to murder Jamie/);
+  for(const saved of scenarios){
+    const before=JSON.stringify(saved);
+    for(const player of saved.players){
+      const viewerId='a different viewer',lines=scoreBreakdown(player,saved,viewerId);
+      assert.equal(lines.reduce((sum,line)=>sum+line.points,0),player.delta);
+      assert.doesNotMatch(JSON.stringify([lines,resultDetails(player,saved,viewerId),resultOutcome(player,saved,viewerId)]),/\byou\b|\byour\b/i);
+    }
+    assert.equal(JSON.stringify(saved),before);
+  }
+});
 test('presentation is stable, does not mutate saved rounds, and explains the exact recorded total',()=>{
   assert.ok(scenarios.length>=14);
   for(const r of scenarios){

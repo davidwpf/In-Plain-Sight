@@ -14,7 +14,7 @@ function fixture(count=3,rng=fixed){
 const innocents=g=>g.active.filter(id=>g.roles[id]==='faithful');
 const killers=g=>g.active.filter(id=>g.roles[id]==='traitor');
 const questionAction=(g,target)=>({type:'mostLikelyAnswer',round:g.round,questionId:g.mostLikely?.question.id,target});
-const answer=(g,id,target=killers(g)[0])=>applyAction(g,id,questionAction(g,target),now,fixed);
+const answer=(g,id,target=killers(g).find(other=>other!==id)??g.active.find(other=>other!==id))=>applyAction(g,id,questionAction(g,target),now,fixed);
 function nextRound(g,rng=fixed){
   if(g.phase==='playing')openVoting(g);
   if(g.phase==='voting')finishRound(g,now);
@@ -38,25 +38,66 @@ test('the editable question bank has distinct non-empty IDs and prompts',()=>{
   for(const invalid of [[],null,[null],[{id:'',prompt:'Question?'}],[{id:'one',prompt:''}],[{id:'one',prompt:'First?'},{id:'one',prompt:'Second?'}],[{id:'one',prompt:'Same?'},{id:'two',prompt:' same? '}]])assert.throws(()=>validateMostLikelyQuestions(invalid));
 });
 
-for(const count of [3,4,6,10,30])test(`${count}-player rounds share one question among Innocents only`,()=>{
+for(const count of [3,4,6,10,30])test(`${count}-player rounds share one question among all active players`,()=>{
   const g=fixture(count);if(count<30)addPlayer(g,{id:'late',name:'Joining next round'});
-  for(const id of innocents(g))assert.deepEqual(publicView(g,id,now).secret.mostLikely,{question:g.mostLikely.question,answerId:null});
-  for(const id of killers(g))assert.equal(publicView(g,id,now).secret.mostLikely,undefined);
+  for(const id of g.active)assert.deepEqual(publicView(g,id,now).secret.mostLikely,{question:g.mostLikely.question,answerId:null});
   if(count<30)assert.equal(publicView(g,'late',now).secret,null);
   assert.equal(g.usedTaskIds.mostLikely.length,1);assert.equal(Object.keys(g.mostLikely.answers).length,0);
 });
 
-test('an Innocent can choose a Killer, but a Killer cannot submit a question answer',()=>{
+test('Innocents and Killers can both answer and choose a Killer as their target',()=>{
   const g=fixture(6),id=innocents(g)[0],killer=killers(g)[0];
   answer(g,id,killer);assert.equal(publicView(g,id,now).secret.mostLikely.answerId,killer);
   assert.equal(g.mostLikely.answers[id],killer);
-  rejectWithoutChange(g,killer,questionAction(g,id),/Only Innocents/);
+  const otherKiller=killers(g)[1];answer(g,otherKiller,killer);
+  assert.equal(publicView(g,otherKiller,now).secret.mostLikely.answerId,killer);
   openVoting(g);finishRound(g,now);
   assert.deepEqual(g.results.mostLikely.winners,[{id:killer,name:g.players.find(p=>p.id===killer).name}]);
 });
 
-test('answering changes only the answering player’s private view and no ballot or readiness state',()=>{
-  const g=fixture(10),id=innocents(g)[0];addPlayer(g,{id:'late',name:'Late player'});
+test('the eight-player demo shows its Killer a question and reveals the answer only after Court ballots lock',()=>{
+  const actor='demo-me',g=makeGame('DEMO24','Saturday game',{id:actor,name:'You'},now);
+  ['Alice','Ben','Charlie','Isla','Jamie','Grace','Noah'].forEach((name,i)=>addPlayer(g,{id:`demo-${i}`,name}));
+  startRound(g,now,fixed);
+  const initial=clone(publicView(g,actor,now)),question=clone(g.mostLikely.question),target='demo-2';
+  assert.equal(initial.activeCount,8);assert.equal(initial.secret.role,'traitor');assert.equal(initial.secret.otherTraitors,1);
+  assert.deepEqual(initial.secret.mostLikely,{question,answerId:null});
+  assert.ok(initial.secret.signal?.prompt);assert.ok(initial.secret.mission?.instruction);
+  answer(g,actor,target);
+  const answered=clone(publicView(g,actor,now));
+  assert.deepEqual(answered.secret.mostLikely,{question,answerId:target});
+  assert.deepEqual(answered.secret.signal,initial.secret.signal);assert.deepEqual(answered.secret.mission,initial.secret.mission);
+  assert.equal(answered.results,null);assert.deepEqual(answered.history,[]);assert.equal(answered.submittedCount,0);
+  applyAction(g,actor,{type:'roundtable'},now,fixed);
+  for(const id of g.active){const view=publicView(g,id,now);assert.equal(view.secret.mostLikely,undefined);assert.equal(view.results,null);assert.deepEqual(view.history,[]);}
+  const victim=innocents(g)[0],suspect=killers(g)[0];
+  for(const id of g.active){
+    assert.equal(g.phase,'voting');assert.equal(publicView(g,actor,now).results,null);
+    const killer=g.roles[id]==='traitor';
+    applyAction(g,id,{type:'ballot',target:killer?victim:suspect,...(killer?{performed:!killers(g).some(other=>g.ballots[other]?.targetId===victim&&g.ballots[other].performed===true)}:{suspectedAttempt:id===victim})},now,fixed);
+  }
+  const summary={question,winners:[{id:target,name:'Charlie'}]},results=publicView(g,actor,now);
+  assert.equal(results.phase,'results');assert.equal(results.secret,null);assert.equal(results.results.mode,'group');
+  assert.deepEqual(results.results.mostLikely,summary);assert.deepEqual(results.history[0].mostLikely,summary);
+  nextRound(g);
+  assert.equal(g.round,2);assert.notEqual(g.mostLikely.question.id,question.id);assert.deepEqual(g.mostLikely.answers,{});
+  for(const id of g.active)assert.deepEqual(publicView(g,id,now).secret.mostLikely,{question:g.mostLikely.question,answerId:null});
+  assert.deepEqual(g.history[0].mostLikely,summary);
+});
+
+for(const count of [3,6,10])test(`a Killer keeps all private task instructions while answering in a ${count}-player round`,()=>{
+  const g=fixture(count),id=killers(g)[0],before=clone(publicView(g,id,now).secret);
+  assert.equal(before.role,'traitor');assert.deepEqual(before.mission,g.mission);assert.deepEqual(before.signal,g.signal);
+  assert.equal(before.missionChangesRemaining,2);assert.equal(before.otherTraitors,killers(g).length-1);
+  answer(g,id,innocents(g)[0]);
+  const after=clone(publicView(g,id,now).secret);
+  const {mostLikely:previousQuestion,...previousInstructions}=before,{mostLikely:answeredQuestion,...currentInstructions}=after;
+  assert.deepEqual(currentInstructions,previousInstructions);
+  assert.deepEqual(answeredQuestion,{...previousQuestion,answerId:innocents(g)[0]});
+});
+
+for(const role of ['faithful','traitor'])test(`${role} answering changes only their private view and no ballot or readiness state`,()=>{
+  const g=fixture(10),id=g.active.find(id=>g.roles[id]===role);addPlayer(g,{id:'late',name:'Late player'});
   const views=new Map(g.players.filter(p=>p.id!==id).map(p=>[p.id,clone(publicView(g,p.id,now))]));
   const stable=clone({roles:g.roles,signal:g.signal,mission:g.mission,deadline:g.deadline,voteDeadline:g.voteDeadline,players:g.players,ballots:g.ballots,history:g.history});
   answer(g,id);
@@ -70,8 +111,8 @@ test('answering changes only the answering player’s private view and no ballot
   }
 });
 
-test('question answers survive reconnection and remain immutable after duplicate or changed submissions',()=>{
-  let g=fixture(6);const id=innocents(g)[0],first=questionAction(g,killers(g)[0]);
+for(const role of ['faithful','traitor'])test(`${role} answers survive reconnection and remain immutable after duplicate or changed submissions`,()=>{
+  let g=fixture(6);const id=g.active.find(id=>g.roles[id]===role),first=questionAction(g,g.active.find(other=>other!==id));
   applyAction(g,id,first,now,fixed);g=clone(g);
   assert.equal(publicView(g,id,now).secret.mostLikely.answerId,first.target);
   assert.deepEqual(publicView(g,id,now).secret.mostLikely.question,g.mostLikely.question);
@@ -83,7 +124,7 @@ test('stale snapshots and self, missing, inactive or late-arrival targets are re
   const valid=questionAction(g,target);
   for(const action of [{...valid,round:g.round-1},{...valid,round:undefined},{...valid,questionId:'old'},{...valid,questionId:undefined}])rejectWithoutChange(g,id,action,/question has changed/);
   for(const target of [id,null,undefined,'missing','late'])rejectWithoutChange(g,id,questionAction(g,target),/Choose another player/);
-  rejectWithoutChange(g,'late',valid,/Only Innocents/);
+  rejectWithoutChange(g,'late',valid,/Only players in this round/);
   answer(g,id,target);const old=questionAction(g,target);nextRound(g);
   rejectWithoutChange(g,innocents(g)[0],old,/question has changed/);
 });
@@ -123,6 +164,15 @@ test('missing question answers never hold up the game or alter scores, final sta
   assert.deepEqual(actual,baseline.results);assert.deepEqual(publicView(g,g.adminId,now).standings,publicView(baseline,baseline.adminId,now).standings);
 });
 
+test('all-player question answers leave ordinary scores, Court ballots, tasks and timers unchanged',()=>{
+  const g=fixture(10),baseline=clone(g);delete baseline.mostLikely;
+  for(let i=0;i<g.active.length;i++)answer(g,g.active[i],g.active[(i+1)%g.active.length]);
+  for(const field of ['roles','ballots','mission','signal','deadline','voteDeadline','players','roundMissionIds','missionChanges','missionChangeRequest'])assert.deepEqual(g[field],baseline[field]);
+  openVoting(g);openVoting(baseline);submitNormalBallots(g);submitNormalBallots(baseline);
+  const {mostLikely,...actual}=g.results;assert.equal(mostLikely.winners.length,g.active.length);
+  assert.deepEqual(actual,baseline.results);assert.deepEqual(publicView(g,g.adminId,now).standings,publicView(baseline,baseline.adminId,now).standings);
+});
+
 for(const [count,tied]of [[4,3],[6,4]])test(`all ${tied} tied names are revealed in roster order without counts or individual answers`,()=>{
   const g=fixture(count),voters=innocents(g);assert.equal(voters.length,tied);
   for(let i=voters.length-1;i>=0;i--)answer(g,voters[i],voters[(i+1)%voters.length]);
@@ -130,6 +180,38 @@ for(const [count,tied]of [[4,3],[6,4]])test(`all ${tied} tied names are revealed
   const expected={question:g.mostLikely.question,winners:voters.map(id=>({id,name:g.players.find(p=>p.id===id).name}))};
   assert.deepEqual(g.results.mostLikely,expected);assert.deepEqual(g.history[0].mostLikely,expected);
   for(const id of g.active){const view=publicView(g,id,now);assert.equal(view.secret,null);assert.deepEqual(view.results.mostLikely,expected);assert.deepEqual(Object.keys(view.results.mostLikely).sort(),['question','winners']);assert.ok(view.results.mostLikely.winners.every(w=>Object.keys(w).sort().join(',')==='id,name'));}
+});
+
+for(const count of [3,4,6,10,30])test(`all ${count} active players can vote and share a tie, including every Killer`,()=>{
+  const g=fixture(count),voters=[...g.active];
+  for(let i=voters.length-1;i>=0;i--)answer(g,voters[i],voters[(i+1)%voters.length]);
+  assert.equal(Object.keys(g.mostLikely.answers).length,count);openVoting(g);finishRound(g,now);
+  const expected={question:g.mostLikely.question,winners:voters.map(id=>({id,name:g.players.find(p=>p.id===id).name}))};
+  assert.deepEqual(g.results.mostLikely,expected);assert.deepEqual(g.history[0].mostLikely,expected);
+  for(const id of voters){const view=publicView(g,id,now);assert.equal(view.secret,null);assert.deepEqual(view.results.mostLikely,expected);}
+});
+
+test('saved Innocent answers remain locked while Killers can add answers to the same legacy question',()=>{
+  let g=fixture(6);const [first,second,third]=innocents(g),killer=killers(g)[0];
+  answer(g,first,second);answer(g,second,third);const question=clone(g.mostLikely.question),saved=clone(g.mostLikely.answers);g=clone(g);
+  for(const [id,target]of Object.entries(saved)){
+    assert.deepEqual(publicView(g,id,now).secret.mostLikely,{question,answerId:target});
+    rejectWithoutChange(g,id,questionAction(g,killer),/already saved/);
+  }
+  assert.deepEqual(publicView(g,killer,now).secret.mostLikely,{question,answerId:null});
+  answer(g,killer,second);openVoting(g);finishRound(g,now);
+  assert.deepEqual(g.results.mostLikely,{question,winners:[{id:second,name:g.players.find(p=>p.id===second).name}]});
+});
+
+test('each new round resets every player’s answer without changing archived summaries',()=>{
+  const g=fixture(6),summaries=[];
+  for(let round=0;round<5;round++){
+    for(const id of g.active)assert.deepEqual(publicView(g,id,now).secret.mostLikely,{question:g.mostLikely.question,answerId:null});
+    for(let i=0;i<g.active.length;i++)answer(g,g.active[i],g.active[(i+1)%g.active.length]);
+    openVoting(g);finishRound(g,now);summaries.push(clone(g.results.mostLikely));
+    assert.deepEqual(g.history.map(result=>result.mostLikely),summaries);
+    nextRound(g);assert.deepEqual(g.mostLikely.answers,{});assert.deepEqual(g.history.map(result=>result.mostLikely),summaries);
+  }
 });
 
 test('a sole top choice wins while lower choices and raw answers are never archived',()=>{
@@ -145,7 +227,7 @@ test('question decks exhaust without repetitions, survive storage and avoid imme
   let g=fixture(3,()=>0);const ids=[],bankLength=MOST_LIKELY_QUESTIONS.length;
   for(let i=0;i<bankLength*2+1;i++){
     ids.push(g.mostLikely.question.id);const question=clone(g.mostLikely.question);g=clone(g);
-    for(const id of innocents(g))assert.deepEqual(publicView(g,id,now).secret.mostLikely.question,question);
+    for(const id of g.active)assert.deepEqual(publicView(g,id,now).secret.mostLikely.question,question);
     if(i<bankLength*2)nextRound(g,()=>0);
   }
   for(const start of [0,bankLength])assert.equal(new Set(ids.slice(start,start+bankLength)).size,bankLength);
@@ -154,7 +236,7 @@ test('question decks exhaust without repetitions, survive storage and avoid imme
 
 for(const rng of [()=>0,fixed])test('two-player rounds skip the question and never consume its deck',()=>{
   const g=fixture(2,rng);assert.equal(g.mostLikely,null);assert.equal(g.usedTaskIds?.mostLikely,undefined);
-  for(const id of g.active){assert.equal(publicView(g,id,now).secret.mostLikely,undefined);if(g.roles[id]==='faithful')rejectWithoutChange(g,id,{type:'mostLikelyAnswer',round:g.round,questionId:'any',target:g.active.find(other=>other!==id)},/no question/);}
+  for(const id of g.active){assert.equal(publicView(g,id,now).secret.mostLikely,undefined);rejectWithoutChange(g,id,{type:'mostLikelyAnswer',round:g.round,questionId:'any',target:g.active.find(other=>other!==id)},/no question/);}
   nextRound(g,rng);assert.equal(g.mostLikely,null);assert.equal(g.usedTaskIds?.mostLikely,undefined);
 });
 
