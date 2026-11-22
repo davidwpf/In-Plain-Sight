@@ -530,3 +530,23 @@ input::placeholder{color:#777}
 .most-likely-result ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:12px 0 0}
 .most-likely-result li{background:#f5f5f5;padding:8px 12px;font-size:18px;line-height:1.5;font-weight:500;max-width:100%;overflow-wrap:anywhere}
 @media(max-width:640px){.most-likely-choices{grid-template-columns:1fr}.most-likely-result{padding:16px}.most-likely-question{padding:18px 0}}
+
+/* Sign-in and game history share the existing simple monochrome controls. */
+.pin-field{position:relative}
+.pin-field input{margin:0;padding-right:56px;font-size:16px;letter-spacing:2px}
+.pin-field>.icon-button{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:44px;height:44px;color:var(--ink)}
+.pin-help{font-size:14px!important;line-height:1.6;margin:9px 0 0!important}
+.recent-games{margin:28px 0 32px;max-width:720px}
+.recent-games h2{font-size:26px;line-height:1.3;font-weight:400;letter-spacing:-.5px;margin:0 0 16px}
+.recent-games-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.recent-game{display:flex;flex-direction:column;align-items:flex-start;gap:7px;text-align:left;min-width:0;min-height:88px;padding:17px 18px;background:#fff;border:1px solid var(--ink);font-size:18px;line-height:1.4;color:var(--ink)}
+.recent-game:hover{background:#f5f5f5}
+.recent-game>span,.recent-game>small{max-width:100%;overflow-wrap:anywhere}
+.recent-game>small{font-size:15px;color:var(--muted)}
+.recent-games>p{font-size:14px;line-height:1.6;color:var(--muted);margin-top:12px}
+.shared-game-code{border:1px solid var(--border);padding:18px;text-align:center;margin:18px 0}
+.shared-game-code>span{display:block;font-size:13px;letter-spacing:1px}
+.shared-game-code>strong{display:block;font-size:30px;letter-spacing:4px;line-height:1.5;font-weight:500;margin:8px 0 14px;overflow-wrap:anywhere}
+.shared-game-code .button{font-size:16px}
+.hero-buttons{flex-wrap:wrap}
+@media(max-width:640px){.recent-games-list{grid-template-columns:1fr}.recent-games h2{font-size:24px}.recent-games{margin:24px 0}.pin-field input{font-size:16px!important}}

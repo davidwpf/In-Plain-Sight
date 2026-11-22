@@ -6,7 +6,7 @@ export function PlayerCode({code,demo=false,onCopy}:{code?:string;demo?:boolean;
     <span className="eyebrow"><KeyRound size={14} aria-hidden="true"/> YOUR PLAYER CODE</span>
     <div className="player-code-value" aria-label={`Your private player code ${code}`}>{code}</div>
     <button className="button secondary full" onClick={onCopy} disabled={!code}><Copy size={16}/> Copy code</button>
-    <p>Keep this code and the game invite to sign back in.</p>
+    <p>Use your name and this code to return to the game.</p>
   </div>;
 }
 

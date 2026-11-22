@@ -2,6 +2,7 @@
   "id": "/",
   "name": "In Plain Sight",
   "short_name": "In Plain Sight",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",

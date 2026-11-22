@@ -1,4 +1,5 @@
 import {env} from 'cloudflare:workers';
+import {cleanPlayerName,chosenLogin,findLoginPlayer,validLoginCode} from '../../../lib/game/identity.mjs';
 import {makeGame,addPlayer,applyAction,tick,publicView,randomInt,validateRoundMinutes} from '../../../lib/game/engine.mjs';
 import {GAME_RETENTION_MS,deleteExpiredGames,validInviteKey,makeInviteKey,hashSecret,validatePlayerCode} from '../../../lib/game/storage.mjs';
 import {saveGame,pushKeys,notificationAction} from '../../../lib/notifications/server.mjs';
@@ -13,12 +14,16 @@ const respond=(o:Outcome)=>new Response(JSON.stringify(o.body),{status:o.status,
 function db(){if(!env.DB)throw new Error('Game storage is unavailable. Please try again shortly.');return env.DB;}
 const clean=(s:unknown,max=24)=>typeof s==='string'?s.trim().replace(/[\u0000-\u001f<>]/g,'').slice(0,max):'';
 function code(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from(crypto.getRandomValues(new Uint8Array(6)),x=>chars[x%32]).join('');}
-function readCode(s:unknown){const v=typeof s==='string'?s.toUpperCase().trim():'';if(!/^[A-Z2-9]{6}$/.test(v))throw new Error('Open the game’s invite link or scan its QR code.');return v;}
+function readCode(s:unknown){const v=typeof s==='string'?s.toUpperCase().trim():'';if(!/^[A-Z2-9]{6}$/.test(v))throw new Error('Enter the six-character game code, or open an invite link.');return v;}
 function gameView(g:any,id:string,expiresAt:number){return {...publicView(g,id),inviteKey:g.inviteKey??null,expiresAt};}
 async function newLogin(g:any,chosen?:unknown){
   if(chosen!==undefined){const passcode=validatePlayerCode(chosen);return {passcode,loginHash:await hashSecret(`${g.authSalt}:${passcode}`)};}
   for(let i=0;i<50;i++){const passcode=String(randomInt(1000000)).padStart(6,'0');const loginHash=await hashSecret(`${g.authSalt}:${passcode}`);if(!g.players.some((p:any)=>p.loginHash===loginHash))return {passcode,loginHash};}
   throw new Error('Could not create a player code. Try again.');
+}
+async function playerLogin(g:any,body:any,name:string,admin=false){
+  if(body.passcode!==undefined&&body.passcode!=='')return chosenLogin(g,name,body.passcode);
+  return newLogin(g,admin?body.adminPasscode:undefined);
 }
 async function expired(row:GameRow){
   if(row.expires_at>Date.now())return false;
@@ -35,16 +40,16 @@ async function update(gameCode:string,operation:(g:any,row:GameRow)=>Outcome|Pro
   }return respond(fail('Several players submitted at once. Please try again.',409));
 }
 async function tokenPlayer(req:Request,g:any){const token=req.headers.get('Authorization')?.replace(/^Bearer /,'');if(!token)return null;const digest=await hashSecret(token);return g.players.find((p:any)=>p.tokenHashes?.includes(digest));}
-async function matchingInvite(row:GameRow,key:unknown){return !row.invite_hash||(validInviteKey(key)&&row.invite_hash===await hashSecret(key as string));}
+async function matchingInvite(row:GameRow,key:unknown,byCode=false){if(key!==undefined&&key!==null&&key!=='')return validInviteKey(key)&&row.invite_hash===await hashSecret(key as string);return byCode||!row.invite_hash;}
 export async function GET(req:Request){
   try{
     const query=new URL(req.url).searchParams;
-    // An invite preview reveals only the game name and internal identifier.
-    // Old six-character links remain valid only for games created before invites.
+    // Both entry routes expose only the game name, identifier and expiry.
+    // Explicit code mode also supports entering a shared code from the home hub.
     if(query.get('preview')==='1'){
       const key=query.get('invite');let row:GameRow|null;
       if(key){if(!validInviteKey(key))return respond(unavailable());row=await db().prepare('SELECT code, state, version, expires_at, invite_hash FROM games WHERE invite_hash = ?').bind(await hashSecret(key)).first<GameRow>();}
-      else{const gameCode=readCode(query.get('code'));row=await db().prepare('SELECT code, state, version, expires_at, invite_hash FROM games WHERE code = ? AND invite_hash IS NULL').bind(gameCode).first<GameRow>();}
+      else{const gameCode=readCode(query.get('code'));row=await db().prepare(query.get('access')==='code'?'SELECT code, state, version, expires_at, invite_hash FROM games WHERE code = ?':'SELECT code, state, version, expires_at, invite_hash FROM games WHERE code = ? AND invite_hash IS NULL').bind(gameCode).first<GameRow>();}
       if(!row||await expired(row))return respond(unavailable());const g=JSON.parse(row.state);
       if(g.schemaVersion!==2)return respond(unavailable());
       return respond(ok({name:g.name,code:row.code,expiresAt:row.expires_at}));
@@ -57,14 +62,14 @@ export async function POST(req:Request){
     const origin=req.headers.get('Origin');if(origin&&origin!==new URL(req.url).origin)return respond(fail('Use the game website to make changes.',403));
     if(Number(req.headers.get('content-length'))>12000)return respond(fail('Request too large.',413));const raw=await req.text();if(raw.length>12000)return respond(fail('Request too large.',413));const body=JSON.parse(raw);
     if(body.type==='create'){
-      const name=clean(body.name),gameName=clean(body.gameName,40);if(!name||!gameName)return respond(fail('Enter your name and a name for the game.'));
+      const name=cleanPlayerName(body.name),gameName=clean(body.gameName,40);if(!name||!gameName)return respond(fail('Enter your name and a name for the game.'));
       const roundMinutes=validateRoundMinutes(body.roundMinutes);if(body.adminPasscode!==undefined)validatePlayerCode(body.adminPasscode);
       await deleteExpiredGames(db());
       for(let i=0;i<5;i++){
         const gameCode=code(),token=crypto.randomUUID()+crypto.randomUUID(),inviteKey=makeInviteKey(),expiresAt=Date.now()+GAME_RETENTION_MS;
         const player={id:crypto.randomUUID(),name,tokenHashes:[await hashSecret(token)]};
         const g:any=makeGame(gameCode,gameName,player,Date.now(),roundMinutes);g.authSalt=crypto.randomUUID();g.inviteKey=inviteKey;
-        const login=await newLogin(g,body.adminPasscode);g.players[0].loginHash=login.loginHash;
+        const login=await playerLogin(g,body,name,true);g.players[0].loginHash=login.loginHash;if('loginVersion' in login)g.players[0].loginVersion=login.loginVersion;
         const r=await db().prepare('INSERT OR IGNORE INTO games (code, state, version, expires_at, invite_hash) VALUES (?, ?, 0, ?, ?)').bind(gameCode,JSON.stringify(g),expiresAt,await hashSecret(inviteKey)).run();
         if(r.meta.changes===1)return respond(ok({token,passcode:login.passcode,view:gameView(g,player.id,expiresAt)},201));
       }throw new Error('Could not create the game. Please try again.');
@@ -78,18 +83,18 @@ export async function POST(req:Request){
       return respond(ok(await notificationAction(db(),g,p,body)));
     }
     if(body.type==='join'){
-      const name=clean(body.name);if(!name)return respond(fail('Enter your name.'));const token=crypto.randomUUID()+crypto.randomUUID(),tokenHash=await hashSecret(token),id=crypto.randomUUID();
-      return await update(gameCode,async(g,row)=>{if(!await matchingInvite(row,body.invite))return unavailable();tick(g);const login=await newLogin(g);addPlayer(g,{id,name,loginHash:login.loginHash,tokenHashes:[tokenHash]});return ok({token,passcode:login.passcode,view:gameView(g,id,row.expires_at)});});
+      const name=cleanPlayerName(body.name);if(!name)return respond(fail('Enter your name.'));const token=crypto.randomUUID()+crypto.randomUUID(),tokenHash=await hashSecret(token),id=crypto.randomUUID();
+      return await update(gameCode,async(g,row)=>{if(!await matchingInvite(row,body.invite,body.access==='code'))return unavailable();tick(g);const login=await playerLogin(g,body,name);addPlayer(g,{id,name,loginHash:login.loginHash,...('loginVersion' in login?{loginVersion:login.loginVersion}:{}),tokenHashes:[tokenHash]});return ok({token,passcode:login.passcode,view:gameView(g,id,row.expires_at)});});
     }
     if(body.type==='login'){
-      if(typeof body.passcode!=='string'||!/^\d{6}$/.test(body.passcode))return respond(fail('Enter your six-digit player code.'));
+      if(!validLoginCode(body.passcode))return respond(fail('Enter your four-digit player code.'));
       const address=req.headers.get('CF-Connecting-IP')||'local-preview';const clientKey=(await hashSecret(`${gameCode}:${address}`)).slice(0,24);
       return await update(gameCode,async(g,row)=>{
-        if(!await matchingInvite(row,body.invite))return unavailable();
+        if(!await matchingInvite(row,body.invite,body.access==='code'))return unavailable();
         const now=Date.now(),attempts=g.loginAttempts[clientKey];
         if(attempts?.blockedUntil>now)return fail('Too many incorrect codes. Please wait a minute and try again.',429);
-        const loginHash=await hashSecret(`${g.authSalt}:${body.passcode}`);const p=g.players.find((p:any)=>p.loginHash===loginHash);
-        if(!p){const record=!attempts||now-attempts.since>300000?{count:0,since:now,blockedUntil:0}:attempts;record.count++;if(record.count>=8){record.blockedUntil=now+60000;record.count=0;}g.loginAttempts[clientKey]=record;return fail('That player code was not recognised. Check you opened the right game invite.',401);}
+        const p=await findLoginPlayer(g,body.name,body.passcode);
+        if(!p){const record=!attempts||now-attempts.since>300000?{count:0,since:now,blockedUntil:0}:attempts;record.count++;if(record.count>=8){record.blockedUntil=now+60000;record.count=0;}g.loginAttempts[clientKey]=record;return fail('That name and player code were not recognised. Check the game, name and code.',401);}
         delete g.loginAttempts[clientKey];const token=crypto.randomUUID()+crypto.randomUUID();p.tokenHashes=[...(p.tokenHashes||[]).slice(-4),await hashSecret(token)];p.left=false;tick(g);return ok({token,passcode:body.passcode,view:gameView(g,p.id,row.expires_at)});
       });
     }
