@@ -63,3 +63,20 @@ Open [tasks.json on GitHub](https://github.com/davidwpf/In-Plain-Sight/blob/main
 ## Check changes locally
 
 Run `pnpm test` to check the content structure, draw cycles and game rules. The library is bundled with the app, so editing the file requires a new build and deployment before it appears on the live site. Adding tasks does not require updating a hardcoded list in the tests; the checks validate content quality and game behaviour.
+
+## Most Likely To questions
+
+The separate [most-likely.json](https://github.com/davidwpf/In-Plain-Sight/blob/main/content/most-likely.json) file contains the 45 approved questions. Each entry has a stable unique `id` and a `prompt`, for example:
+
+```json
+{
+  "id": "deserted-island",
+  "prompt": "Who is most likely to survive alone on a deserted island?"
+}
+```
+
+Edit `prompt` to change wording. Keep its existing `id` so games remember which questions they have used. Add an entry with a new unique ID to expand the bank. Prompts must also be unique. The same GitHub edit, commit and automatic publication process described above applies.
+
+In a round with at least three active players, every Innocent sees the same one question. Killers are included as possible answers but do not answer themselves. A player cannot choose themselves or someone outside that round. Two-player rounds consume no question. Questions use their own non-repeating draw cycle, separate from recognition signals and murder tasks.
+
+Only the top chosen names are revealed with Court results, including all ties. Questions have no scoring effect. Current questions and completed result snapshots keep their saved wording after edits; new eligible rounds use the updated bank. Run `pnpm test` before publishing to validate the file and game behaviour.

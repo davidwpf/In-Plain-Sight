@@ -6,7 +6,7 @@ A social deduction game for an evening or weekend with friends and family. Every
 
 ## Play
 
-1. **Create game.** The admin enters their name and a Game name, chooses a private six-digit player code, and sets the round length using separate Hours and Minutes dropdowns, defaulting to 1 and 0. Minutes show only 0 or 30. Hours run from 0 to 24, with “More…” allowing any larger whole-hour value. Choosing 0 hours selects 30 minutes to keep the minimum round length at half an hour. Their private six-digit player code also unlocks Start, Call court, Finish voting, Pause, Resume and End.
+1. **Create game.** The admin enters their name and a Game name, receives a random private six-digit player code, and sets the round length using separate Hours and Minutes dropdowns, defaulting to 1 and 0. Minutes show only 0 or 30. Hours run from 0 to 24, with “More…” allowing any larger whole-hour value. Choosing 0 hours selects 30 minutes to keep the minimum round length at half an hour. Their private six-digit player code also unlocks Start, Call court, Finish voting, Pause, Resume and End.
 2. **Share an invite.** Both admins and players have **Share link** and **Show QR code** buttons in the lobby and on the main Game screen during rounds, voting and results. New players wait until the next round starts. Share only with people playing. Keep personal player codes private.
 3. **Join.** Open the shared link or scan the QR code. The invitation shows the Game name, with no editable game code. A player chooses “Enter my player code” or “Join as a new player”. Joining gives them their own private six-digit code. Shared devices use **Switch player** to hide the current identity and sign in as someone else.
 4. **Start.** The admin starts when everyone has joined. There must be at least two ready players. The admin receives a normal role and cannot inspect anyone else’s role.
@@ -37,6 +37,18 @@ New arrivals wait until the next deal. Sit-outs and **Leave game** also affect t
 When the admin chooses to sit out, **Choose another admin?** offers a named replacement or **Sit out and stay admin**. Leaving requires a replacement or the existing End game confirmation. The server transfers the single `adminId` and changes the departing player's readiness in one version-checked write. Only the current admin can pass control, and the replacement must be a different player in the same game who has not left. A sitting-out player or late arrival can take over. Pausing does not block handover. The previous admin immediately loses the controls, including on other devices; stale or competing transfer requests cannot take control back. Neither player changes their existing private code or token. Returning does not restore previous admin privileges. The new admin receives a dismissible **You are now the admin** message when their screen next updates, including after signing back in. Transfers do not change roles, ballots, timers, results or scores and need no database migration.
 
 A game can move from two players to a group and back repeatedly, with its chosen duration, scores, completed results and task history preserved. Results record the mode and distinguish an explicit No killer vote from a missed ballot.
+
+## Most Likely To questions
+
+In rounds with at least three active players, every Innocent receives the same one question from [content/most-likely.json](content/most-likely.json) when viewing their private role. Choices include all other participants in that round, including Killers. Killers do not answer. Two-player rounds skip the feature entirely, even when other people are waiting to join.
+
+Submitting hides the private role and returns to the same neutral screen used by Killers. Players can reopen their instructions, but a saved answer cannot be edited or submitted twice. The normal round timer runs throughout; answers are optional, have no points or penalties, and never hold up play. Pausing blocks submissions. Court opening closes submissions, including when it is called early or the round deadline is reached.
+
+One shared question is drawn at each eligible deal, without repeats until the independent 45-question bank is exhausted. The question, draw history and answers persist in the existing saved Game state, so refreshing or signing back in does not redraw it. The electorate and answer choices use the fixed current-round roster; joining, leaving or sitting out affects the next deal. Existing rounds without a question finish unchanged and get the feature at their next eligible deal.
+
+Before results, only an Innocent's own question and saved answer are returned to that Innocent. No public answer status, completion time, answer count or tally is exposed. The existing Court submission indicators still describe only Court ballots. Cross-game authentication and version-checked writes protect answers like other game actions. Results and history include only the question and all top chosen names, including any number of tied names. They never reveal vote counts, individual answers or voters. No answers produces a simple empty-result message. Discarding a round leaves this unscored summary available without affecting points or awards.
+
+`tests/most-likely.test.mjs` checks eligibility, privacy, timer boundaries, reconnects, immutable answers, ties, draw cycles, roster changes and unchanged scoring. The local-only `node tests/most-likely-flow.mjs` checks the same flow through the API, including concurrent submissions and isolated games.
 
 ## A round
 

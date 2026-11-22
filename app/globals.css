@@ -508,3 +508,26 @@ input::placeholder{color:#777}
   .task-options>summary>.task-options-meta{gap:7px}
   .task-change-pending{align-items:stretch;flex-direction:column;gap:12px;padding:14px}
 }
+
+/* Private, unscored round question and its Court-only reveal. */
+.most-likely-question{border-top:1px solid var(--border);padding:20px 0}
+.most-likely-question .most-likely-role-task{font-size:16px;line-height:1.65;margin:0 0 22px}
+.most-likely-question>.eyebrow,.most-likely-result>.eyebrow{font-size:13px;letter-spacing:1px}
+.most-likely-question fieldset{border:0;padding:0;margin:10px 0 0;min-width:0}
+.most-likely-question legend,.most-likely-question h3,.most-likely-result h3{font-family:var(--sans);font-size:22px;line-height:1.4;font-weight:400;letter-spacing:-.35px;margin:8px 0 16px;padding:0;overflow-wrap:anywhere}
+.most-likely-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.most-likely-question .most-likely-choice{display:flex;align-items:center;gap:12px;min-height:48px;margin:0;padding:13px 14px;border:1px solid var(--border);font-size:16px;line-height:1.5;cursor:pointer}
+.most-likely-choice.selected{border-color:var(--ink);background:#f5f5f5}
+.most-likely-choice span{min-width:0;overflow-wrap:anywhere}
+.most-likely-question .most-likely-choice input{width:18px;height:18px;min-height:0;margin:0;flex-shrink:0;accent-color:var(--ink)}
+.most-likely-choice:focus-within{outline:2px solid var(--ink);outline-offset:3px}
+.most-likely-question fieldset:disabled .most-likely-choice{cursor:default;opacity:.65}
+.most-likely-question .most-likely-help{font-size:14px;line-height:1.6;color:var(--muted);margin:12px 0}
+.most-likely-question .button{font-size:16px;margin-top:8px}
+.most-likely-saved{display:flex;align-items:flex-start;gap:10px;font-size:16px;line-height:1.65;margin:0}
+.most-likely-saved svg{flex-shrink:0;margin-top:4px}
+.most-likely-result{border:1px solid var(--ink);padding:20px;margin:0 0 24px}
+.most-likely-result p{font-size:16px;line-height:1.65;margin:0}
+.most-likely-result ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:12px 0 0}
+.most-likely-result li{background:#f5f5f5;padding:8px 12px;font-size:18px;line-height:1.5;font-weight:500;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:640px){.most-likely-choices{grid-template-columns:1fr}.most-likely-result{padding:16px}.most-likely-question{padding:18px 0}}
