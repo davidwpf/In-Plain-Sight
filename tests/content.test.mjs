@@ -20,7 +20,7 @@ test('recognition accepts a single shared signal and still supports a legacy rep
 
 test('both task lists complete independent cycles without repeats or immediate boundary repeats',()=>{
   const g=fixture(),signals=[],murders=[];
-  for(let i=0;i<CONTENT.recognition.length*2;i++){
+  for(let i=0;i<Math.max(CONTENT.recognition.length,CONTENT.murders.length)*2;i++){
     signals.push(g.signal.id);murders.push(g.mission.id);
     if(i>0){assert.notEqual(signals[i],signals[i-1]);assert.notEqual(murders[i],murders[i-1]);}
     next(g);

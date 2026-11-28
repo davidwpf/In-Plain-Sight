@@ -354,6 +354,69 @@
       "kind": "spoken",
       "difficulty": "easy",
       "instruction": "Get your chosen person to join you in counting down from five."
+    },
+    {
+      "id": "give-thumbs-up",
+      "title": "Thumbs-up",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to give you a thumbs-up."
+    },
+    {
+      "id": "shake-hands",
+      "title": "Shake hands",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to shake hands with you."
+    },
+    {
+      "id": "take-photograph",
+      "title": "Take a photograph",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to take a photograph of you."
+    },
+    {
+      "id": "whisper-something",
+      "title": "Whisper something",
+      "kind": "spoken",
+      "difficulty": "easy",
+      "instruction": "Get your chosen person to whisper something."
+    },
+    {
+      "id": "pat-on-back",
+      "title": "Pat on the back",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Give your chosen person a light pat on the back."
+    },
+    {
+      "id": "shoulder-touch",
+      "title": "Shoulder touch",
+      "kind": "action",
+      "difficulty": "easy",
+      "instruction": "Briefly place a hand on your chosen person’s shoulder."
+    },
+    {
+      "id": "walk-around-person",
+      "title": "Walk around them",
+      "kind": "action",
+      "difficulty": "medium",
+      "instruction": "Walk one complete circle around your chosen person."
+    },
+    {
+      "id": "watching-you",
+      "title": "Watching you",
+      "kind": "action",
+      "difficulty": "medium",
+      "instruction": "Point to your own eyes, then point at your chosen person."
+    },
+    {
+      "id": "binoculars",
+      "title": "Binoculars",
+      "kind": "action",
+      "difficulty": "medium",
+      "instruction": "Make binoculars with your hands and look through them at your chosen person, while they are looking at you."
     }
   ]
 }
